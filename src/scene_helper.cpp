@@ -8,6 +8,11 @@ using namespace irr;
 using namespace irr::video;
 using namespace irr::scene;
 
+int foo()
+{
+	return 10;
+}
+
 CSceneHelper::CSceneHelper(irr::IrrlichtDevice *device)
 	: device(device)
 {

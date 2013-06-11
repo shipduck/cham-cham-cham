@@ -1,6 +1,8 @@
 ﻿// Ŭnicode please 
 #pragma once
 
+int foo();
+
 namespace irr {;
 class IrrlichtDevice;
 namespace scene {;
