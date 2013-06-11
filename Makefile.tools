@@ -1,0 +1,21 @@
+ALL:
+	@echo "make [submodule-init|update|init]"
+
+submodule-init:
+	@echo "Initializing git submodules"
+	@git submodule init
+	@echo "Checkout from remote"
+	@git submodule update
+	@echo "Track orign/master"
+	@git submodule foreach "git checkout -b master origin/master"
+
+update:
+	@echo "Pull rebase each submodules"
+	@git submodule foreach "git pull --rebase"
+	@echo "Run cmake"
+	@cmake .
+
+init: submodule-init
+	@echo "Run cmake"
+	@cmake .
+	
