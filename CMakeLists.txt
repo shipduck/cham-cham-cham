@@ -37,9 +37,9 @@ INCLUDE_DIRECTORIES( ${DOKURO_EXT_DIR}/googletest/include )
 INCLUDE_DIRECTORIES( ${DOKURO_SRC_DIR} )
 
 IF( MSVC )
-	LIST( APPEND DOKURO_LINK_LIBS irrlicht_shared LibOVR Setupapi Winmm	)
+	LIST( APPEND DOKURO_LINK_LIBS irrlicht_shared LibOVR Setupapi Winmm )
 ELSE()
-	LIST( APPEND DOKURO_LINK_LIBS irrlicht_static )
+	LIST( APPEND DOKURO_LINK_LIBS irrlicht_static LibOVR )
 ENDIF()
 
 IF( APPLE )
