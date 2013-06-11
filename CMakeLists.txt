@@ -67,6 +67,6 @@ ADD_EXECUTABLE( dokuro_test
 TARGET_LINK_LIBRARIES( dokuro_test 
 	${DOKURO_LINK_LIBS} 
 	${IRRLICHT_LINK_LIBS} 
-	gtest_main
+	gtest
 	dokuro )
 

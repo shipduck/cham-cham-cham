@@ -7,3 +7,4 @@ TEST(SID, test)
 	EXPECT_EQ(10, foo());
 	EXPECT_EQ(1, 1);
 }
+
