@@ -57,6 +57,8 @@ scene::ITerrainSceneNode *CSceneHelper::initTerrain()
 		scene::ETPS_17,				// patchSize
 		4					// smoothFactor
 		);
+    
+    assert(terrain != nullptr);
 
 	terrain->setMaterialFlag(video::EMF_LIGHTING, false);
 	terrain->setMaterialTexture(0,

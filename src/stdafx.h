@@ -10,4 +10,6 @@
 #include <algorithm>
 #include <memory>
 
+#include <assert.h>
+
 #include "irrlicht.h"
