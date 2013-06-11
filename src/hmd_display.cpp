@@ -1,4 +1,5 @@
 ﻿// Ŭnicode please 
+#include "stdafx.h"
 #include "hmd_display.h"
 #include "HMDStereoRender.h"
 #include "ISceneManager.h"

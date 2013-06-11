@@ -1,4 +1,5 @@
 ﻿// Ŭnicode please 
+#include "stdafx.h"
 #include "head_tracking.h"
 
 using namespace OVR;

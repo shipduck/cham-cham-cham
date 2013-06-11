@@ -1,5 +1,5 @@
 // Ŭnicode please 
-#include <gtest/gtest.h>
+#include "test_stdafx.h"
 #include "scene_helper.h"
 
 TEST(SID, test)

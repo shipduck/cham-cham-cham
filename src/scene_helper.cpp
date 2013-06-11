@@ -1,4 +1,5 @@
 ﻿// Ŭnicode please 
+#include "stdafx.h"
 #include "scene_helper.h"
 #include "ISceneManager.h"
 #include "ITerrainSceneNode.h"

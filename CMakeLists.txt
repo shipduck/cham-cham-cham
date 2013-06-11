@@ -29,6 +29,26 @@ ADD_SUBDIRECTORY( ${DOKURO_EXT_DIR}/googletest )
 INCLUDE_DIRECTORIES( ${DOKURO_EXT_DIR}/googletest/include )
 #########################################################
 
+# MSVC PrecompiledHeader 
+MACRO( MSVC_SET_PCH Target PrecompiledHeader PrecompiledSource)
+  IF( MSVC )
+    SET(PrecompiledBinary "\$(IntDir)\$(TargetName).pch")
+    SET(Sources ${${SourcesVar}})
+    GET_FILENAME_COMPONENT(PrecompiledBasename
+       ${PrecompiledHeader} NAME)
+
+    SET_SOURCE_FILES_PROPERTIES(${PrecompiledSource}
+      PROPERTIES
+        COMPILE_FLAGS
+          "/Yc\"${PrecompiledBasename}\" /Fp\"${PrecompiledBinary}\""
+        OBJECT_OUTPUTS "${PrecompiledBinary}") 
+    SET_TARGET_PROPERTIES(${Target}
+      PROPERTIES
+        COMPILE_FLAGS
+          "/Yu\"${PrecompiledBasename}\"")
+  ENDIF( MSVC )
+ENDMACRO( MSVC_SET_PCH )
+
 # Set Include Path
 INCLUDE_DIRECTORIES( ${DOKURO_SRC_DIR} )
 
@@ -45,11 +65,16 @@ ELSE(  )
 ENDIF(  )
 
 FILE( GLOB DOKURO_INC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h )
+FILE( GLOB DOKURO_TEST_INC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/test/*.h )
 
 ADD_LIBRARY( dokuro 
 	${DOKURO_SRC_FILES}
 	${DOKURO_RES_FILES}
 	${DOKURO_INC_FILES} )
+	
+MSVC_SET_PCH( dokuro
+    "${DOKURO_SRC_DIR}/stdafx.h"
+    "${DOKURO_SRC_DIR}/stdafx.cpp")
 
 ADD_EXECUTABLE( dokuro_exe 
 	${DOKURO_EXE_OPTION}
@@ -62,6 +87,7 @@ TARGET_LINK_LIBRARIES( dokuro_exe
 
 
 ADD_EXECUTABLE( dokuro_test
+	${DOKURO_TEST_INC_FILES}
 	${DOKURO_TEST_FILES} )
 
 TARGET_LINK_LIBRARIES( dokuro_test 
@@ -70,3 +96,6 @@ TARGET_LINK_LIBRARIES( dokuro_test
 	gtest
 	dokuro )
 
+MSVC_SET_PCH( dokuro_test
+    "${DOKURO_TEST_DIR}/test_stdafx.h"
+    "${DOKURO_TEST_DIR}/test_stdafx.cpp")
