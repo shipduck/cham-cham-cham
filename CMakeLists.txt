@@ -1,6 +1,10 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 2.6 )
 PROJECT( dokuro )
 
+LIST( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" )
+INCLUDE( pch_support )
+INCLUDE( compiler_option )
+
 SET( DOKURO_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src )
 SET( DOKURO_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/test )
 SET( DOKURO_RES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/res )
@@ -28,26 +32,6 @@ ADD_SUBDIRECTORY( ${DOKURO_EXT_DIR}/googletest )
 
 INCLUDE_DIRECTORIES( ${DOKURO_EXT_DIR}/googletest/include )
 #########################################################
-
-# MSVC PrecompiledHeader 
-MACRO( MSVC_SET_PCH Target PrecompiledHeader PrecompiledSource)
-  IF( MSVC )
-    SET(PrecompiledBinary "\$(IntDir)\$(TargetName).pch")
-    SET(Sources ${${SourcesVar}})
-    GET_FILENAME_COMPONENT(PrecompiledBasename
-       ${PrecompiledHeader} NAME)
-
-    SET_SOURCE_FILES_PROPERTIES(${PrecompiledSource}
-      PROPERTIES
-        COMPILE_FLAGS
-          "/Yc\"${PrecompiledBasename}\" /Fp\"${PrecompiledBinary}\""
-        OBJECT_OUTPUTS "${PrecompiledBinary}") 
-    SET_TARGET_PROPERTIES(${Target}
-      PROPERTIES
-        COMPILE_FLAGS
-          "/Yu\"${PrecompiledBasename}\"")
-  ENDIF( MSVC )
-ENDMACRO( MSVC_SET_PCH )
 
 # Set Include Path
 INCLUDE_DIRECTORIES( ${DOKURO_SRC_DIR} )
@@ -90,11 +74,7 @@ ADD_EXECUTABLE( dokuro_test
 	${DOKURO_TEST_INC_FILES}
 	${DOKURO_TEST_FILES} )
 
-IF( NOT MSVC )
-	SET_TARGET_PROPERTIES( dokuro
-	PROPERTIES
-	COMPILE_FLAGS "-std=c++11 -stdlib=libc++" )
-ENDIF(  )
+USE_CPP11( dokuro dokuro_exe)
 
 TARGET_LINK_LIBRARIES( dokuro_test 
 	${DOKURO_LINK_LIBS} 
