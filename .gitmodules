@@ -1,9 +1,12 @@
 [submodule "ext/libovr"]
 	path = ext/libovr
 	url = git://github.com/if1live/LibOVR.git
+	ignore = dirty
 [submodule "ext/irrlicht"]
 	path = ext/irrlicht
 	url = git://github.com/omniavinco/irrlicht-cmake.git
+	ignore = dirty
 [submodule "ext/googletest"]
 	path = ext/googletest
 	url = https://github.com/if1live/googletest-svn.git
+	ignore = dirty
