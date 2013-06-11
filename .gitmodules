@@ -6,4 +6,4 @@
 	url = git@github.com:omniavinco/irrlicht-cmake.git
 [submodule "ext/googletest"]
 	path = ext/googletest
-	url = git@github.com:hazelnusse/googletest-svn
+	url = git@github.com:hazelnusse/googletest-svn.git
