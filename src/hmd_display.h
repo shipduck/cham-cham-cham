@@ -1,8 +1,6 @@
 ﻿// Ŭnicode please 
 #pragma once
 
-#include <memory>
-
 namespace irr 
 {;
 class IrrlichtDevice;

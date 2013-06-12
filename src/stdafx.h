@@ -2,6 +2,10 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstdio>
+#include <cassert>
+
+#include <iostream>
+#include <sstream>
 
 #include <string>
 #include <vector>
@@ -11,3 +15,5 @@
 #include <memory>
 
 #include "irrlicht.h"
+
+#include <OVR.h>
