@@ -15,5 +15,4 @@
 #include <memory>
 
 #include "irrlicht.h"
-
 #include <OVR.h>
