@@ -1,19 +1,9 @@
 ﻿// Ŭnicode please 
 #pragma once
 
-int foo();
-
-namespace irr {;
-class IrrlichtDevice;
-namespace scene {;
-class ISceneNode;
-class ITerrainSceneNode;
-}
-}
-
-class CSceneHelper {
+class SceneHelper {
 public:
-	CSceneHelper(irr::IrrlichtDevice *device);
+	SceneHelper(irr::IrrlichtDevice *device);
 
 	irr::scene::ISceneNode *initSky();
 	irr::scene::ITerrainSceneNode* initTerrain();

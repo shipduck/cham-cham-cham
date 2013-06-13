@@ -9,17 +9,12 @@ using namespace irr;
 using namespace irr::video;
 using namespace irr::scene;
 
-int foo()
-{
-	return 10;
-}
-
-CSceneHelper::CSceneHelper(irr::IrrlichtDevice *device)
+SceneHelper::SceneHelper(irr::IrrlichtDevice *device)
 	: device(device)
 {
 }
 
-scene::ISceneNode *CSceneHelper::initSky()
+scene::ISceneNode *SceneHelper::initSky()
 {
 	IVideoDriver* driver = device->getVideoDriver();
 	ISceneManager* smgr = device->getSceneManager();
@@ -39,7 +34,7 @@ scene::ISceneNode *CSceneHelper::initSky()
 	return skybox;
 }
 
-scene::ITerrainSceneNode *CSceneHelper::initTerrain()
+scene::ITerrainSceneNode *SceneHelper::initTerrain()
 {
 	IVideoDriver* driver = device->getVideoDriver();
 	ISceneManager* smgr = device->getSceneManager();

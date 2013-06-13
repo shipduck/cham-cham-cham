@@ -1,21 +1,12 @@
 ﻿// Ŭnicode please 
 #pragma once
 
-namespace irr 
-{;
-class IrrlichtDevice;
-namespace scene
-{;
-class ISceneManager;
-}
-}
-
 class HMDStereoRender;
 
-class CHMDDisplay {
+class HMDDisplay {
 public:
-	CHMDDisplay();
-	~CHMDDisplay();
+	HMDDisplay();
+	~HMDDisplay();
 
 	void setUp(irr::IrrlichtDevice *device);
 	void shutDown();

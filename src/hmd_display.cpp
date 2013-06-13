@@ -4,15 +4,15 @@
 #include "HMDStereoRender.h"
 #include "ISceneManager.h"
 
-CHMDDisplay::CHMDDisplay()
+HMDDisplay::HMDDisplay()
 {
 }
-CHMDDisplay::~CHMDDisplay()
+HMDDisplay::~HMDDisplay()
 {
 	shutDown();
 }
 
-void CHMDDisplay::setUp(irr::IrrlichtDevice *device)
+void HMDDisplay::setUp(irr::IrrlichtDevice *device)
 {
 	HMDDescriptor HMD;
 	// Parameters from the Oculus Rift DK1
@@ -30,16 +30,16 @@ void CHMDDisplay::setUp(irr::IrrlichtDevice *device)
 
 	Renderer.reset(new HMDStereoRender(device, HMD, 10));
 }
-void CHMDDisplay::shutDown()
+void HMDDisplay::shutDown()
 {
 	Renderer.reset(nullptr);
 }
 
-void CHMDDisplay::NormalDrawAll(irr::scene::ISceneManager *smgr)
+void HMDDisplay::NormalDrawAll(irr::scene::ISceneManager *smgr)
 {
 	smgr->drawAll();
 }
-void CHMDDisplay::StereoDrawAll(irr::scene::ISceneManager *smgr)
+void HMDDisplay::StereoDrawAll(irr::scene::ISceneManager *smgr)
 {
 	Renderer->drawAll(smgr);
 }
