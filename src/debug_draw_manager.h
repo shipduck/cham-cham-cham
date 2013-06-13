@@ -31,23 +31,54 @@ struct DebugDraw2D_Cross;
 struct DebugDraw2D_String;
 struct DebugDraw2D_Circle;
 
-class DebugDrawManager3D {
+template<typename DebugDraw>
+class DebugDrawManagerT {
 public:
-	typedef std::list<std::unique_ptr<DebugDraw3D>> DebugDrawList;
-
+	typedef std::list<std::unique_ptr<DebugDraw>> DebugDrawList;
 public:
-	DebugDrawManager3D();
-	~DebugDrawManager3D();
+	DebugDrawManagerT() : Device(nullptr) {}
+	~DebugDrawManagerT() {}
 
-	void setUp(irr::IrrlichtDevice *dev);
-	void shutDown();
+	void setUp(irr::IrrlichtDevice *dev)
+	{
+		this->Device = dev;
+	}
+	void shutDown()
+	{
+		clear();
+	}
 
-	void draw();
-	void update(int ms);
+	void draw()
+	{
+	}
+	void update(int ms)
+	{
+		struct RemoveFindFunctor {
+			bool operator()(std::unique_ptr<DebugDraw> &cmd) {
+				return (cmd->Duration < 0);
+			}
+		};
+		RemoveFindFunctor functor;
+
+		auto it = CmdList.begin();
+		auto endit = CmdList.end();
+		for( ; it != endit ; ++it) {
+			std::unique_ptr<DebugDraw> &cmd = *it;
+			cmd->Duration -= ms;
+		}
+		CmdList.remove_if(functor);
+	}
 
 	void clear() { CmdList.clear(); }
 	int count() const { return CmdList.size(); }
 
+protected:
+	irr::IrrlichtDevice *Device;	
+	DebugDrawList CmdList;
+};
+
+class DebugDrawManager3D : public DebugDrawManagerT<DebugDraw3D> {	
+public:
 	void AddLine(const irr::core::vector3df &p1, const irr::core::vector3df &p2,
 		const irr::video::SColor &color,
 		float lineWidth = 1.0f,
@@ -77,28 +108,10 @@ public:
 		float scale = 1.0f,
 		int duration = 0,
 		bool depthEnable = true);
-
-private:
-	irr::IrrlichtDevice *Device;	
-	DebugDrawList CmdList;
 };
 
-class DebugDrawManager2D {
+class DebugDrawManager2D : public DebugDrawManagerT<DebugDraw2D> {
 public:
-	typedef std::list<std::unique_ptr<DebugDraw2D>> DebugDrawList;
-public:
-	DebugDrawManager2D();
-	~DebugDrawManager2D();
-
-	void setUp(irr::IrrlichtDevice *dev);
-	void shutDown();
-
-	void draw();
-	void update(int ms);
-
-	void clear() { CmdList.clear(); }
-	int count() const { return CmdList.size(); }
-
 	void AddLine(const irr::core::vector2df &p1, const irr::core::vector2df &p2,
 		const irr::video::SColor &color,
 		float lineWidth = 1.0f,
@@ -117,10 +130,6 @@ public:
 	void AddCircle(const irr::core::vector2df &pos, float radius,
 		const irr::video::SColor &color,
 		int duration = 0);
-
-private:
-	irr::IrrlichtDevice *Device;
-	DebugDrawList CmdList;
 };
 
 struct DebugDraw2D {

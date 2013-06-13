@@ -2,47 +2,6 @@
 #include "stdafx.h"
 #include "debug_draw_manager.h"
 
-DebugDrawManager3D::DebugDrawManager3D()
-	: Device(nullptr)
-{
-}
-
-DebugDrawManager3D::~DebugDrawManager3D()
-{
-}
-
-void DebugDrawManager3D::draw()
-{
-}
-
-void DebugDrawManager3D::update(int ms)
-{
-	struct RemoveFindFunctor {
-		bool operator()(std::unique_ptr<DebugDraw3D> &cmd) {
-			return (cmd->Duration < 0);
-		}
-	};
-	RemoveFindFunctor functor;
-	
-	auto it = CmdList.begin();
-	auto endit = CmdList.end();
-	for( ; it != endit ; ++it) {
-		std::unique_ptr<DebugDraw3D> &cmd = *it;
-		cmd->Duration -= ms;
-	}
-	CmdList.remove_if(functor);
-}
-
-void DebugDrawManager3D::setUp(irr::IrrlichtDevice *dev)
-{
-	this->Device = dev;
-}
-
-void DebugDrawManager3D::shutDown()
-{
-	clear();
-}
-
 DebugDraw3D::DebugDraw3D(DebugDraw3DType type)
 	: Type(type),
 	Duration(0),
@@ -128,46 +87,6 @@ void DebugDrawManager3D::AddString(const irr::core::vector3df &pos,
 	cmd->Duration = duration;
 	cmd->DepthEnable = depthEnable;
 	CmdList.push_back(std::move(cmd));
-}
-
-
-
-DebugDrawManager2D::DebugDrawManager2D()
-	: Device(nullptr)
-{
-}
-
-DebugDrawManager2D::~DebugDrawManager2D()
-{
-}
-
-void DebugDrawManager2D::setUp(irr::IrrlichtDevice *dev)
-{
-	this->Device = dev;
-}
-void DebugDrawManager2D::shutDown()
-{
-	clear();
-}
-void DebugDrawManager2D::draw()
-{
-}
-void DebugDrawManager2D::update(int ms)
-{
-	struct RemoveFindFunctor {
-		bool operator()(std::unique_ptr<DebugDraw2D> &cmd) {
-			return (cmd->Duration < 0);
-		}
-	};
-	RemoveFindFunctor functor;
-
-	auto it = CmdList.begin();
-	auto endit = CmdList.end();
-	for( ; it != endit ; ++it) {
-		std::unique_ptr<DebugDraw2D> &cmd = *it;
-		cmd->Duration -= ms;
-	}
-	CmdList.remove_if(functor);
 }
 
 void DebugDrawManager2D::AddLine(const irr::core::vector2df &p1, const irr::core::vector2df &p2,
