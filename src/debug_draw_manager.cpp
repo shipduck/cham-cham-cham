@@ -13,7 +13,7 @@ DebugDraw3D::DebugDraw3D(DebugDraw3DType type)
 	//model_mat = render_state->model_mat;
 }
 
-void DebugDrawManager3D::AddLine(const irr::core::vector3df &p1, const irr::core::vector3df &p2,
+void DebugDrawManager3D::addLine(const irr::core::vector3df &p1, const irr::core::vector3df &p2,
 		const irr::video::SColor &color,
 		float lineWidth,
 		int duration,
@@ -29,7 +29,7 @@ void DebugDrawManager3D::AddLine(const irr::core::vector3df &p1, const irr::core
 	CmdList.push_back(std::move(cmd));
 }
 
-void DebugDrawManager3D::AddCross(const irr::core::vector3df &pos, 
+void DebugDrawManager3D::addCross(const irr::core::vector3df &pos, 
 		const irr::video::SColor &color,
 		float size,
 		int duration,
@@ -44,7 +44,7 @@ void DebugDrawManager3D::AddCross(const irr::core::vector3df &pos,
 	CmdList.push_back(std::move(cmd));
 }
 
-void DebugDrawManager3D::AddSphere(const irr::core::vector3df &pos, 
+void DebugDrawManager3D::addSphere(const irr::core::vector3df &pos, 
 		float radius,
 		const irr::video::SColor &color,
 		int duration,
@@ -59,7 +59,7 @@ void DebugDrawManager3D::AddSphere(const irr::core::vector3df &pos,
 	CmdList.push_back(std::move(cmd));
 }
 
-void DebugDrawManager3D::AddAxis(const irr::core::matrix4 &xf,
+void DebugDrawManager3D::addAxis(const irr::core::matrix4 &xf,
 		float size, 
 		int duration,
 		bool depthEnable)
@@ -72,7 +72,7 @@ void DebugDrawManager3D::AddAxis(const irr::core::matrix4 &xf,
 	CmdList.push_back(std::move(cmd));
 }
 
-void DebugDrawManager3D::AddString(const irr::core::vector3df &pos, 
+void DebugDrawManager3D::addString(const irr::core::vector3df &pos, 
 		const std::u32string &msg,
 		const irr::video::SColor &color,
 		float scale,
@@ -89,7 +89,7 @@ void DebugDrawManager3D::AddString(const irr::core::vector3df &pos,
 	CmdList.push_back(std::move(cmd));
 }
 
-void DebugDrawManager2D::AddLine(const irr::core::vector2df &p1, const irr::core::vector2df &p2,
+void DebugDrawManager2D::addLine(const irr::core::vector2df &p1, const irr::core::vector2df &p2,
 		const irr::video::SColor &color,
 		float lineWidth,
 		int duration)
@@ -103,7 +103,7 @@ void DebugDrawManager2D::AddLine(const irr::core::vector2df &p1, const irr::core
 	CmdList.push_back(std::move(cmd));
 }
 
-void DebugDrawManager2D::AddCross(const irr::core::vector2df &pos, 
+void DebugDrawManager2D::addCross(const irr::core::vector2df &pos, 
 		const irr::video::SColor &color,
 		float size,
 		int duration)
@@ -116,7 +116,7 @@ void DebugDrawManager2D::AddCross(const irr::core::vector2df &pos,
 	CmdList.push_back(std::move(cmd));
 }
 
-void DebugDrawManager2D::AddString(const irr::core::vector2df &pos, const std::u32string &msg,
+void DebugDrawManager2D::addString(const irr::core::vector2df &pos, const std::u32string &msg,
 		const irr::video::SColor &color,
 		float scale,
 		int duration)
@@ -130,7 +130,7 @@ void DebugDrawManager2D::AddString(const irr::core::vector2df &pos, const std::u
 	CmdList.push_back(std::move(cmd));
 }
 
-void DebugDrawManager2D::AddCircle(const irr::core::vector2df &pos, float radius,
+void DebugDrawManager2D::addCircle(const irr::core::vector2df &pos, float radius,
 		const irr::video::SColor &color,
 		int duration)
 {
@@ -140,4 +140,39 @@ void DebugDrawManager2D::AddCircle(const irr::core::vector2df &pos, float radius
 	cmd->Color = color;
 	cmd->Duration = duration;
 	CmdList.push_back(std::move(cmd));
+}
+
+
+void DebugDrawer2D::drawElem(DebugDraw2D_Line *cmd)
+{
+}
+
+void DebugDrawer2D::drawElem(DebugDraw2D_Cross *cmd)
+{
+}
+
+void DebugDrawer2D::drawElem(DebugDraw2D_String *cmd)
+{
+}
+
+void DebugDrawer2D::drawElem(DebugDraw2D_Circle *cmd)
+{
+}
+
+void DebugDrawer3D::drawElem(DebugDraw3D_Line *cmd)
+{
+}
+
+void DebugDrawer3D::drawElem(DebugDraw3D_Cross *cmd)
+{
+}
+
+void DebugDrawer3D::drawElem(DebugDraw3D_Sphere *cmd)
+{
+}
+void DebugDrawer3D::drawElem(DebugDraw3D_String *cmd)
+{
+}
+void DebugDrawer3D::drawElem(DebugDraw3D_Axis *cmd)
+{
 }

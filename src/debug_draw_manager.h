@@ -79,30 +79,30 @@ protected:
 
 class DebugDrawManager3D : public DebugDrawManagerT<DebugDraw3D> {	
 public:
-	void AddLine(const irr::core::vector3df &p1, const irr::core::vector3df &p2,
+	void addLine(const irr::core::vector3df &p1, const irr::core::vector3df &p2,
 		const irr::video::SColor &color,
 		float lineWidth = 1.0f,
 		int duration = 0,
 		bool depthEnable = true);
 
-	void AddCross(const irr::core::vector3df &pos, 
+	void addCross(const irr::core::vector3df &pos, 
 		const irr::video::SColor &color,
 		float size,
 		int duration = 0,
 		bool depthEnable = true);
 
-	void AddSphere(const irr::core::vector3df &pos, 
+	void addSphere(const irr::core::vector3df &pos, 
 		float radius,
 		const irr::video::SColor &color,
 		int duration = 0,
 		bool depthEnable = true);
 
-	void AddAxis(const irr::core::matrix4 &xf,
+	void addAxis(const irr::core::matrix4 &xf,
 		float size, 
 		int duration = 0,
 		bool depthEnable = true);
 
-	void AddString(const irr::core::vector3df &pos, 
+	void addString(const irr::core::vector3df &pos, 
 		const std::u32string &msg,
 		const irr::video::SColor &color,
 		float scale = 1.0f,
@@ -112,25 +112,43 @@ public:
 
 class DebugDrawManager2D : public DebugDrawManagerT<DebugDraw2D> {
 public:
-	void AddLine(const irr::core::vector2df &p1, const irr::core::vector2df &p2,
+	void addLine(const irr::core::vector2df &p1, const irr::core::vector2df &p2,
 		const irr::video::SColor &color,
 		float lineWidth = 1.0f,
 		int duration = 0);
 
-	void AddCross(const irr::core::vector2df &pos, 
+	void addCross(const irr::core::vector2df &pos, 
 		const irr::video::SColor &color,
 		float size,
 		int duration = 0);
 
-	void AddString(const irr::core::vector2df &pos, const std::u32string &msg,
+	void addString(const irr::core::vector2df &pos, const std::u32string &msg,
 		const irr::video::SColor &color,
 		float scale = 1.0f,
 		int duration = 0);
 
-	void AddCircle(const irr::core::vector2df &pos, float radius,
+	void addCircle(const irr::core::vector2df &pos, float radius,
 		const irr::video::SColor &color,
 		int duration = 0);
 };
+
+class DebugDrawer2D {
+public:
+	void drawElem(DebugDraw2D_Line *cmd);
+	void drawElem(DebugDraw2D_Cross *cmd);
+	void drawElem(DebugDraw2D_String *cmd);
+	void drawElem(DebugDraw2D_Circle *cmd);
+};
+
+class DebugDrawer3D {
+public:
+	void drawElem(DebugDraw3D_Line *cmd);
+	void drawElem(DebugDraw3D_Cross *cmd);
+	void drawElem(DebugDraw3D_Sphere *cmd);
+	void drawElem(DebugDraw3D_String *cmd);
+	void drawElem(DebugDraw3D_Axis *cmd);
+};
+
 
 struct DebugDraw2D {
 	DebugDraw2D() : Type(kDebugDraw2DNone), Duration(0) {}
