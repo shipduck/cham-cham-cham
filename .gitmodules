@@ -10,6 +10,6 @@
 	update = rebase
 [submodule "cli/ext/googletest"]
 	path = cli/ext/googletest
-	url = https://github.com/if1live/googletest-svn.git
+	url = git://github.com/if1live/googletest-svn.git
 	ignore = dirty
 	update = rebase
