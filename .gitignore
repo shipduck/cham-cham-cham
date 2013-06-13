@@ -30,3 +30,7 @@ ipch
 
 # submodule
 ext/*
+*.build
+*.pbxproj
+*.xcworkspacedata
+*.xcodeproj
