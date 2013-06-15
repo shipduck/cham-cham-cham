@@ -85,3 +85,8 @@ MSVC_SET_PCH( dokuro_test
     "${DOKURO_TEST_DIR}/test_stdafx.cpp")
 
 USE_CPP11( TARGET dokuro LibOVR gtest dokuro_exe dokuro_test )
+
+IF( APPLE )
+	# For debug... OSX App bundle find file from app bundle existance path
+	SET_TARGET_PROPERTIES( dokuro_exe PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR} )
+ENDIF(  )
