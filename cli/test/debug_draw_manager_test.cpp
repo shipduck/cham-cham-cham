@@ -22,8 +22,8 @@ TEST_F(DebugDrawManagerTest, Update)
 	EXPECT_EQ(0, mgr.count());
 
 	SColor color;
-	mgr.addCross(vector2df(0, 0), color, 1);	// without duration
-	mgr.addCross(vector2df(0, 0), color, 1, 1000);	// with duration
+	mgr.addCross(vector2di(0, 0), color, 1);	// without duration
+	mgr.addCross(vector2di(0, 0), color, 1, 1000);	// with duration
 	EXPECT_EQ(2, mgr.count());
 
 	mgr.update(500);

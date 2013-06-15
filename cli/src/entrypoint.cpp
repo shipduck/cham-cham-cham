@@ -3,6 +3,7 @@
 #include "entrypoint.h"
 #include "head_tracking.h"
 #include "sample_scene.h"
+#include "debug_draw_scene.h"
 
 using namespace irr;
 using namespace core;
@@ -42,12 +43,22 @@ int entrypoint(int argc, char* argv[])
 	headTracking.startUp();
 
 	//simple scene framework
-	std::unique_ptr<Scene> scene(new SampleScene(device));
+	//std::unique_ptr<Scene> scene(new SampleScene(device));
+	std::unique_ptr<Scene> scene(new DebugDrawScene(device));
 	scene->setUp();
+
+	// In order to do framerate independent movement, we have to know
+	// how long it was since the last frame
+	u32 then = device->getTimer()->getTime();
 
 	int lastFPS = -1;
 	// Render loop
 	while(device->run()) {
+		// Work out a frame delta time.
+		const u32 now = device->getTimer()->getTime();
+		const u32 frameDeltaTime = now - then;
+		then = now;
+
 		// Read-Write Head Tracking Sensor Value to Camera
 		float yaw = 0;
 		float pitch = 0;
@@ -57,7 +68,8 @@ int entrypoint(int argc, char* argv[])
 		}
 		//hmdCam->setHeadTrackingValue(yaw, pitch, roll);
 
-		scene->update(16);
+
+		scene->update(frameDeltaTime);
 		
 
 		int fps = driver->getFPS();

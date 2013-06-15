@@ -30,25 +30,3 @@ void Scene::update(int ms)
 {
 }
 
-
-DebugDrawTestScene::DebugDrawTestScene(irr::IrrlichtDevice *dev)
-	: Scene(dev)
-{
-}
-DebugDrawTestScene::~DebugDrawTestScene()
-{
-}
-
-void DebugDrawTestScene::setUp()
-{
-	Scene::setUp();
-}
-
-void DebugDrawTestScene::shutDown()
-{
-	Scene::shutDown();
-}
-void DebugDrawTestScene::update(int ms)
-{
-}
-

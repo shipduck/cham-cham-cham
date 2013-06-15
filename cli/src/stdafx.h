@@ -9,11 +9,14 @@
 #include <cassert>
 #include <climits>
 
-#include <iostream>
+#include <locale>   // wstring_convert
+#include <codecvt>  // codecvt_utf8
+#include <iostream> // cout
+#include <string>   // stoi and u32string
+
 #include <sstream>
 
 #include <list>
-#include <string>
 #include <vector>
 #include <map>
 #include <set>

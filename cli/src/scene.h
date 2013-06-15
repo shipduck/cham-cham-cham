@@ -13,14 +13,3 @@ public:
 protected:
 	irr::IrrlichtDevice *Device;
 };
-
-class DebugDrawTestScene : public Scene {
-public:
-	DebugDrawTestScene(irr::IrrlichtDevice *dev);
-	virtual ~DebugDrawTestScene();
-
-	virtual void update(int ms);
-	virtual void setUp();
-	virtual void shutDown();
-};
-
