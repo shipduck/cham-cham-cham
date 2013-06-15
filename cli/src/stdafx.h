@@ -29,6 +29,8 @@
 #include "irrlicht.h"
 #include <OVR.h>
 
+#include "Typelist.h"
+
 #else
 #error "NEED PCH"
 #endif

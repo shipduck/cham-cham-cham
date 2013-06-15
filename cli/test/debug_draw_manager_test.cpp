@@ -36,3 +36,9 @@ TEST_F(DebugDrawManagerTest, updateAll)
 	EXPECT_EQ(0, mgr.count());
 }
 
+TEST_F(DebugDrawManagerTest, getCmdList)
+{
+	DebugDrawManager mgr;
+	auto line2dList = mgr.getCmdList<DebugDraw_Line2D>();
+	auto cross2dList = mgr.getCmdList<DebugDraw_Cross2D>();
+}

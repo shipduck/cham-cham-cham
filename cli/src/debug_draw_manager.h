@@ -1,6 +1,8 @@
 ﻿// Ŭnicode please b
 #pragma once
 
+#include "Typelist.h"
+
 typedef enum {
 	kDebugDrawNone,
 	kDebugDrawLine2D,
@@ -122,6 +124,24 @@ public:
 	void drawElem(const DebugDraw_Sphere3D *cmd);
 	void drawElem(const DebugDraw_Axis3D *cmd);
 	void drawElem(const DebugDraw_String3D *cmd);
+
+public:
+	template<typename T>
+	typename DebugDrawTypeHolder<T>::list_type &getCmdList()
+	{
+		SR_ASSERT(!"Implement T");
+		return Line2DList;
+	}
+	template<>
+	DebugDrawTypeHolder<DebugDraw_Line2D>::list_type &getCmdList<DebugDraw_Line2D>()
+	{
+		return Line2DList;
+	}
+	template<>
+	DebugDrawTypeHolder<DebugDraw_Cross2D>::list_type &getCmdList<DebugDraw_Cross2D>()
+	{
+		return Cross2DList;
+	}
 
 private:
 	irr::IrrlichtDevice *Device;	
@@ -253,3 +273,14 @@ extern DebugDrawManager gDebugDrawMgr;
 
 extern irr::gui::IGUIFont *gNormalFont12;
 extern irr::gui::IGUIFont *gNormalFont14;
+
+typedef TYPELIST_9(
+	DebugDraw_Line3D,
+	DebugDraw_Cross3D,
+	DebugDraw_Sphere3D,
+	DebugDraw_String3D,
+	DebugDraw_Axis3D,
+	DebugDraw_Line2D,
+	DebugDraw_Cross2D,
+	DebugDraw_String2D,
+	DebugDraw_Circle2D) DebugDrawCmdTypeList;

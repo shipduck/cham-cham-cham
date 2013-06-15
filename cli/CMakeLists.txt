@@ -31,6 +31,9 @@ INCLUDE_DIRECTORIES( ${LIBOVR_INC_DIR} )
 ADD_SUBDIRECTORY( ${DOKURO_EXT_DIR}/googletest )
 
 INCLUDE_DIRECTORIES( ${DOKURO_EXT_DIR}/googletest/include )
+
+# Add Ext Inlcude
+INCLUDE_DIRECTORIES( ${DOKURO_EXT_DIR}/loki )
 #########################################################
 
 # Set Include Path

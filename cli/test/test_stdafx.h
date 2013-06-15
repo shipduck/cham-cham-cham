@@ -17,3 +17,5 @@
 
 #include <gtest/gtest.h>
 #include "irrlicht.h"
+
+#include "Typelist.h"

@@ -13,3 +13,6 @@
 	url = git://github.com/if1live/googletest-svn.git
 	ignore = dirty
 	update = rebase
+[submodule "cli/ext/loki"]
+	path = cli/ext/loki
+	url = https://github.com/dutor/loki.git
