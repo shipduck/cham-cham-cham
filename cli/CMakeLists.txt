@@ -39,7 +39,7 @@ INCLUDE_DIRECTORIES( ${DOKURO_SRC_DIR} )
 IF( MSVC )
 	LIST( APPEND DOKURO_LINK_LIBS irrlicht_shared LibOVR Setupapi Winmm )
 ELSE()
-	LIST( APPEND DOKURO_LINK_LIBS irrlicht_static LibOVR )
+	LIST( APPEND DOKURO_LINK_LIBS irrlicht_shared LibOVR )
 ENDIF()
 
 IF( APPLE )
@@ -74,8 +74,6 @@ ADD_EXECUTABLE( dokuro_test
 	${DOKURO_TEST_INC_FILES}
 	${DOKURO_TEST_FILES} )
 
-USE_CPP11( dokuro dokuro_exe)
-
 TARGET_LINK_LIBRARIES( dokuro_test 
 	${DOKURO_LINK_LIBS} 
 	${IRRLICHT_LINK_LIBS} 
@@ -85,3 +83,10 @@ TARGET_LINK_LIBRARIES( dokuro_test
 MSVC_SET_PCH( dokuro_test
     "${DOKURO_TEST_DIR}/test_stdafx.h"
     "${DOKURO_TEST_DIR}/test_stdafx.cpp")
+
+USE_CPP11( TARGET dokuro LibOVR gtest dokuro_exe dokuro_test )
+
+IF( APPLE )
+	# For debug... OSX App bundle find file from app bundle existance path
+	SET_TARGET_PROPERTIES( dokuro_exe PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR} )
+ENDIF(  )
