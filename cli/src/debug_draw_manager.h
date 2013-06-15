@@ -2,34 +2,28 @@
 #pragma once
 
 typedef enum {
-	kDebugDraw2DNone,
-	kDebugDraw2DLine,
-	kDebugDraw2DCross,
-	kDebugDraw2DString,
-	kDebugDraw2DCircle,
-} DebugDraw2DType;
+	kDebugDrawNone,
+	kDebugDrawLine2D,
+	kDebugDrawCross2D,
+	kDebugDrawString2D,
+	kDebugDrawCircle2D,
+	kDebugDrawLine3D,
+	kDebugDrawCross3D,
+	kDebugDrawSphere3D,
+	kDebugDrawAxis3D,
+	kDebugDrawString3D
+} DebugDrawType;
 
-typedef enum {
-	kDebugDraw3DNone,
-	kDebugDraw3DLine,
-	kDebugDraw3DCross,
-	kDebugDraw3DSphere,
-	kDebugDraw3DAxis,
-	kDebugDraw3DString
-} DebugDraw3DType;
-
-struct DebugDraw3D;
-struct DebugDraw3D_Line;
-struct DebugDraw3D_Cross;
-struct DebugDraw3D_Sphere;
-struct DebugDraw3D_String;
-struct DebugDraw3D_Axis;
-
-struct DebugDraw2D;
-struct DebugDraw2D_Line;
-struct DebugDraw2D_Cross;
-struct DebugDraw2D_String;
-struct DebugDraw2D_Circle;
+struct DebugDraw;
+struct DebugDraw_Line3D;
+struct DebugDraw_Cross3D;
+struct DebugDraw_Sphere3D;
+struct DebugDraw_String3D;
+struct DebugDraw_Axis3D;
+struct DebugDraw_Line2D;
+struct DebugDraw_Cross2D;
+struct DebugDraw_String2D;
+struct DebugDraw_Circle2D;
 
 class DebugDrawManager {
 public:
@@ -37,8 +31,7 @@ public:
 	typedef std::wstring::value_type value_type;
 
 public:
-	typedef std::list<std::unique_ptr<DebugDraw2D>> DebugDraw2DList;
-	typedef std::list<std::unique_ptr<DebugDraw3D>> DebugDraw3DList;
+	typedef std::list<std::unique_ptr<DebugDraw>> DebugDrawList;
 
 public:
 	DebugDrawManager() : Device(nullptr) {}
@@ -106,107 +99,102 @@ public:
 		const irr::video::SColor &color,
 		int duration = 0);
 
-	//draw 2d
+	//draw
 public:
-	void drawElem(DebugDraw2D *cmd);
-	void drawElem(DebugDraw2D_Line *cmd);
-	void drawElem(DebugDraw2D_Cross *cmd);
-	void drawElem(DebugDraw2D_Circle *cmd);
-	void drawElem(DebugDraw2D_String *cmd);
-
-	//draw 3d
-public:
-	void drawElem(DebugDraw3D *cmd);
-	void drawElem(DebugDraw3D_Line *cmd);
-	void drawElem(DebugDraw3D_Cross *cmd);
-	void drawElem(DebugDraw3D_Sphere *cmd);
-	void drawElem(DebugDraw3D_Axis *cmd);
-	void drawElem(DebugDraw3D_String *cmd);
+	void drawElem(DebugDraw *cmd);
+	void drawElem(DebugDraw_Line2D *cmd);
+	void drawElem(DebugDraw_Cross2D *cmd);
+	void drawElem(DebugDraw_Circle2D *cmd);
+	void drawElem(DebugDraw_String2D *cmd);
+	void drawElem(DebugDraw_Line3D *cmd);
+	void drawElem(DebugDraw_Cross3D *cmd);
+	void drawElem(DebugDraw_Sphere3D *cmd);
+	void drawElem(DebugDraw_Axis3D *cmd);
+	void drawElem(DebugDraw_String3D *cmd);
 
 protected:
 	irr::IrrlichtDevice *Device;	
-	DebugDraw2DList Cmd2DList;
-	DebugDraw3DList Cmd3DList;
+	DebugDrawList Cmd2DList;
+	DebugDrawList Cmd3DList;
 };
 
-struct DebugDraw2D {
-	DebugDraw2D() : Type(kDebugDraw2DNone), Duration(0) {}
-	DebugDraw2D(DebugDraw2DType type)  : Type(type), Duration(0) {}
-	virtual ~DebugDraw2D() {}
-	DebugDraw2DType Type;
+struct DebugDraw {
+	DebugDraw() : Type(kDebugDrawNone), Duration(0), Node(nullptr) {}
+	DebugDraw(DebugDrawType type)  : Type(type), Duration(0), Node(nullptr) {}
+	virtual ~DebugDraw();
+	DebugDrawType Type;
 	irr::video::SColor Color;
 	int Duration;	//millisecond
+	irr::scene::ISceneNode *Node;
 };
-struct DebugDraw2D_Line : public DebugDraw2D {
-	DebugDraw2D_Line() : DebugDraw2D(kDebugDraw2DLine), LineWidth(1.0f) {}
-	virtual ~DebugDraw2D_Line() {}
+
+struct DebugDraw3D : public DebugDraw {
+	DebugDraw3D() : DebugDraw() {}
+	DebugDraw3D(DebugDrawType type)  : DebugDraw(type), DepthEnable(true) {}
+	virtual ~DebugDraw3D() {}
+	bool DepthEnable;
+};
+
+struct DebugDraw_Line2D : public DebugDraw {
+	DebugDraw_Line2D() : DebugDraw(kDebugDrawLine2D), LineWidth(1.0f) {}
+	virtual ~DebugDraw_Line2D() {}
 	irr::core::vector2di P1;
 	irr::core::vector2di P2;
 	float LineWidth;
 };
-struct DebugDraw2D_Cross : public DebugDraw2D {
-	DebugDraw2D_Cross() : DebugDraw2D(kDebugDraw2DCross), Size(5.0f) {}
-	virtual ~DebugDraw2D_Cross() {}
+struct DebugDraw_Cross2D : public DebugDraw {
+	DebugDraw_Cross2D() : DebugDraw(kDebugDrawCross2D), Size(5.0f) {}
+	virtual ~DebugDraw_Cross2D() {}
 	irr::core::vector2di Pos;
 	float Size;
 };
 
-struct DebugDraw2D_String : public DebugDraw2D {
-	DebugDraw2D_String() : DebugDraw2D(kDebugDraw2DString), Scale(1.0f) {}
-	virtual ~DebugDraw2D_String() {}
+struct DebugDraw_String2D : public DebugDraw {
+	DebugDraw_String2D() : DebugDraw(kDebugDrawString2D), Scale(1.0f) {}
+	virtual ~DebugDraw_String2D() {}
 	irr::core::vector2di Pos;
 	DebugDrawManager::string_type Msg;
 	float Scale;
 };
-struct DebugDraw2D_Circle: public DebugDraw2D {
-	DebugDraw2D_Circle() : DebugDraw2D(kDebugDraw2DCircle), Radius(1.0f) {}
-	virtual ~DebugDraw2D_Circle() {}
+struct DebugDraw_Circle2D: public DebugDraw {
+	DebugDraw_Circle2D() : DebugDraw(kDebugDrawCircle2D), Radius(1.0f) {}
+	virtual ~DebugDraw_Circle2D() {}
 	float Radius;
 	irr::core::vector2di Pos;  //cross, sphere, string
 };
 
-struct DebugDraw3D {
-	DebugDraw3D(DebugDraw3DType type);
-	virtual ~DebugDraw3D();
-
-	DebugDraw3DType Type;
-
-	//shared
-	irr::video::SColor Color;
-	int Duration;	//millisecond
-	bool DepthEnable;
-};
-
-struct DebugDraw3D_Line : public DebugDraw3D {
-	DebugDraw3D_Line() : DebugDraw3D(kDebugDraw3DLine), LineWidth(1.0f) {}
+struct DebugDraw_Line3D : public DebugDraw3D {
+	DebugDraw_Line3D() : DebugDraw3D(kDebugDrawLine3D), LineWidth(1.0f) {}
+	virtual ~DebugDraw_Line3D() {}
 	float LineWidth;
 	irr::core::vector3df P1;
 	irr::core::vector3df P2;
 };
 
-struct DebugDraw3D_Cross : public DebugDraw3D {
-	DebugDraw3D_Cross() : DebugDraw3D(kDebugDraw3DCross), Size(1.0f) {}
+struct DebugDraw_Cross3D : public DebugDraw3D {
+	DebugDraw_Cross3D() : DebugDraw3D(kDebugDrawCross3D), Size(1.0f) {}
+	virtual ~DebugDraw_Cross3D() {}
 	float Size;
 	irr::core::vector3df Pos;  //cross
+	
 };
-struct DebugDraw3D_Sphere : public DebugDraw3D {
-	DebugDraw3D_Sphere() : DebugDraw3D(kDebugDraw3DSphere), Radius(1.0f), Node(nullptr) {}
-	virtual ~DebugDraw3D_Sphere();
+struct DebugDraw_Sphere3D : public DebugDraw3D {
+	DebugDraw_Sphere3D() : DebugDraw3D(kDebugDrawSphere3D), Radius(1.0f) {}
+	virtual ~DebugDraw_Sphere3D() {}
 	float Radius;
 	irr::core::vector3df Pos;  //sphere
-
-	//scene node
-	irr::scene::ISceneNode *Node;
 };
 
-struct DebugDraw3D_String : public DebugDraw3D {
-	DebugDraw3D_String() : DebugDraw3D(kDebugDraw3DString), Scale(1.0f) {}
+struct DebugDraw_String3D : public DebugDraw3D {
+	DebugDraw_String3D() : DebugDraw3D(kDebugDrawString3D), Scale(1.0f) {}
+	virtual ~DebugDraw_String3D() {}
 	DebugDrawManager::string_type Msg;
 	float Scale;
 	irr::core::vector3df Pos;  //string
 };
-struct DebugDraw3D_Axis : public DebugDraw3D {
-	DebugDraw3D_Axis() : DebugDraw3D(kDebugDraw3DAxis), Size(1.0f) {}
+struct DebugDraw_Axis3D : public DebugDraw3D {
+	DebugDraw_Axis3D() : DebugDraw3D(kDebugDrawAxis3D), Size(1.0f) {}
+	virtual ~DebugDraw_Axis3D() {}
 	float Size;
 	irr::core::matrix4 Xf;   //axis
 };

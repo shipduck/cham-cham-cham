@@ -27,7 +27,7 @@ void DebugDrawManager::draw()
 		auto it = Cmd3DList.begin();
 		auto endit = Cmd3DList.end();
 		for( ; it != endit ; ++it) {
-			const std::unique_ptr<DebugDraw3D> &cmd = *it;
+			const std::unique_ptr<DebugDraw> &cmd = *it;
 			drawElem(cmd.get());
 		}
 	}
@@ -35,7 +35,7 @@ void DebugDrawManager::draw()
 		auto it = Cmd2DList.begin();
 		auto endit = Cmd2DList.end();
 		for( ; it != endit ; ++it) {
-			const std::unique_ptr<DebugDraw2D> &cmd = *it;
+			const std::unique_ptr<DebugDraw> &cmd = *it;
 			drawElem(cmd.get());
 		}
 	}
@@ -57,7 +57,7 @@ struct RemoveFindFunctor {
 void DebugDrawManager::update(int ms)
 {
 	{
-		RemoveFindFunctor<DebugDraw2D> functor;
+		RemoveFindFunctor<DebugDraw> functor;
 		auto it = Cmd2DList.begin();
 		auto endit = Cmd2DList.end();
 		for( ; it != endit ; ++it) {
@@ -67,7 +67,7 @@ void DebugDrawManager::update(int ms)
 		Cmd2DList.remove_if(functor);
 	}
 	{
-		RemoveFindFunctor<DebugDraw3D> functor;
+		RemoveFindFunctor<DebugDraw> functor;
 		auto it = Cmd3DList.begin();
 		auto endit = Cmd3DList.end();
 		for( ; it != endit ; ++it) {
@@ -78,17 +78,7 @@ void DebugDrawManager::update(int ms)
 	}
 }
 
-DebugDraw3D::DebugDraw3D(DebugDraw3DType type)
-	: Type(type),
-	Duration(0),
-	DepthEnable(true)
-{
-}
-DebugDraw3D::~DebugDraw3D()
-{
-}
-
-DebugDraw3D_Sphere::~DebugDraw3D_Sphere()
+DebugDraw::~DebugDraw()
 {
 	if(Node) {
 		Node->remove();
@@ -103,7 +93,7 @@ void DebugDrawManager::addLine(const irr::core::vector3df &p1, const irr::core::
 		int duration,
 		bool depthEnable)
 {
-	std::unique_ptr<DebugDraw3D_Line> cmd(new DebugDraw3D_Line());
+	std::unique_ptr<DebugDraw_Line3D> cmd(new DebugDraw_Line3D());
 	cmd->P1 = p1;
 	cmd->P2 = p2;
 	cmd->Color = color;
@@ -119,7 +109,7 @@ void DebugDrawManager::addCross(const irr::core::vector3df &pos,
 		int duration,
 		bool depthEnable)
 {
-	std::unique_ptr<DebugDraw3D_Cross> cmd(new DebugDraw3D_Cross());
+	std::unique_ptr<DebugDraw_Cross3D> cmd(new DebugDraw_Cross3D());
 	cmd->Pos = pos;
 	cmd->Color = color;
 	cmd->Size = size;
@@ -134,7 +124,7 @@ void DebugDrawManager::addSphere(const irr::core::vector3df &pos,
 		int duration,
 		bool depthEnable)
 {
-	std::unique_ptr<DebugDraw3D_Sphere> cmd(new DebugDraw3D_Sphere());
+	std::unique_ptr<DebugDraw_Sphere3D> cmd(new DebugDraw_Sphere3D());
 	cmd->Pos = pos;
 	cmd->Radius = radius;
 	cmd->Color = color;
@@ -165,7 +155,7 @@ void DebugDrawManager::addAxis(const irr::core::matrix4 &xf,
 		int duration,
 		bool depthEnable)
 {
-	std::unique_ptr<DebugDraw3D_Axis> cmd(new DebugDraw3D_Axis());
+	std::unique_ptr<DebugDraw_Axis3D> cmd(new DebugDraw_Axis3D());
 	cmd->Xf = xf;
 	cmd->Size = size;
 	cmd->Duration = duration;
@@ -180,7 +170,7 @@ void DebugDrawManager::addString(const irr::core::vector3df &pos,
 		int duration,
 		bool depthEnable)
 {
-	std::unique_ptr<DebugDraw3D_String> cmd(new DebugDraw3D_String());
+	std::unique_ptr<DebugDraw_String3D> cmd(new DebugDraw_String3D());
 	cmd->Pos = pos;
 	cmd->Msg = msg;
 	cmd->Color = color;
@@ -195,7 +185,7 @@ void DebugDrawManager::addLine(const irr::core::vector2di &p1, const irr::core::
 		float lineWidth,
 		int duration)
 {
-	std::unique_ptr<DebugDraw2D_Line> cmd(new DebugDraw2D_Line());
+	std::unique_ptr<DebugDraw_Line2D> cmd(new DebugDraw_Line2D());
 	cmd->P1 = p1;
 	cmd->P2 = p2;
 	cmd->Color = color;
@@ -209,7 +199,7 @@ void DebugDrawManager::addCross(const irr::core::vector2di &pos,
 		float size,
 		int duration)
 {
-	std::unique_ptr<DebugDraw2D_Cross> cmd(new DebugDraw2D_Cross());
+	std::unique_ptr<DebugDraw_Cross2D> cmd(new DebugDraw_Cross2D());
 	cmd->Pos = pos;
 	cmd->Color = color;
 	cmd->Size = size;
@@ -223,7 +213,7 @@ void DebugDrawManager::addString(const irr::core::vector2di &pos,
 								   float scale,
 								   int duration)
 {
-	std::unique_ptr<DebugDraw2D_String> cmd(new DebugDraw2D_String());
+	std::unique_ptr<DebugDraw_String2D> cmd(new DebugDraw_String2D());
 	cmd->Pos = pos;
 	cmd->Msg = msg;
 	cmd->Color = color;
@@ -236,7 +226,7 @@ void DebugDrawManager::addCircle(const irr::core::vector2di &pos, float radius,
 		const irr::video::SColor &color,
 		int duration)
 {
-	std::unique_ptr<DebugDraw2D_Circle> cmd(new DebugDraw2D_Circle());
+	std::unique_ptr<DebugDraw_Circle2D> cmd(new DebugDraw_Circle2D());
 	cmd->Pos = pos;
 	cmd->Radius = radius;
 	cmd->Color = color;
@@ -245,28 +235,44 @@ void DebugDrawManager::addCircle(const irr::core::vector2di &pos, float radius,
 }
 
 
-void DebugDrawManager::drawElem(DebugDraw2D *cmd) 
+void DebugDrawManager::drawElem(DebugDraw *cmd) 
 {
 	switch(cmd->Type) {
-	case kDebugDraw2DLine:
-		drawElem(static_cast<DebugDraw2D_Line*>(cmd));
+	case kDebugDrawLine2D:
+		drawElem(static_cast<DebugDraw_Line2D*>(cmd));
 		break;
-	case kDebugDraw2DCross:
-		drawElem(static_cast<DebugDraw2D_Cross*>(cmd));
+	case kDebugDrawCross2D:
+		drawElem(static_cast<DebugDraw_Cross2D*>(cmd));
 		break;
-	case kDebugDraw2DString:
-		drawElem(static_cast<DebugDraw2D_String*>(cmd));
+	case kDebugDrawString2D:
+		drawElem(static_cast<DebugDraw_String2D*>(cmd));
 		break;
-	case kDebugDraw2DCircle:
-		drawElem(static_cast<DebugDraw2D_Circle*>(cmd));
+	case kDebugDrawCircle2D:
+		drawElem(static_cast<DebugDraw_Circle2D*>(cmd));
+		break;
+	case kDebugDrawLine3D:
+		drawElem(static_cast<DebugDraw_Line3D*>(cmd));
+		break;
+	case kDebugDrawCross3D:
+		drawElem(static_cast<DebugDraw_Cross3D*>(cmd));
+		break;
+	case kDebugDrawSphere3D:
+		drawElem(static_cast<DebugDraw_Sphere3D*>(cmd));
+		break;
+	case kDebugDrawString3D:
+		drawElem(static_cast<DebugDraw_String3D*>(cmd));
+		break;
+	case kDebugDrawAxis3D:
+		drawElem(static_cast<DebugDraw_Axis3D*>(cmd));
 		break;
 	default:
+		SR_ASSERT(!"Not implemented");
 		break;
 	}
 }
 
 
-void DebugDrawManager::drawElem(DebugDraw2D_Line *cmd)
+void DebugDrawManager::drawElem(DebugDraw_Line2D *cmd)
 {
 	IVideoDriver* driver = Device->getVideoDriver();
 	video::SMaterial m; 
@@ -277,7 +283,7 @@ void DebugDrawManager::drawElem(DebugDraw2D_Line *cmd)
 	driver->draw2DLine(cmd->P1, cmd->P2, cmd->Color);
 }
 
-void DebugDrawManager::drawElem(DebugDraw2D_Cross *cmd)
+void DebugDrawManager::drawElem(DebugDraw_Cross2D *cmd)
 {
 	IVideoDriver* driver = Device->getVideoDriver();
 	video::SMaterial m; 
@@ -294,39 +300,16 @@ void DebugDrawManager::drawElem(DebugDraw2D_Cross *cmd)
 	driver->draw2DLine(right, left, cmd->Color);
 }
 
-void DebugDrawManager::drawElem(DebugDraw2D_String *cmd)
+void DebugDrawManager::drawElem(DebugDraw_String2D *cmd)
 {
 }
 
-void DebugDrawManager::drawElem(DebugDraw2D_Circle *cmd)
+void DebugDrawManager::drawElem(DebugDraw_Circle2D *cmd)
 {
 	SR_ASSERT(false && "NotImplemented");
 }
 
-void DebugDrawManager::drawElem(DebugDraw3D *cmd) 
-{
-	switch(cmd->Type) {
-	case kDebugDraw3DLine:
-		drawElem(static_cast<DebugDraw3D_Line*>(cmd));
-		break;
-	case kDebugDraw3DCross:
-		drawElem(static_cast<DebugDraw3D_Cross*>(cmd));
-		break;
-	case kDebugDraw3DSphere:
-		drawElem(static_cast<DebugDraw3D_Sphere*>(cmd));
-		break;
-	case kDebugDraw3DString:
-		drawElem(static_cast<DebugDraw3D_String*>(cmd));
-		break;
-	case kDebugDraw3DAxis:
-		drawElem(static_cast<DebugDraw3D_Axis*>(cmd));
-		break;
-	default:
-		break;
-	}
-}
-
-void DebugDrawManager::drawElem(DebugDraw3D_Line *cmd)
+void DebugDrawManager::drawElem(DebugDraw_Line3D *cmd)
 {
 	IVideoDriver* driver = Device->getVideoDriver();
 	video::SMaterial m; 
@@ -337,19 +320,19 @@ void DebugDrawManager::drawElem(DebugDraw3D_Line *cmd)
 	driver->draw3DLine(cmd->P1, cmd->P2, cmd->Color);
 }
 
-void DebugDrawManager::drawElem(DebugDraw3D_Cross *cmd)
+void DebugDrawManager::drawElem(DebugDraw_Cross3D *cmd)
 {
 	//항상 동일한 크기로 보이게 적절히 렌더링하기
 }
 
-void DebugDrawManager::drawElem(DebugDraw3D_Sphere *cmd)
+void DebugDrawManager::drawElem(DebugDraw_Sphere3D *cmd)
 {
 	//use scene node based
 }
-void DebugDrawManager::drawElem(DebugDraw3D_String *cmd)
+void DebugDrawManager::drawElem(DebugDraw_String3D *cmd)
 {
 }
-void DebugDrawManager::drawElem(DebugDraw3D_Axis *cmd)
+void DebugDrawManager::drawElem(DebugDraw_Axis3D *cmd)
 {
 	IVideoDriver* driver = Device->getVideoDriver();
 	video::SMaterial m; 
