@@ -6,22 +6,20 @@ MACRO( MSVC_SET_PCH Target PrecompiledHeader PrecompiledSource)
     GET_FILENAME_COMPONENT(PrecompiledBasename
        ${PrecompiledHeader} NAME)
     GET_SOURCE_FILE_PROPERTY(OLD_COMPILE_FLAGS ${PrecompiledSource} COMPILE_FLAGS)
-    IF( OLD_COMPILE_FLAGS STREQUAL "OLD_COMPILE_FLAGS-NOTFOUND" )
-      SET(OLD_COMPILE_FLAGS "")
-    ENDIF(  )
-    GET_TARGET_PROPERTY(OLD_TAGET_COMPILE_FLAGS ${Target} COMPILE_FLAGS)
-    IF( OLD_TATGET_COMPILE_FLAGS STREQUAL "OLD_TARGET_COMPILE_FLAGS-NOTFOUND" )
-      SET(OLD_TARGET_COMPILE_FLAGS "")
-    ENDIF(  )
 
-    SET_SOURCE_FILES_PROPERTIES(${PrecompiledSource}
-      PROPERTIES
+    SET_PROPERTY(SOURCE ${PrecompiledSource}
+      APPEND
+      PROPERTY
         COMPILE_FLAGS
-          "${OLD_COMPILE_FLAGS} /Yc\"${PrecompiledBasename}\" /Fp\"${PrecompiledBinary}\""
+          "/Yc\"${PrecompiledBasename}\" /Fp\"${PrecompiledBinary}\"")
+    SET_PROPERTY(SOURCE ${PrecompiledSource}
+      APPEND
+      PROPERTY
         OBJECT_OUTPUTS "${PrecompiledBinary}") 
-    SET_TARGET_PROPERTIES(${Target}
-      PROPERTIES
+    SET_PROPERTY(TARGET ${Target}
+      APPEND
+      PROPERTY
         COMPILE_FLAGS
-          "${OLD_TAGET_COMPILE_FLAGS} /Yu\"${PrecompiledBasename}\"")
+          "/Yu\"${PrecompiledBasename}\"")
   ENDIF( MSVC )
 ENDMACRO( MSVC_SET_PCH )
