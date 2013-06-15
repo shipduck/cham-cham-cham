@@ -25,6 +25,19 @@ struct DebugDraw_Cross2D;
 struct DebugDraw_String2D;
 struct DebugDraw_Circle2D;
 
+template<typename T>
+struct RemoveFindFunctor {
+	bool operator()(T &cmd) {
+		return (cmd.Duration < 0);
+	}
+};
+
+template<typename T>
+struct DebugDrawTypeHolder {
+	typedef std::list<T> list_type;
+	typedef T value_type;
+};
+
 class DebugDrawManager {
 public:
 	typedef std::wstring string_type;
@@ -39,11 +52,10 @@ public:
 
 	void setUp(irr::IrrlichtDevice *dev);
 	void shutDown();
-	void draw();
-	void update(int ms);
+	void drawAll();
+	void updateAll(int ms);
 	void clear();
-	int count2d() const { return Cmd2DList.size(); }
-	int count3d() const { return Cmd3DList.size(); }
+	int count() const;
 
 	//add 3d
 public:
@@ -101,27 +113,64 @@ public:
 
 	//draw
 public:
-	void drawElem(DebugDraw *cmd);
-	void drawElem(DebugDraw_Line2D *cmd);
-	void drawElem(DebugDraw_Cross2D *cmd);
-	void drawElem(DebugDraw_Circle2D *cmd);
-	void drawElem(DebugDraw_String2D *cmd);
-	void drawElem(DebugDraw_Line3D *cmd);
-	void drawElem(DebugDraw_Cross3D *cmd);
-	void drawElem(DebugDraw_Sphere3D *cmd);
-	void drawElem(DebugDraw_Axis3D *cmd);
-	void drawElem(DebugDraw_String3D *cmd);
+	void drawElem(const DebugDraw_Line2D *cmd);
+	void drawElem(const DebugDraw_Cross2D *cmd);
+	void drawElem(const DebugDraw_Circle2D *cmd);
+	void drawElem(const DebugDraw_String2D *cmd);
+	void drawElem(const DebugDraw_Line3D *cmd);
+	void drawElem(const DebugDraw_Cross3D *cmd);
+	void drawElem(const DebugDraw_Sphere3D *cmd);
+	void drawElem(const DebugDraw_Axis3D *cmd);
+	void drawElem(const DebugDraw_String3D *cmd);
 
-protected:
+private:
 	irr::IrrlichtDevice *Device;	
-	DebugDrawList Cmd2DList;
-	DebugDrawList Cmd3DList;
+
+	DebugDrawTypeHolder<DebugDraw_Line2D>::list_type Line2DList;
+	DebugDrawTypeHolder<DebugDraw_Cross2D>::list_type Cross2DList;
+	DebugDrawTypeHolder<DebugDraw_Circle2D>::list_type Circle2DList;
+	DebugDrawTypeHolder<DebugDraw_String2D>::list_type String2DList;
+	DebugDrawTypeHolder<DebugDraw_Line3D>::list_type Line3DList;
+	DebugDrawTypeHolder<DebugDraw_Cross3D>::list_type Cross3DList;
+	DebugDrawTypeHolder<DebugDraw_Sphere3D>::list_type Sphere3DList;
+	DebugDrawTypeHolder<DebugDraw_Axis3D>::list_type Axis3DList;
+	DebugDrawTypeHolder<DebugDraw_String3D>::list_type String3DList;
+
+	template<typename T>
+	void draw(const T &elemList)
+	{
+		auto it = elemList.begin();
+		auto endit = elemList.end();
+		for( ; it != endit ; ++it) {
+			const T::value_type &cmd = *it;
+			drawElem(&cmd);
+		}
+	}
+
+	template<typename T>
+	void update(int ms, T &elemList)
+	{
+		RemoveFindFunctor<T::value_type> functor;
+		auto it = elemList.begin();
+		auto endit = elemList.end();
+		for( ; it != endit ; ++it) {
+			T::value_type &cmd = *it;
+			cmd.Duration -= ms;
+
+			if(cmd.Duration < 0 && cmd.Node) {
+				cmd.Node->remove();
+				cmd.Node->drop();
+				cmd.Node = nullptr;
+			}
+		}
+		elemList.remove_if(functor);
+	}
 };
 
 struct DebugDraw {
 	DebugDraw() : Type(kDebugDrawNone), Duration(0), Node(nullptr) {}
 	DebugDraw(DebugDrawType type)  : Type(type), Duration(0), Node(nullptr) {}
-	virtual ~DebugDraw();
+	virtual ~DebugDraw() {}
 	DebugDrawType Type;
 	irr::video::SColor Color;
 	int Duration;	//millisecond

@@ -16,23 +16,23 @@ protected:
 	}
 };
 
-TEST_F(DebugDrawManagerTest, Update) 
+TEST_F(DebugDrawManagerTest, updateAll) 
 {
 	DebugDrawManager mgr;
-	EXPECT_EQ(0, mgr.count2d());
+	EXPECT_EQ(0, mgr.count());
 
 	SColor color;
 	mgr.addCross(vector2di(0, 0), color, 1);	// without duration
 	mgr.addCross(vector2di(0, 0), color, 1, 1000);	// with duration
-	EXPECT_EQ(2, mgr.count2d());
+	EXPECT_EQ(2, mgr.count());
 
-	mgr.update(500);
-	EXPECT_EQ(1, mgr.count2d());
+	mgr.updateAll(500);
+	EXPECT_EQ(1, mgr.count());
 
-	mgr.update(1000);
-	EXPECT_EQ(0, mgr.count2d());
+	mgr.updateAll(1000);
+	EXPECT_EQ(0, mgr.count());
 
-	mgr.update(1000);
-	EXPECT_EQ(0, mgr.count2d());
+	mgr.updateAll(1000);
+	EXPECT_EQ(0, mgr.count());
 }
 

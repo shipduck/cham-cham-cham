@@ -71,12 +71,12 @@ void DebugDrawScene::update(int ms)
 	smgr->drawAll(); // draw the 3d scene
 
 	// debug render
-	gDebugDrawMgr.draw();
+	gDebugDrawMgr.drawAll();
 
 	//guienv->drawAll();
 
 	driver->endScene();	//render end
 
-	gDebugDrawMgr.update(ms);
+	gDebugDrawMgr.updateAll(ms);
 }
 
