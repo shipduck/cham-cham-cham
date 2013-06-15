@@ -17,11 +17,6 @@ int SCREEN_WIDTH = 1280;
 int SCREEN_HEIGHT = 800;
 bool fullscreen = false;
 bool vsync = true;
-float mouseSpeed = 40.0f;
-float walkSpeed = 3.0f;
-
-
-
 
 
 int entrypoint(int argc, char* argv[])
@@ -29,7 +24,7 @@ int entrypoint(int argc, char* argv[])
 	// Check fullscreen
 	for (int i=1;i<argc;i++) fullscreen |= !strcmp("-f", argv[i]);
 	//fullscreen = true;
-		
+	
 	IrrlichtDevice *device = createDevice(EDT_OPENGL, dimension2d<u32>(SCREEN_WIDTH, SCREEN_HEIGHT), 32, fullscreen, false, vsync);
 	if (!device) {
 		return 1;
@@ -46,8 +41,14 @@ int entrypoint(int argc, char* argv[])
 	scene->setUp();
 
 	int lastFPS = -1;
+	u32 then = device->getTimer()->getTime();
+
 	// Render loop
 	while(device->run()) {
+		const u32 now = device->getTimer()->getTime();
+		const f32 frameDeltaTime = (f32)(now - then);// Time in milliseconds
+		then = now;
+
 		// Read-Write Head Tracking Sensor Value to Camera
 		float yaw = 0;
 		float pitch = 0;
@@ -57,7 +58,7 @@ int entrypoint(int argc, char* argv[])
 		}
 		//hmdCam->setHeadTrackingValue(yaw, pitch, roll);
 
-		scene->update(16);
+		scene->update(frameDeltaTime);
 		
 
 		int fps = driver->getFPS();
