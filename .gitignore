@@ -26,6 +26,8 @@ install_manifest.txt
 *.sdf
 *.sln
 *.opensdf
+*.tlog
+*.lastbuildstate
 ipch
 
 # submodule
