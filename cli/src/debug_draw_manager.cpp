@@ -7,6 +7,77 @@ using namespace video;
 using namespace scene;
 using namespace core;
 
+DebugDrawManager gDebugDrawMgr;
+irr::gui::IGUIFont *gNormalFont12 = nullptr;
+irr::gui::IGUIFont *gNormalFont14 = nullptr;
+
+
+void DebugDrawManager::setUp(irr::IrrlichtDevice *dev)
+{
+	this->Device = dev;
+}
+void DebugDrawManager::shutDown()
+{
+	clear();
+}
+
+void DebugDrawManager::draw()
+{
+	{
+		auto it = Cmd3DList.begin();
+		auto endit = Cmd3DList.end();
+		for( ; it != endit ; ++it) {
+			const std::unique_ptr<DebugDraw3D> &cmd = *it;
+			drawElem(cmd.get());
+		}
+	}
+	{
+		auto it = Cmd2DList.begin();
+		auto endit = Cmd2DList.end();
+		for( ; it != endit ; ++it) {
+			const std::unique_ptr<DebugDraw2D> &cmd = *it;
+			drawElem(cmd.get());
+		}
+	}
+}
+void DebugDrawManager::clear() 
+{
+	Cmd2DList.clear(); 
+	Cmd3DList.clear(); 
+}
+
+
+template<typename T>
+struct RemoveFindFunctor {
+	bool operator()(std::unique_ptr<T> &cmd) {
+		return (cmd->Duration < 0);
+	}
+};
+
+void DebugDrawManager::update(int ms)
+{
+	{
+		RemoveFindFunctor<DebugDraw2D> functor;
+		auto it = Cmd2DList.begin();
+		auto endit = Cmd2DList.end();
+		for( ; it != endit ; ++it) {
+			auto &cmd = *it;
+			cmd->Duration -= ms;
+		}
+		Cmd2DList.remove_if(functor);
+	}
+	{
+		RemoveFindFunctor<DebugDraw3D> functor;
+		auto it = Cmd3DList.begin();
+		auto endit = Cmd3DList.end();
+		for( ; it != endit ; ++it) {
+			auto &cmd = *it;
+			cmd->Duration -= ms;
+		}
+		Cmd3DList.remove_if(functor);
+	}
+}
+
 DebugDraw3D::DebugDraw3D(DebugDraw3DType type)
 	: Type(type),
 	Duration(0),
@@ -21,11 +92,12 @@ DebugDraw3D_Sphere::~DebugDraw3D_Sphere()
 {
 	if(Node) {
 		Node->remove();
+		Node->drop();
 		Node = nullptr;
 	}
 }
 
-void DebugDrawManager3D::addLine(const irr::core::vector3df &p1, const irr::core::vector3df &p2,
+void DebugDrawManager::addLine(const irr::core::vector3df &p1, const irr::core::vector3df &p2,
 		const irr::video::SColor &color,
 		float lineWidth,
 		int duration,
@@ -38,10 +110,10 @@ void DebugDrawManager3D::addLine(const irr::core::vector3df &p1, const irr::core
 	cmd->LineWidth = lineWidth;
 	cmd->Duration = duration;
 	cmd->DepthEnable = depthEnable;
-	CmdList.push_back(std::move(cmd));
+	Cmd3DList.push_back(std::move(cmd));
 }
 
-void DebugDrawManager3D::addCross(const irr::core::vector3df &pos, 
+void DebugDrawManager::addCross(const irr::core::vector3df &pos, 
 		const irr::video::SColor &color,
 		float size,
 		int duration,
@@ -53,10 +125,10 @@ void DebugDrawManager3D::addCross(const irr::core::vector3df &pos,
 	cmd->Size = size;
 	cmd->Duration = duration;
 	cmd->DepthEnable = depthEnable;
-	CmdList.push_back(std::move(cmd));
+	Cmd3DList.push_back(std::move(cmd));
 }
 
-void DebugDrawManager3D::addSphere(const irr::core::vector3df &pos, 
+void DebugDrawManager::addSphere(const irr::core::vector3df &pos, 
 		float radius,
 		const irr::video::SColor &color,
 		int duration,
@@ -82,12 +154,13 @@ void DebugDrawManager3D::addSphere(const irr::core::vector3df &pos,
 		smgr->getMeshManipulator()->setVertexColors(node->getMesh(), color);
 	}
 	node->setPosition(pos);
+	node->grab();
 	cmd->Node = node;
 
-	CmdList.push_back(std::move(cmd));
+	Cmd3DList.push_back(std::move(cmd));
 }
 
-void DebugDrawManager3D::addAxis(const irr::core::matrix4 &xf,
+void DebugDrawManager::addAxis(const irr::core::matrix4 &xf,
 		float size, 
 		int duration,
 		bool depthEnable)
@@ -97,11 +170,11 @@ void DebugDrawManager3D::addAxis(const irr::core::matrix4 &xf,
 	cmd->Size = size;
 	cmd->Duration = duration;
 	cmd->DepthEnable = depthEnable;
-	CmdList.push_back(std::move(cmd));
+	Cmd3DList.push_back(std::move(cmd));
 }
 
-void DebugDrawManager3D::addString(const irr::core::vector3df &pos, 
-		const DebugDrawManager3D::string_type &msg,
+void DebugDrawManager::addString(const irr::core::vector3df &pos, 
+		const DebugDrawManager::string_type &msg,
 		const irr::video::SColor &color,
 		float scale,
 		int duration,
@@ -114,10 +187,10 @@ void DebugDrawManager3D::addString(const irr::core::vector3df &pos,
 	cmd->Scale = scale;
 	cmd->Duration = duration;
 	cmd->DepthEnable = depthEnable;
-	CmdList.push_back(std::move(cmd));
+	Cmd3DList.push_back(std::move(cmd));
 }
 
-void DebugDrawManager2D::addLine(const irr::core::vector2di &p1, const irr::core::vector2di &p2,
+void DebugDrawManager::addLine(const irr::core::vector2di &p1, const irr::core::vector2di &p2,
 		const irr::video::SColor &color,
 		float lineWidth,
 		int duration)
@@ -128,10 +201,10 @@ void DebugDrawManager2D::addLine(const irr::core::vector2di &p1, const irr::core
 	cmd->Color = color;
 	cmd->LineWidth = lineWidth;
 	cmd->Duration = duration;
-	CmdList.push_back(std::move(cmd));
+	Cmd2DList.push_back(std::move(cmd));
 }
 
-void DebugDrawManager2D::addCross(const irr::core::vector2di &pos, 
+void DebugDrawManager::addCross(const irr::core::vector2di &pos, 
 		const irr::video::SColor &color,
 		float size,
 		int duration)
@@ -141,11 +214,11 @@ void DebugDrawManager2D::addCross(const irr::core::vector2di &pos,
 	cmd->Color = color;
 	cmd->Size = size;
 	cmd->Duration = duration;
-	CmdList.push_back(std::move(cmd));
+	Cmd2DList.push_back(std::move(cmd));
 }
 
-void DebugDrawManager2D::addString(const irr::core::vector2di &pos, 
-								   const DebugDrawManager3D::string_type &msg,
+void DebugDrawManager::addString(const irr::core::vector2di &pos, 
+								   const DebugDrawManager::string_type &msg,
 								   const irr::video::SColor &color,
 								   float scale,
 								   int duration)
@@ -156,10 +229,10 @@ void DebugDrawManager2D::addString(const irr::core::vector2di &pos,
 	cmd->Color = color;
 	cmd->Scale = scale;
 	cmd->Duration = duration;
-	CmdList.push_back(std::move(cmd));
+	Cmd2DList.push_back(std::move(cmd));
 }
 
-void DebugDrawManager2D::addCircle(const irr::core::vector2di &pos, float radius,
+void DebugDrawManager::addCircle(const irr::core::vector2di &pos, float radius,
 		const irr::video::SColor &color,
 		int duration)
 {
@@ -168,21 +241,11 @@ void DebugDrawManager2D::addCircle(const irr::core::vector2di &pos, float radius
 	cmd->Radius = radius;
 	cmd->Color = color;
 	cmd->Duration = duration;
-	CmdList.push_back(std::move(cmd));
+	Cmd2DList.push_back(std::move(cmd));
 }
 
 
-void DebugDrawer2D::drawAll(const DebugDrawManager2D &mgr)
-{
-	auto it = mgr.CmdList.begin();
-	auto endit = mgr.CmdList.end();
-	for( ; it != endit ; ++it) {
-		const std::unique_ptr<DebugDraw2D> &cmd = *it;
-		drawElem(cmd.get());
-	}
-}
-
-void DebugDrawer2D::drawElem(DebugDraw2D *cmd) 
+void DebugDrawManager::drawElem(DebugDraw2D *cmd) 
 {
 	switch(cmd->Type) {
 	case kDebugDraw2DLine:
@@ -203,7 +266,7 @@ void DebugDrawer2D::drawElem(DebugDraw2D *cmd)
 }
 
 
-void DebugDrawer2D::drawElem(DebugDraw2D_Line *cmd)
+void DebugDrawManager::drawElem(DebugDraw2D_Line *cmd)
 {
 	IVideoDriver* driver = Device->getVideoDriver();
 	video::SMaterial m; 
@@ -214,7 +277,7 @@ void DebugDrawer2D::drawElem(DebugDraw2D_Line *cmd)
 	driver->draw2DLine(cmd->P1, cmd->P2, cmd->Color);
 }
 
-void DebugDrawer2D::drawElem(DebugDraw2D_Cross *cmd)
+void DebugDrawManager::drawElem(DebugDraw2D_Cross *cmd)
 {
 	IVideoDriver* driver = Device->getVideoDriver();
 	video::SMaterial m; 
@@ -231,26 +294,16 @@ void DebugDrawer2D::drawElem(DebugDraw2D_Cross *cmd)
 	driver->draw2DLine(right, left, cmd->Color);
 }
 
-void DebugDrawer2D::drawElem(DebugDraw2D_String *cmd)
+void DebugDrawManager::drawElem(DebugDraw2D_String *cmd)
 {
 }
 
-void DebugDrawer2D::drawElem(DebugDraw2D_Circle *cmd)
+void DebugDrawManager::drawElem(DebugDraw2D_Circle *cmd)
 {
 	SR_ASSERT(false && "NotImplemented");
 }
 
-void DebugDrawer3D::drawAll(const DebugDrawManager3D &mgr)
-{
-	auto it = mgr.CmdList.begin();
-	auto endit = mgr.CmdList.end();
-	for( ; it != endit ; ++it) {
-		const std::unique_ptr<DebugDraw3D> &cmd = *it;
-		drawElem(cmd.get());
-	}
-}
-
-void DebugDrawer3D::drawElem(DebugDraw3D *cmd) 
+void DebugDrawManager::drawElem(DebugDraw3D *cmd) 
 {
 	switch(cmd->Type) {
 	case kDebugDraw3DLine:
@@ -273,7 +326,7 @@ void DebugDrawer3D::drawElem(DebugDraw3D *cmd)
 	}
 }
 
-void DebugDrawer3D::drawElem(DebugDraw3D_Line *cmd)
+void DebugDrawManager::drawElem(DebugDraw3D_Line *cmd)
 {
 	IVideoDriver* driver = Device->getVideoDriver();
 	video::SMaterial m; 
@@ -284,19 +337,19 @@ void DebugDrawer3D::drawElem(DebugDraw3D_Line *cmd)
 	driver->draw3DLine(cmd->P1, cmd->P2, cmd->Color);
 }
 
-void DebugDrawer3D::drawElem(DebugDraw3D_Cross *cmd)
+void DebugDrawManager::drawElem(DebugDraw3D_Cross *cmd)
 {
 	//항상 동일한 크기로 보이게 적절히 렌더링하기
 }
 
-void DebugDrawer3D::drawElem(DebugDraw3D_Sphere *cmd)
+void DebugDrawManager::drawElem(DebugDraw3D_Sphere *cmd)
 {
 	//use scene node based
 }
-void DebugDrawer3D::drawElem(DebugDraw3D_String *cmd)
+void DebugDrawManager::drawElem(DebugDraw3D_String *cmd)
 {
 }
-void DebugDrawer3D::drawElem(DebugDraw3D_Axis *cmd)
+void DebugDrawManager::drawElem(DebugDraw3D_Axis *cmd)
 {
 	IVideoDriver* driver = Device->getVideoDriver();
 	video::SMaterial m; 

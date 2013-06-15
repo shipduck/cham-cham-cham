@@ -2,10 +2,10 @@
 #pragma once
 #include <OVR.h>
 
-class CHeadTracking {
+class HeadTracking {
 public:
-	CHeadTracking();
-	~CHeadTracking();
+	HeadTracking();
+	~HeadTracking();
 
 	bool startUp();
 	bool shutDown();

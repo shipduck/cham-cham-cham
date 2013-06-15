@@ -14,9 +14,5 @@ public:
 	virtual void update(int ms);
 	virtual void setUp();
 	virtual void shutDown();
-
-private:
-	std::unique_ptr<DebugDrawManager2D> DebugDrawMgr2d;
-	std::unique_ptr<DebugDrawManager3D> DebugDrawMgr3d;
 };
 

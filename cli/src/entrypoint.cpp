@@ -1,6 +1,7 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
 #include "entrypoint.h"
+#include "debug_draw_manager.h"
 #include "head_tracking.h"
 #include "sample_scene.h"
 #include "debug_draw_scene.h"
@@ -21,10 +22,6 @@ bool vsync = true;
 float mouseSpeed = 40.0f;
 float walkSpeed = 3.0f;
 
-
-
-
-
 int entrypoint(int argc, char* argv[])
 {
 	// Check fullscreen
@@ -37,10 +34,16 @@ int entrypoint(int argc, char* argv[])
 	}
 	
 	IVideoDriver* driver = device->getVideoDriver();
+	IGUIEnvironment* guienv = device->getGUIEnvironment();
 
 	//Oculus Rift Head Tracking
-	CHeadTracking headTracking;
+	HeadTracking headTracking;
 	headTracking.startUp();
+
+	//set debug tool
+	gDebugDrawMgr.setUp(device);
+	gNormalFont12 = guienv->getFont("res/font_12.xml");
+	gNormalFont14 = guienv->getFont("res/font_12.xml");
 
 	//simple scene framework
 	//std::unique_ptr<Scene> scene(new SampleScene(device));
@@ -85,6 +88,9 @@ int entrypoint(int argc, char* argv[])
 	}
 	//shut down scene before device drop!
 	scene->shutDown();
+
+	//clean debug tool
+	gDebugDrawMgr.shutDown();
 
 	device->drop();	
 	

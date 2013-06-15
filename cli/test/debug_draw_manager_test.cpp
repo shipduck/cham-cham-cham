@@ -18,21 +18,21 @@ protected:
 
 TEST_F(DebugDrawManagerTest, Update) 
 {
-	DebugDrawManager2D mgr;
-	EXPECT_EQ(0, mgr.count());
+	DebugDrawManager mgr;
+	EXPECT_EQ(0, mgr.count2d());
 
 	SColor color;
 	mgr.addCross(vector2di(0, 0), color, 1);	// without duration
 	mgr.addCross(vector2di(0, 0), color, 1, 1000);	// with duration
-	EXPECT_EQ(2, mgr.count());
+	EXPECT_EQ(2, mgr.count2d());
 
 	mgr.update(500);
-	EXPECT_EQ(1, mgr.count());
+	EXPECT_EQ(1, mgr.count2d());
 
 	mgr.update(1000);
-	EXPECT_EQ(0, mgr.count());
+	EXPECT_EQ(0, mgr.count2d());
 
 	mgr.update(1000);
-	EXPECT_EQ(0, mgr.count());
+	EXPECT_EQ(0, mgr.count2d());
 }
 

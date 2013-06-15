@@ -4,16 +4,16 @@
 
 using namespace OVR;
 
-CHeadTracking::CHeadTracking() 
+HeadTracking::HeadTracking() 
 {
 }
 
-CHeadTracking::~CHeadTracking() 
+HeadTracking::~HeadTracking() 
 {
 	shutDown(); 
 }
 
-bool CHeadTracking::startUp()
+bool HeadTracking::startUp()
 {
 	OVR::System::Init();
 
@@ -33,7 +33,7 @@ bool CHeadTracking::startUp()
 	}
 }
 
-bool CHeadTracking::shutDown()
+bool HeadTracking::shutDown()
 {
 	Sensor.Clear();
     HMD.Clear();
@@ -43,7 +43,7 @@ bool CHeadTracking::shutDown()
 	return true;
 }
 
-bool CHeadTracking::getValue(float *yaw, float *pitch, float *roll)
+bool HeadTracking::getValue(float *yaw, float *pitch, float *roll)
 {
 	if(Sensor == nullptr) {
 		*yaw = 0;
@@ -66,7 +66,7 @@ bool CHeadTracking::getValue(float *yaw, float *pitch, float *roll)
 	return true;
 }
 
-bool CHeadTracking::isConnected() const
+bool HeadTracking::isConnected() const
 {
 	if(Sensor == nullptr) {
 		return false;
