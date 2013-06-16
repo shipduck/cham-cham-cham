@@ -76,8 +76,6 @@ void SampleScene::setUp()
 
 	SceneHelper sceneHelper(Device);
 
-	display.setUp(Device);
-
 	// Create world
 	sceneHelper.initSky();
 
@@ -168,15 +166,6 @@ void SampleScene::update(int ms)
 	ISceneManager* smgr = Device->getSceneManager();
 	IGUIEnvironment* guienv = Device->getGUIEnvironment();
 	scene::ISceneCollisionManager* collMan = smgr->getSceneCollisionManager();
-
-
-	driver->beginScene(true,true,SColor(0,100,100,100));
-
-	display.NormalDrawAll(smgr);
-	//display.StereoDrawAll(smgr);
-
-	guienv->drawAll();
-
 		
 	// All intersections in this example are done with a ray cast out from the camera to
     // a distance of 1000.  You can easily modify this to check (e.g.) a bullet
@@ -233,7 +222,9 @@ void SampleScene::update(int ms)
             highlightedSceneNode->setMaterialFlag(video::EMF_LIGHTING, false);
         }
     }
+}
 
-	// end scene
-	driver->endScene();	
+void SampleScene::draw()
+{
+	
 }

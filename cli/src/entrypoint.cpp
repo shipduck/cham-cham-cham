@@ -5,6 +5,7 @@
 #include "util/head_tracking.h"
 #include "game/sample_scene.h"
 #include "game/debug_draw_scene.h"
+#include "util/hmd_display.h"
 
 using namespace irr;
 using namespace core;
@@ -27,12 +28,16 @@ int entrypoint(int argc, char* argv[])
 	//fullscreen = true;
 	
 	IrrlichtDevice *device = createDevice(EDT_OPENGL, dimension2d<u32>(SCREEN_WIDTH, SCREEN_HEIGHT), 32, fullscreen, false, vsync);
-	if (!device) {
+	if (!device){ 
 		return 1;
 	}
 	
 	IVideoDriver* driver = device->getVideoDriver();
 	IGUIEnvironment* guienv = device->getGUIEnvironment();
+	ISceneManager* smgr = device->getSceneManager();
+
+	HMDDisplay display;
+	display.setUp(device);
 
 	//Oculus Rift Head Tracking
 	HeadTracking headTracking;
@@ -41,7 +46,7 @@ int entrypoint(int argc, char* argv[])
 	//set debug tool
 	gDebugDrawMgr.setUp(device);
 	gNormalFont12 = guienv->getFont("res/font_12.xml");
-	gNormalFont14 = guienv->getFont("res/font_12.xml");
+	gNormalFont14 = guienv->getFont("res/font_14.xml");
 
 	//simple scene framework
 	//std::unique_ptr<Scene> scene(new SampleScene(device));
@@ -68,8 +73,25 @@ int entrypoint(int argc, char* argv[])
 			headTracking.getValue(&yaw, &pitch, &roll);			
 		}
 		//hmdCam->setHeadTrackingValue(yaw, pitch, roll);
-
 		scene->update(frameDeltaTime);
+
+		// draw block
+		driver->beginScene(true, true, video::SColor(255,113,113,133));
+
+		// draw the 3d scene
+		display.NormalDrawAll(smgr);
+		//display.StereoDrawAll(smgr);
+		
+		scene->draw();
+
+		// debug render
+		gDebugDrawMgr.drawAll();
+		guienv->drawAll();
+		driver->endScene();	//render end
+
+		//debug draw mgr의 업데이트를 나중에 처리해야 1프레임만 렌더링되는 객체도
+		//제대로 렌더링된다
+		gDebugDrawMgr.updateAll(frameDeltaTime);
 		
 		int fps = driver->getFPS();
 		if (lastFPS != fps) {

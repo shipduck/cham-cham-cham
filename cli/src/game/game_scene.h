@@ -3,18 +3,16 @@
 
 #include "scene.h"
 
-class DebugDrawManager2D;
-class DebugDrawManager3D;
-
-class DebugDrawScene : public Scene {
+class GameScene : public Scene {
 public:
-	DebugDrawScene(irr::IrrlichtDevice *dev);
-	virtual ~DebugDrawScene();
+	GameScene(irr::IrrlichtDevice *dev);
+	virtual ~GameScene();
 
 	virtual void setUp();
 	virtual void shutDown();
 
 	virtual void update(int ms);
 	virtual void draw();
-};
 
+private:
+};

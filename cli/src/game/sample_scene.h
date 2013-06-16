@@ -2,7 +2,6 @@
 #pragma once
 
 #include "scene.h"
-#include "util/hmd_display.h"
 #include "game/scene_node_animator_camera_hmd.h"
 
 class JoystickEventReceiver;
@@ -28,9 +27,11 @@ public:
 	SampleScene(irr::IrrlichtDevice *dev);
 	virtual ~SampleScene();
 
-	virtual void update(int ms);
 	virtual void setUp();
 	virtual void shutDown();
+
+	virtual void update(int ms);
+	virtual void draw();
 
 private:
 	irr::scene::IBillboardSceneNode *bill;
@@ -39,8 +40,6 @@ private:
 
 	JoystickEventReceiver *Receiver;
 	irr::core::array<irr::SJoystickInfo> JoystickInfo;
-
-	HMDDisplay display;
 
 	float mouseSpeed;
 	float walkSpeed;

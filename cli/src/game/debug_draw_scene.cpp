@@ -63,18 +63,8 @@ void DebugDrawScene::update(int ms)
 	gDebugDrawMgr.addLine(vector2di(0, 0), vector2di(50, 100), blue, 5.0f);
 	gDebugDrawMgr.addCross(vector2di(50, 100), red, 5.0f);
 	gDebugDrawMgr.addString(vector2di(50, 100), msg, white);
-
-	driver->beginScene(true, true, video::SColor(255,113,113,133));
-
-	smgr->drawAll(); // draw the 3d scene
-
-	// debug render
-	gDebugDrawMgr.drawAll();
-
-	//guienv->drawAll();
-
-	driver->endScene();	//render end
-
-	gDebugDrawMgr.updateAll(ms);
 }
 
+void DebugDrawScene::draw()
+{
+}

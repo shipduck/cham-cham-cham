@@ -26,7 +26,4 @@ void Scene::shutDown()
 	smgr->clear();
 	guienv->clear();
 }
-void Scene::update(int ms)
-{
-}
 
