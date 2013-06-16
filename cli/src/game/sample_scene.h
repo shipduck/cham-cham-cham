@@ -2,8 +2,8 @@
 #pragma once
 
 #include "scene.h"
-#include "hmd_display.h"
-#include "scene_node_animator_camera_hmd.h"
+#include "util/hmd_display.h"
+#include "game/scene_node_animator_camera_hmd.h"
 
 class JoystickEventReceiver;
 

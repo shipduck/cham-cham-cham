@@ -1,10 +1,10 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
 #include "entrypoint.h"
-#include "debug_draw_manager.h"
-#include "head_tracking.h"
-#include "sample_scene.h"
-#include "debug_draw_scene.h"
+#include "util/debug_draw_manager.h"
+#include "util/head_tracking.h"
+#include "game/sample_scene.h"
+#include "game/debug_draw_scene.h"
 
 using namespace irr;
 using namespace core;

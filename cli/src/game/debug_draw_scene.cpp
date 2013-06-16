@@ -1,7 +1,7 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
-#include "debug_draw_scene.h"
-#include "debug_draw_manager.h"
+#include "game/debug_draw_scene.h"
+#include "util/debug_draw_manager.h"
 
 using namespace std;
 using namespace irr;

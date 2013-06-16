@@ -1,6 +1,6 @@
 // Ŭnicode please
 #include "test_stdafx.h"
-#include "debug_draw_manager.h"
+#include "util/debug_draw_manager.h"
 
 using namespace Loki;
 using namespace irr;
