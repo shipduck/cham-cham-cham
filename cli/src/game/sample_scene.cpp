@@ -3,7 +3,6 @@
 #include "sample_scene.h"
 #include "scene_helper.h"
 #include "scene_node_animator_camera_hmd.h"
-#include "JoystickEventReceiver.h"
 
 using namespace irr;
 using namespace core;
@@ -16,7 +15,8 @@ ICameraSceneNode* initCamera(IrrlichtDevice *device, ISceneManager *smgr, scene:
 {
 	ICameraSceneNode* camNode = smgr->addCameraSceneNode();
 	auto cursorControl = device->getCursorControl();
-	SceneNodeAnimatorCameraHMD* hmdCam = new SceneNodeAnimatorCameraHMD(cursorControl);
+	SceneNodeAnimatorCameraHMD* hmdCam = new SceneNodeAnimatorCameraHMD(device, cursorControl);
+
 	camNode->addAnimator(hmdCam);
 	camNode->setID(ID_IsNotPickable);
 	camNode->setPosition(core::vector3df(2700*2,255*2 + 100,2600*2));
@@ -45,9 +45,7 @@ SampleScene::SampleScene(irr::IrrlichtDevice *dev)
 	bill(nullptr),
 	camNode(nullptr),
 	hmdCam(nullptr),
-	highlightedSceneNode(nullptr),
-	mouseSpeed(40.0f),
-	walkSpeed(500.0f)
+	highlightedSceneNode(nullptr)
 {
 }
 
@@ -59,13 +57,8 @@ void SampleScene::setUp()
 {
 	Scene::setUp();
 
-	Receiver = new JoystickEventReceiver;
-	Device->setEventReceiver(Receiver);
-	Device->activateJoysticks(JoystickInfo);
-
+	//Device->activateJoysticks(JoystickInfo);
 	Device->setWindowCaption(L"Hello World! - Irrlicht Engine Demo");
-	Receiver->setDevice(Device);
-	Receiver->setCursor(Device->getCursorControl());
 
 	IVideoDriver* driver = Device->getVideoDriver();
 	ISceneManager* smgr = Device->getSceneManager();
@@ -119,46 +112,6 @@ void SampleScene::shutDown()
 
 void SampleScene::update(int ms)
 {
-	core::vector3df nodePosition = camNode->getPosition();
-
-	if(JoystickInfo.size() > 0)
-	{
-		Receiver->update();
-
-		f32 moveHorizontal = Receiver->getXMovement(); // Range is -1.f for full left to +1.f for full right
-		f32 moveVertical = Receiver->getYMovement(); // -1.f for full down to +1.f for full up.
-
-		float verticalMoveDelta = moveVertical * walkSpeed * ms / 1000.0f;
-		float horizontalMoveDelta = moveHorizontal * walkSpeed * ms / 1000.0f;
-
-		vector3df forward = camNode->getTarget() - camNode->getPosition();
-		f32 distance = sqrt(pow(forward.Z,2) + pow(forward.X,2));
-
-		float sine = forward.Z / distance;
-		float cosine = forward.X / distance;
-
-		// Rotate -90
-		float sineTemp = sine;
-		sine = -cosine;
-		cosine = sineTemp;
-
-		if(!core::equals(moveHorizontal, 0.f) || !core::equals(moveVertical, 0.f))
-		{
-			vector3df moveVector;
-		
-			moveVector.X  = horizontalMoveDelta * cosine - verticalMoveDelta * sine;
-			moveVector.Z = horizontalMoveDelta * sine + verticalMoveDelta * cosine;
-
-			nodePosition.X += moveVector.X;
-			nodePosition.Z += moveVector.Z;
-
-			printf("sine : %f, cosine : %f\n", sine, cosine);
-		}
-
-		camNode->setPosition(nodePosition);
-
-		Receiver->rotateCamera(camNode, ms);
-	}
 
 	IVideoDriver* driver = Device->getVideoDriver();
 	ISceneManager* smgr = Device->getSceneManager();

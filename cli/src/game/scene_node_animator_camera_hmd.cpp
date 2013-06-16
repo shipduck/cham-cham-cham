@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2012 Nikolaus Gebhardt
+// Copyright (C) 2002-2012 Nikolausf Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 #include "stdafx.h"
@@ -11,53 +11,41 @@
 #include "ICameraSceneNode.h"
 #include "ISceneNodeAnimatorCollisionResponse.h"
 
-namespace irr
-{
-namespace scene
-{
+
+using namespace irr;
+using namespace core;
+using namespace scene;
 
 //! constructor
-SceneNodeAnimatorCameraHMD::SceneNodeAnimatorCameraHMD(gui::ICursorControl* cursorControl,
-		f32 rotateSpeed, f32 moveSpeed, f32 jumpSpeed,
-		SKeyMap* keyMapArray, u32 keyMapSize, bool noVerticalMovement)
-: CursorControl(cursorControl), MaxVerticalAngle(88.0f),
+SceneNodeAnimatorCameraHMD::SceneNodeAnimatorCameraHMD(IrrlichtDevice *dev, gui::ICursorControl* cursorControl,
+		f32 rotateSpeed, f32 moveSpeed, f32 jumpSpeed)
+: Device(dev), CursorControl(cursorControl), MaxVerticalAngle(88.0f),
 	MoveSpeed(moveSpeed), RotateSpeed(rotateSpeed), JumpSpeed(jumpSpeed),
-	LastAnimationTime(0), firstUpdate(true), firstInput(true), NoVerticalMovement(noVerticalMovement),
-	Yaw(0), Pitch(0), Roll(0)
+	Yaw(0), Pitch(0), Roll(0),
+	XMovement(0.0f),
+	YMovement(0.0f),
+	XView(0.0f),
+	YView(0.0f),
+	Moved(false)
 {
 	#ifdef _DEBUG
-	setDebugName("CCameraSceneNodeAnimatorHMD");
+	setDebugName("CameraSceneNodeAnimatorHMD");
 	#endif
 
-	if (CursorControl)
+	if (CursorControl) {
 		CursorControl->grab();
-
-	allKeysUp();
-
-	// create key map
-	if (!keyMapArray || !keyMapSize)
-	{
-		// create default key map
-		KeyMap.push_back(SKeyMap(EKA_JUMP_UP, irr::KEY_KEY_J));
-
-		KeyMap.push_back(SKeyMap(EKA_MOVE_FORWARD, irr::KEY_KEY_W));
-		KeyMap.push_back(SKeyMap(EKA_MOVE_BACKWARD, irr::KEY_KEY_S));
-		KeyMap.push_back(SKeyMap(EKA_STRAFE_LEFT, irr::KEY_KEY_A));
-		KeyMap.push_back(SKeyMap(EKA_STRAFE_RIGHT, irr::KEY_KEY_D));
 	}
-	else
-	{
-		// create custom key map
-		setKeyMap(keyMapArray, keyMapSize);
-	}
+
+	Device->activateJoysticks(JoystickInfo);
 }
 
 
 //! destructor
 SceneNodeAnimatorCameraHMD::~SceneNodeAnimatorCameraHMD()
 {
-	if (CursorControl)
+	if (CursorControl) {
 		CursorControl->drop();
+	}
 }
 
 
@@ -68,185 +56,133 @@ SceneNodeAnimatorCameraHMD::~SceneNodeAnimatorCameraHMD()
 //! for changing their position, look at target or whatever.
 bool SceneNodeAnimatorCameraHMD::OnEvent(const SEvent& evt)
 {
-	switch(evt.EventType)
-	{
-	case EET_KEY_INPUT_EVENT:
-		for (u32 i=0; i<KeyMap.size(); ++i)
-		{
-			if (KeyMap[i].KeyCode == evt.KeyInput.Key)
-			{
-				CursorKeys[KeyMap[i].Action] = evt.KeyInput.PressedDown;
-				return true;
-			}
-		}
-		break;
-
-	default:
-		break;
+	// The state of each connected joystick is sent to us
+	// once every run() of the Irrlicht device.  Store the
+	// state of the first joystick, ignoring other joysticks.
+	// This is currently only supported on Windows and Linux.
+	if (evt.EventType == EET_JOYSTICK_INPUT_EVENT && evt.JoystickEvent.Joystick == 0) {
+		JoystickState = evt.JoystickEvent;
 	}
 
+	if (evt.EventType == EET_KEY_INPUT_EVENT && evt.KeyInput.PressedDown) {
+		if (evt.KeyInput.Key == KEY_ESCAPE)
+		{
+			SR_ASSERT(Device != nullptr);
+			Device->closeDevice();
+			return true;
+		}
+	}
+	
 	return false;
 }
 
 
 void SceneNodeAnimatorCameraHMD::animateNode(ISceneNode* node, u32 timeMs)
 {
-	if (!node || node->getType() != ESNT_CAMERA)
+	if (!node || node->getType() != ESNT_CAMERA) {
 		return;
+	}
 
 	ICameraSceneNode* camera = static_cast<ICameraSceneNode*>(node);
-
-	if (firstUpdate)
-	{
-		camera->updateAbsolutePosition();
-		if (CursorControl )
-		{
-			CursorControl->setPosition(0.5f, 0.5f);
-			CursorPos = CenterCursor = CursorControl->getRelativePosition();
-		}
-
-		LastAnimationTime = timeMs;
-
-		firstUpdate = false;
-	}
-
-	// If the camera isn't the active camera, and receiving input, then don't process it.
-	if(!camera->isInputReceiverEnabled())
-	{
-		firstInput = true;
-		return;
-	}
-
-	if ( firstInput )
-	{
-		allKeysUp();
-		firstInput = false;
-	}
-
 	scene::ISceneManager * smgr = camera->getSceneManager();
-	if(smgr && smgr->getActiveCamera() != camera)
+	if(smgr && smgr->getActiveCamera() != camera) {
 		return;
+	}
 
-	// get time
-	f32 timeDiff = (f32) ( timeMs - LastAnimationTime );
-	LastAnimationTime = timeMs;
+	if(JoystickInfo.size() == 0) {
+		return;
+	}
+	
+	// 기본 변수 초기화
+	XMovement = (f32)JoystickState.Axis[SEvent::SJoystickEvent::AXIS_X] / 32767.f;
+	YMovement = (f32)JoystickState.Axis[SEvent::SJoystickEvent::AXIS_Y] / -32767.f;
+
+	XView = (f32)JoystickState.Axis[SEvent::SJoystickEvent::AXIS_R] / 32767.f;
+	YView = (f32)JoystickState.Axis[SEvent::SJoystickEvent::AXIS_U] / 32767.f;
+
+	YView = 0.0f; //temp
+
+	const f32 DEAD_ZONE = 0.12f;
+
+	if(fabs(XMovement) < DEAD_ZONE) {
+		XMovement = 0.0f;
+	}
+	if(fabs(YMovement) < DEAD_ZONE) {
+		YMovement = 0.0f;
+	}
+
+	if(fabs(XView) < DEAD_ZONE) {
+		XView = 0.0f;
+	}
+	if(fabs(YView) < DEAD_ZONE) {
+		YView = 0.0f;
+	}
+
+	const u16 povDegrees = JoystickState.POV / 100;
+
+	if(povDegrees < 360) {
+		if(povDegrees > 0 && povDegrees < 180) {
+			XMovement = 1.f;
+		} else if(povDegrees > 180) {
+			XMovement = -1.f;
+		}
+		if(povDegrees > 90 && povDegrees < 270) {
+			YMovement = -1.f;
+		} else if(povDegrees > 270 || povDegrees < 90) {
+			YMovement = +1.f;
+		}
+	}
+
+	if(!core::equals(XMovement, 0.f) || !core::equals(YMovement, 0.f)) {
+		Moved = true;
+	} else {
+		Moved = false;
+	}
+
+	////////////////////////////////////////
+
+	f32 moveHorizontal = getXMovement(); // Range is -1.f for full left to +1.f for full right
+	f32 moveVertical = getYMovement(); // -1.f for full down to +1.f for full up.
+
+	float verticalMoveDelta = moveVertical * MoveSpeed * timeMs / 1000.0f;
+	float horizontalMoveDelta = moveHorizontal * MoveSpeed * timeMs / 1000.0f;
+
+	vector3df forward = camera->getTarget() - camera->getPosition();
+	f32 distance = sqrt(pow(forward.Z,2) + pow(forward.X,2));
+
+	float sine = forward.Z / distance;
+	float cosine = forward.X / distance;
+
+	// Rotate -90
+	float sineTemp = sine;
+	sine = -cosine;
+	cosine = sineTemp;
 
 	// update position
-	core::vector3df pos = camera->getPosition();
+	vector3df pos = camera->getPosition();
+	if(!core::equals(moveHorizontal, 0.f) || !core::equals(moveVertical, 0.f)) {
+		vector3df moveVector;
+		
+		moveVector.X  = horizontalMoveDelta * cosine - verticalMoveDelta * sine;
+		moveVector.Z = horizontalMoveDelta * sine + verticalMoveDelta * cosine;
 
-	// Update rotation
-	core::vector3df target = (camera->getTarget() - camera->getAbsolutePosition());
-	core::vector3df relativeRotation = target.getHorizontalAngle();
+		pos.X += moveVector.X;
+		pos.Z += moveVector.Z;
 
-	// set target
-
-	target.set(0,0, core::max_(1.f, pos.getLength()));
-	core::vector3df movedir = target;
-
-	core::matrix4 mat;
-	mat.setRotationDegrees(core::vector3df(relativeRotation.X, relativeRotation.Y, 0));
-	mat.transformVect(target);
-
-	if (NoVerticalMovement)
-	{
-		mat.setRotationDegrees(core::vector3df(0, relativeRotation.Y, 0));
-		mat.transformVect(movedir);
+		//printf("sine : %f, cosine : %f\n", sine, cosine);
 	}
-	else
-	{
-		movedir = target;
-	}
-
-	movedir.normalize();
-
-	if (CursorKeys[EKA_MOVE_FORWARD])
-		pos += movedir * timeDiff * MoveSpeed;
-
-	if (CursorKeys[EKA_MOVE_BACKWARD])
-		pos -= movedir * timeDiff * MoveSpeed;
-
-	// strafing
-
-	core::vector3df strafevect = target;
-	strafevect = strafevect.crossProduct(camera->getUpVector());
-
-	if (NoVerticalMovement)
-		strafevect.Y = 0.0f;
-
-	strafevect.normalize();
-
-	if (CursorKeys[EKA_STRAFE_LEFT])
-		pos += strafevect * timeDiff * MoveSpeed;
-
-	if (CursorKeys[EKA_STRAFE_RIGHT])
-		pos -= strafevect * timeDiff * MoveSpeed;
-
-	// For jumping, we find the collision response animator attached to our camera
-	// and if it's not falling, we tell it to jump.
-	if (CursorKeys[EKA_JUMP_UP])
-	{
-		const ISceneNodeAnimatorList& animators = camera->getAnimators();
-		ISceneNodeAnimatorList::ConstIterator it = animators.begin();
-		while(it != animators.end())
-		{
-			if(ESNAT_COLLISION_RESPONSE == (*it)->getType())
-			{
-				ISceneNodeAnimatorCollisionResponse * collisionResponse =
-					static_cast<ISceneNodeAnimatorCollisionResponse *>(*it);
-
-				if(!collisionResponse->isFalling())
-					collisionResponse->jump(JumpSpeed);
-			}
-
-			it++;
-		}
-	}
-
 	// write translation
 	camera->setPosition(pos);
+	
+	core::vector3df target = (camera->getTarget() - camera->getAbsolutePosition());
+
+	core::matrix4 mat;
+	mat.setRotationDegrees(core::vector3df(YView * RotateSpeed, XView * RotateSpeed, 0));
+	mat.transformVect(target);
 
 	// write right target
 	target += pos;
 	camera->setTarget(target);
-
-	//upvector적절히 비틀기
-	//core::vector3df upVec(1, 0, 0);
-	//camera->setUpVector(upVec);
-}
-
-
-void SceneNodeAnimatorCameraHMD::allKeysUp()
-{
-	for (u32 i=0; i<EKA_COUNT; ++i)
-		CursorKeys[i] = false;
-}
-
-
-//! Sets the rotation speed
-void SceneNodeAnimatorCameraHMD::setRotateSpeed(f32 speed)
-{
-	RotateSpeed = speed;
-}
-
-
-//! Sets the movement speed
-void SceneNodeAnimatorCameraHMD::setMoveSpeed(f32 speed)
-{
-	MoveSpeed = speed;
-}
-
-
-//! Gets the rotation speed
-f32 SceneNodeAnimatorCameraHMD::getRotateSpeed() const
-{
-	return RotateSpeed;
-}
-
-
-// Gets the movement speed
-f32 SceneNodeAnimatorCameraHMD::getMoveSpeed() const
-{
-	return MoveSpeed;
 }
 
 void SceneNodeAnimatorCameraHMD::setHeadTrackingValue(f32 yaw, f32 pitch, f32 roll)
@@ -257,47 +193,11 @@ void SceneNodeAnimatorCameraHMD::setHeadTrackingValue(f32 yaw, f32 pitch, f32 ro
 	//printf("%f, %f, %f\n", yaw, pitch, roll);
 }
 
-//! Sets the keyboard mapping for this animator
-void SceneNodeAnimatorCameraHMD::setKeyMap(SKeyMap *map, u32 count)
-{
-	// clear the keymap
-	KeyMap.clear();
-
-	// add actions
-	for (u32 i=0; i<count; ++i)
-	{
-		KeyMap.push_back(map[i]);
-	}
-}
-
-void SceneNodeAnimatorCameraHMD::setKeyMap(const core::array<SKeyMap>& keymap)
-{
-	KeyMap=keymap;
-}
-
-const core::array<SKeyMap>& SceneNodeAnimatorCameraHMD::getKeyMap() const
-{
-	return KeyMap;
-}
-
-
-//! Sets whether vertical movement should be allowed.
-void SceneNodeAnimatorCameraHMD::setVerticalMovement(bool allow)
-{
-	NoVerticalMovement = !allow;
-}
-
 
 ISceneNodeAnimator* SceneNodeAnimatorCameraHMD::createClone(ISceneNode* node, ISceneManager* newManager)
 {
 	SceneNodeAnimatorCameraHMD * newAnimator =
-		new SceneNodeAnimatorCameraHMD(CursorControl,	RotateSpeed, MoveSpeed, JumpSpeed,
-											0, 0, NoVerticalMovement);
-	newAnimator->setKeyMap(KeyMap);
+		new SceneNodeAnimatorCameraHMD(Device, CursorControl,	RotateSpeed, MoveSpeed, JumpSpeed);
 	return newAnimator;
 }
-
-
-} // namespace scene
-} // namespace irr
 

@@ -11,112 +11,93 @@
 #include "SKeyMap.h"
 #include "irrArray.h"
 
-namespace irr
+//! Special scene node animator for FPS cameras
+class SceneNodeAnimatorCameraHMD : public irr::scene::ISceneNodeAnimator
 {
-namespace gui
-{
-	class ICursorControl;
-}
+public:
 
-namespace scene
-{
+	//! Constructor
+	SceneNodeAnimatorCameraHMD(irr::IrrlichtDevice *dev, irr::gui::ICursorControl* cursorControl,
+		irr::f32 rotateSpeed = 1.5f, irr::f32 moveSpeed = 0.5f, irr::f32 jumpSpeed=0.0f);
 
-	//! Special scene node animator for FPS cameras
-	class SceneNodeAnimatorCameraHMD : public ISceneNodeAnimator
+	//! Destructor
+	virtual ~SceneNodeAnimatorCameraHMD();
+
+	//! Animates the scene node, currently only works on cameras
+	virtual void animateNode(irr::scene::ISceneNode* node, irr::u32 timeMs);
+
+	//! Event receiver
+	virtual bool OnEvent(const irr::SEvent& event);
+
+	//! Returns the speed of movement in units per second
+	virtual irr::f32 getMoveSpeed() const { return MoveSpeed; }
+
+	//! Sets the speed of movement in units per second
+	virtual void setMoveSpeed(irr::f32 moveSpeed) { MoveSpeed = moveSpeed; }
+
+	//! Returns the rotation speed
+	virtual irr::f32 getRotateSpeed() const { return RotateSpeed; }
+
+	//! Set the rotation speed
+	virtual void setRotateSpeed(irr::f32 rotateSpeed) { RotateSpeed = rotateSpeed; }
+
+	virtual void setHeadTrackingValue(irr::f32 yaw, irr::f32 pitch, irr::f32 roll);
+
+	//! This animator will receive events when attached to the active camera
+	virtual bool isEventReceiverEnabled() const
 	{
-	public:
+		return true;
+	}
 
-		//! Constructor
-		SceneNodeAnimatorCameraHMD(gui::ICursorControl* cursorControl,
-			f32 rotateSpeed = 100.0f, f32 moveSpeed = .5f, f32 jumpSpeed=0.f,
-			SKeyMap* keyMapArray=0, u32 keyMapSize=0, bool noVerticalMovement=false);
+	//! Returns the type of this animator
+	virtual irr::scene::ESCENE_NODE_ANIMATOR_TYPE getType() const
+	{
+		return irr::scene::ESNAT_CAMERA_FPS;
+	}
 
-		//! Destructor
-		virtual ~SceneNodeAnimatorCameraHMD();
+	//! Creates a clone of this animator.
+	/** Please note that you will have to drop
+	(IReferenceCounted::drop()) the returned pointer once you're
+	done with it. */
+	virtual ISceneNodeAnimator* createClone(irr::scene::ISceneNode* node, irr::scene::ISceneManager* newManager=0);
 
-		//! Animates the scene node, currently only works on cameras
-		virtual void animateNode(ISceneNode* node, u32 timeMs);
+	void rotateCamera(irr::scene::ISceneNode* node, irr::u32 ms);;
 
-		//! Event receiver
-		virtual bool OnEvent(const SEvent& event);
+	void setCursor(irr::gui::ICursorControl* cursor) { CursorControl = cursor; }
+	irr::f32 getXMovement() const { return XMovement; }
+	irr::f32 getYMovement() const { return YMovement; }
+	irr::f32 getXView() const { return XView; }
+	irr::f32 getYView() const { return YView; }	
+	const irr::SEvent::SJoystickEvent& getJoystickState() const { return JoystickState; }
 
-		//! Returns the speed of movement in units per second
-		virtual f32 getMoveSpeed() const;
+private:
+	irr::gui::ICursorControl *CursorControl;
 
-		//! Sets the speed of movement in units per second
-		virtual void setMoveSpeed(f32 moveSpeed);
+	irr::f32 MaxVerticalAngle;
 
-		//! Returns the rotation speed
-		virtual f32 getRotateSpeed() const;
+	irr::f32 MoveSpeed;
+	irr::f32 RotateSpeed;
+	irr::f32 JumpSpeed;
 
-		//! Set the rotation speed
-		virtual void setRotateSpeed(f32 rotateSpeed);
+	// head tracking sensor value
+	irr::f32 Yaw;
+	irr::f32 Pitch;
+	irr::f32 Roll;
 
-		//! Sets the keyboard mapping for this animator (old style)
-		//! \param keymap: an array of keyboard mappings, see SKeyMap
-		//! \param count: the size of the keyboard map array
-		virtual void setKeyMap(SKeyMap *map, u32 count);
+	// for joystick
+	irr::IrrlichtDevice* Device;
+	irr::SEvent::SJoystickEvent JoystickState;
 
-		//! Sets the keyboard mapping for this animator
-		//!	\param keymap The new keymap array
-		virtual void setKeyMap(const core::array<SKeyMap>& keymap);
+	irr::f32 XMovement;
+	irr::f32 YMovement;
 
-		//! Gets the keyboard mapping for this animator
-		virtual const core::array<SKeyMap>& getKeyMap() const;
+	irr::f32 XView;
+	irr::f32 YView;
 
-		//! Sets whether vertical movement should be allowed.
-		virtual void setVerticalMovement(bool allow);
+	bool Moved;
 
-		virtual void setHeadTrackingValue(f32 yaw, f32 pitch, f32 roll);
-
-		//! This animator will receive events when attached to the active camera
-		virtual bool isEventReceiverEnabled() const
-		{
-			return true;
-		}
-
-		//! Returns the type of this animator
-		virtual ESCENE_NODE_ANIMATOR_TYPE getType() const
-		{
-			return ESNAT_CAMERA_FPS;
-		}
-
-		//! Creates a clone of this animator.
-		/** Please note that you will have to drop
-		(IReferenceCounted::drop()) the returned pointer once you're
-		done with it. */
-		virtual ISceneNodeAnimator* createClone(ISceneNode* node, ISceneManager* newManager=0);
-
-	private:
-		void allKeysUp();
-
-		gui::ICursorControl *CursorControl;
-
-		f32 MaxVerticalAngle;
-
-		f32 MoveSpeed;
-		f32 RotateSpeed;
-		f32 JumpSpeed;
-
-		s32 LastAnimationTime;
-
-		core::array<SKeyMap> KeyMap;
-		core::position2d<f32> CenterCursor, CursorPos;
-
-		bool CursorKeys[EKA_COUNT];
-
-		bool firstUpdate;
-		bool firstInput;
-		bool NoVerticalMovement;
-
-		// head tracking sensor value
-		f32 Yaw;
-		f32 Pitch;
-		f32 Roll;
-	};
-
-} // end namespace scene
-} // end namespace irr
+	irr::core::array<irr::SJoystickInfo> JoystickInfo;
+};
 
 #endif // __C_SCENE_NODE_ANIMATOR_CAMERA_HMD_H_INCLUDED__
 
