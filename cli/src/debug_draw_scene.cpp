@@ -37,9 +37,6 @@ void DebugDrawScene::setUp()
 	Device->getCursorControl()->setVisible(false);
 
 	gDebugDrawMgr.addSphere(core::vector3df(30,0,30), 5, green, 5000);
-
-	auto node = smgr->addTextSceneNode(gNormalFont14, L"HELLO 한글", blue);
-	node->setPosition(core::vector3df(0, 0,30));
 }
 
 void DebugDrawScene::shutDown()
@@ -61,10 +58,11 @@ void DebugDrawScene::update(int ms)
 	//axisMat.setRotationDegrees(vector3df(0, 0, 45));
 	gDebugDrawMgr.addAxis(axisMat, 5);
 	gDebugDrawMgr.addCross(vector3df(-10, 0, 30), blue, 5);
+	gDebugDrawMgr.addString(vector3df(0, 0, 30), msg, blue, 2.0f);
 
 	gDebugDrawMgr.addLine(vector2di(0, 0), vector2di(50, 100), blue, 5.0f);
 	gDebugDrawMgr.addCross(vector2di(50, 100), red, 5.0f);
-	gDebugDrawMgr.addString(vector2di(50, 100), msg, white, 2.0f);
+	gDebugDrawMgr.addString(vector2di(50, 100), msg, white);
 
 	driver->beginScene(true, true, video::SColor(255,113,113,133));
 

@@ -7,6 +7,7 @@ using namespace irr;
 using namespace video;
 using namespace scene;
 using namespace core;
+using namespace gui;
 
 DebugDrawManager gDebugDrawMgr;
 irr::gui::IGUIFont *gNormalFont12 = nullptr;
@@ -226,6 +227,23 @@ void DebugDrawManager::addString(const irr::core::vector3df &pos,
 	cmd.Scale = scale;
 	cmd.Duration = duration;
 	cmd.DepthEnable = depthEnable;
+
+	//create scene node
+	ISceneManager* smgr = Device->getSceneManager();
+	ITextSceneNode *node = smgr->addTextSceneNode(gNormalFont14, msg.data(), color);
+	if(node) {
+		SMaterial material;
+		material.Wireframe = true;
+		material.Lighting = false;
+		material.BackfaceCulling = false;
+		material.FrontfaceCulling = false;
+		node->getMaterial(0) = material;
+	}
+	node->setScale(vector3df(scale, scale, scale));
+	node->setPosition(pos);
+	node->grab();
+	cmd.Node = node;
+
 	Field<CmdType>(*this).getList().push_back(cmd);
 }
 
@@ -317,6 +335,15 @@ void DebugDrawManager::drawElem(const DebugDraw_Cross2D *cmd)
 
 void DebugDrawManager::drawElem(const DebugDraw_String2D *cmd)
 {
+	if(gNormalFont14) {
+		auto driver = Device->getVideoDriver();
+		const irr::core::dimension2du& screenSize = driver->getScreenSize();
+		int x = cmd->Pos.X;
+		int y = cmd->Pos.Y;
+		int w = screenSize.Width;
+		int h = screenSize.Height;
+		gNormalFont14->draw(cmd->Msg.data(), rect<s32>(x, y, w, h), cmd->Color);
+	}
 }
 
 void DebugDrawManager::drawElem(const DebugDraw_Circle2D *cmd)
@@ -346,6 +373,7 @@ void DebugDrawManager::drawElem(const DebugDraw_Sphere3D *cmd)
 }
 void DebugDrawManager::drawElem(const DebugDraw_String3D *cmd)
 {
+	//use scene node based
 }
 void DebugDrawManager::drawElem(const DebugDraw_Axis3D *cmd)
 {
