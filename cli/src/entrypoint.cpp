@@ -54,16 +54,25 @@ int entrypoint(int argc, char* argv[])
 	scene->setUp();
 
 	int lastFPS = -1;
-	// In order to do framerate independent movement, we have to know
-	// how long it was since the last frame
+
+	// 첫번째 프레임 가동에서 시간이 오래 걸릴수 있으니까
+	// 씬 변환이후 첫번쨰 프레임은 dt=0으로 생각하고 돌린다
+	bool isFirstRun = true;
 	u32 then = device->getTimer()->getTime();
 
 	// Render loop
 	while(device->run()) {
-		// Work out a frame delta time.
-		const u32 now = device->getTimer()->getTime();
-		const u32 frameDeltaTime = now - then;	// Time in milliseconds
-		then = now;
+		int frameDeltaTime = 0;
+		if(isFirstRun) {
+			isFirstRun = false;
+			then = device->getTimer()->getTime();
+			frameDeltaTime = 0;
+		} else {
+			// Work out a frame delta time.
+			const u32 now = device->getTimer()->getTime();
+			frameDeltaTime = now - then;	// Time in milliseconds
+			then = now;
+		}
 
 		// Read-Write Head Tracking Sensor Value to Camera
 		float yaw = 0;
@@ -73,6 +82,7 @@ int entrypoint(int argc, char* argv[])
 			headTracking.getValue(&yaw, &pitch, &roll);			
 		}
 		//hmdCam->setHeadTrackingValue(yaw, pitch, roll);
+
 		scene->update(frameDeltaTime);
 
 		// draw block
