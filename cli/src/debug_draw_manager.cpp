@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "debug_draw_manager.h"
 
+using namespace Loki;
 using namespace irr;
 using namespace video;
 using namespace scene;
@@ -21,57 +22,113 @@ void DebugDrawManager::shutDown()
 	clear();
 }
 
+template<typename TList> struct CountList;
+template<>
+struct CountList<NullType> {
+	static int count(const DebugDrawManager &mgr) { return 0; }
+};
+template<typename T, typename U>
+struct CountList< Typelist<T, U> > {
+	static int count(const DebugDrawManager &mgr)
+	{
+		int sum = 0;
+		sum += Field<T>(mgr).getList().size();
+		sum += CountList<U>::count(mgr);
+		return sum;
+	}
+};
+
+template<typename TList> struct DrawList;
+template<>
+struct DrawList<NullType> {
+	static void draw(DebugDrawManager &mgr) { return; }
+};
+template<typename T, typename U>
+struct DrawList< Typelist<T, U> > {
+	static void draw(DebugDrawManager &mgr)
+	{
+		auto &elemList = Field<T>(mgr).getList();
+		auto it = elemList.begin();
+		auto endit = elemList.end();
+		for( ; it != endit ; ++it) {
+			const T &cmd = *it;
+			mgr.drawElem(&cmd);
+		}
+		DrawList<U>::draw(mgr);
+	}
+};
+
+template<typename TList> struct ClearList;
+template<>
+struct ClearList<NullType> {
+	static void clear(DebugDrawManager &mgr) { return; }
+};
+template<typename T, typename U>
+struct ClearList< Typelist<T, U> > {
+	static void clear(DebugDrawManager &mgr)
+	{
+		Field<T>(mgr).getList().clear();
+		ClearList<U>::clear(mgr);
+	}
+};
+
+template<typename T>
+struct DurationOverFindFunctor {
+	bool operator()(T &cmd) {
+		return (cmd.Duration < 0);
+	}
+};
+
+template<typename TList> struct UpdateList;
+template<>
+struct UpdateList<NullType> {
+	static void update(int ms, DebugDrawManager &mgr) { return; }
+};
+template<typename T, typename U>
+struct UpdateList< Typelist<T, U> > {
+	static void update(int ms, DebugDrawManager &mgr)
+	{
+		DurationOverFindFunctor<T> functor;
+		auto &elemList = Field<T>(mgr).getList();
+		
+		auto it = elemList.begin();
+		auto endit = elemList.end();
+		for( ; it != endit ; ++it) {
+			T &cmd = *it;
+			cmd.Duration -= ms;
+
+			if(cmd.Duration < 0 && cmd.Node) {
+				cmd.Node->remove();
+				cmd.Node->drop();
+				cmd.Node = nullptr;
+			}
+		}
+		elemList.remove_if(functor);
+		
+		UpdateList<U>::update(ms, mgr);
+	}
+};
+
 int DebugDrawManager::count() const
 {
-	int sum = 0;
-	sum += Line2DList.size();
-	sum += Cross2DList.size();
-	sum += Circle2DList.size();
-	sum += String2DList.size();
-	sum += Line3DList.size();
-	sum += Cross3DList.size();
-	sum += Sphere3DList.size();
-	sum += Axis3DList.size();
-	sum += String3DList.size();
+	int sum = CountList<DebugDrawCmdTypeList>::count(*this);	
 	return sum;
 }
 
+
 void DebugDrawManager::drawAll()
 {
-	draw(Line2DList);
-	draw(Cross2DList);
-	draw(Circle2DList);
-	draw(String2DList);
-	draw(Line3DList);
-	draw(Cross3DList);
-	draw(Sphere3DList);
-	draw(Axis3DList);
-	draw(String3DList);
+	DrawList<DebugDrawCmdTypeList>::draw(*this);
 }
+
 void DebugDrawManager::clear() 
 {
-	Line2DList.clear();
-	Cross2DList.clear();
-	Circle2DList.clear();
-	String2DList.clear();
-	Line3DList.clear();
-	Cross3DList.clear();
-	Sphere3DList.clear();
-	Axis3DList.clear();
-	String3DList.clear();
+	ClearList<DebugDrawCmdTypeList>::clear(*this);
 }
 
 void DebugDrawManager::updateAll(int ms)
 {
-	update(ms, Line2DList);
-	update(ms, Cross2DList);
-	update(ms, Circle2DList);
-	update(ms, String2DList);
-	update(ms, Line3DList);
-	update(ms, Cross3DList);
-	update(ms, Sphere3DList);
-	update(ms, Axis3DList);
-	update(ms, String3DList);
+	UpdateList<DebugDrawCmdTypeList>::update(ms, *this);
 }
 
 void DebugDrawManager::addLine(const irr::core::vector3df &p1, const irr::core::vector3df &p2,
@@ -80,14 +137,15 @@ void DebugDrawManager::addLine(const irr::core::vector3df &p1, const irr::core::
 		int duration,
 		bool depthEnable)
 {
-	DebugDraw_Line3D cmd;
+	typedef DebugDraw_Line3D CmdType;
+	CmdType cmd;
 	cmd.P1 = p1;
 	cmd.P2 = p2;
 	cmd.Color = color;
 	cmd.LineWidth = lineWidth;
 	cmd.Duration = duration;
 	cmd.DepthEnable = depthEnable;
-	Line3DList.push_back(cmd);
+	Field<CmdType>(*this).getList().push_back(cmd);
 }
 
 void DebugDrawManager::addCross(const irr::core::vector3df &pos, 
@@ -96,13 +154,14 @@ void DebugDrawManager::addCross(const irr::core::vector3df &pos,
 		int duration,
 		bool depthEnable)
 {
-	DebugDraw_Cross3D cmd;
+	typedef DebugDraw_Cross3D CmdType;
+	CmdType cmd;
 	cmd.Pos = pos;
 	cmd.Color = color;
 	cmd.Size = size;
 	cmd.Duration = duration;
 	cmd.DepthEnable = depthEnable;
-	Cross3DList.push_back(std::move(cmd));
+	Field<CmdType>(*this).getList().push_back(cmd);
 }
 
 void DebugDrawManager::addSphere(const irr::core::vector3df &pos, 
@@ -111,7 +170,8 @@ void DebugDrawManager::addSphere(const irr::core::vector3df &pos,
 		int duration,
 		bool depthEnable)
 {
-	DebugDraw_Sphere3D cmd;
+	typedef DebugDraw_Sphere3D CmdType;
+	CmdType cmd;
 	cmd.Pos = pos;
 	cmd.Radius = radius;
 	cmd.Color = color;
@@ -134,7 +194,7 @@ void DebugDrawManager::addSphere(const irr::core::vector3df &pos,
 	node->grab();
 	cmd.Node = node;
 
-	Sphere3DList.push_back(std::move(cmd));
+	Field<CmdType>(*this).getList().push_back(cmd);
 }
 
 void DebugDrawManager::addAxis(const irr::core::matrix4 &xf,
@@ -142,29 +202,31 @@ void DebugDrawManager::addAxis(const irr::core::matrix4 &xf,
 		int duration,
 		bool depthEnable)
 {
-	DebugDraw_Axis3D cmd;
+	typedef DebugDraw_Axis3D CmdType;
+	CmdType cmd;
 	cmd.Xf = xf;
 	cmd.Size = size;
 	cmd.Duration = duration;
 	cmd.DepthEnable = depthEnable;
-	Axis3DList.push_back(std::move(cmd));
+	Field<CmdType>(*this).getList().push_back(cmd);
 }
 
 void DebugDrawManager::addString(const irr::core::vector3df &pos, 
-		const DebugDrawManager::string_type &msg,
+		const DebugDraw::string_type &msg,
 		const irr::video::SColor &color,
 		float scale,
 		int duration,
 		bool depthEnable)
 {
-	DebugDraw_String3D cmd;
+	typedef DebugDraw_String3D CmdType;
+	CmdType cmd;
 	cmd.Pos = pos;
 	cmd.Msg = msg;
 	cmd.Color = color;
 	cmd.Scale = scale;
 	cmd.Duration = duration;
 	cmd.DepthEnable = depthEnable;
-	String3DList.push_back(std::move(cmd));
+	Field<CmdType>(*this).getList().push_back(cmd);
 }
 
 void DebugDrawManager::addLine(const irr::core::vector2di &p1, const irr::core::vector2di &p2,
@@ -172,13 +234,14 @@ void DebugDrawManager::addLine(const irr::core::vector2di &p1, const irr::core::
 		float lineWidth,
 		int duration)
 {
-	DebugDraw_Line2D cmd;
+	typedef DebugDraw_Line2D CmdType;
+	CmdType cmd;
 	cmd.P1 = p1;
 	cmd.P2 = p2;
 	cmd.Color = color;
 	cmd.LineWidth = lineWidth;
 	cmd.Duration = duration;
-	Line2DList.push_back(std::move(cmd));
+	Field<CmdType>(*this).getList().push_back(cmd);
 }
 
 void DebugDrawManager::addCross(const irr::core::vector2di &pos, 
@@ -186,39 +249,42 @@ void DebugDrawManager::addCross(const irr::core::vector2di &pos,
 		float size,
 		int duration)
 {
-	DebugDraw_Cross2D cmd;
+	typedef DebugDraw_Cross2D CmdType;
+	CmdType cmd;
 	cmd.Pos = pos;
 	cmd.Color = color;
 	cmd.Size = size;
 	cmd.Duration = duration;
-	Cross2DList.push_back(std::move(cmd));
+	Field<CmdType>(*this).getList().push_back(cmd);
 }
 
 void DebugDrawManager::addString(const irr::core::vector2di &pos, 
-								   const DebugDrawManager::string_type &msg,
+								   const DebugDraw::string_type &msg,
 								   const irr::video::SColor &color,
 								   float scale,
 								   int duration)
 {
-	DebugDraw_String2D cmd;
+	typedef DebugDraw_String2D CmdType;
+	CmdType cmd;
 	cmd.Pos = pos;
 	cmd.Msg = msg;
 	cmd.Color = color;
 	cmd.Scale = scale;
 	cmd.Duration = duration;
-	String2DList.push_back(std::move(cmd));
+	Field<CmdType>(*this).getList().push_back(cmd);
 }
 
 void DebugDrawManager::addCircle(const irr::core::vector2di &pos, float radius,
 		const irr::video::SColor &color,
 		int duration)
 {
-	DebugDraw_Circle2D cmd;
+	typedef DebugDraw_Circle2D CmdType;
+	CmdType cmd;
 	cmd.Pos = pos;
 	cmd.Radius = radius;
 	cmd.Color = color;
 	cmd.Duration = duration;
-	Circle2DList.push_back(std::move(cmd));
+	Field<CmdType>(*this).getList().push_back(cmd);
 }
 
 void DebugDrawManager::drawElem(const DebugDraw_Line2D *cmd)

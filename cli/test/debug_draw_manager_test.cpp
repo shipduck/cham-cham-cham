@@ -2,6 +2,7 @@
 #include "test_stdafx.h"
 #include "debug_draw_manager.h"
 
+using namespace Loki;
 using namespace irr;
 using namespace irr::core;
 using namespace irr::video;
@@ -39,6 +40,6 @@ TEST_F(DebugDrawManagerTest, updateAll)
 TEST_F(DebugDrawManagerTest, getCmdList)
 {
 	DebugDrawManager mgr;
-	auto line2dList = mgr.getCmdList<DebugDraw_Line2D>();
-	auto cross2dList = mgr.getCmdList<DebugDraw_Cross2D>();
+	//auto line2dList = mgr.getList(Type2Type<DebugDraw_Line2D>());
+	//auto cross2dList = mgr.getList<DebugDraw_Cross2D>();
 }

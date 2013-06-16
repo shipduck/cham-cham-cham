@@ -30,6 +30,7 @@
 #include <OVR.h>
 
 #include "Typelist.h"
+#include "HierarchyGenerators.h"
 
 #else
 #error "NEED PCH"
