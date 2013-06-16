@@ -30,6 +30,20 @@ ADD_SUBDIRECTORY( ${DOKURO_EXT_DIR}/googletest )
 
 INCLUDE_DIRECTORIES( ${DOKURO_EXT_DIR}/googletest/include )
 
+# Add OpenAL
+FIND_PACKAGE( openal )
+SET( OPENAL_ROOT ${DOKURO_EXT_DIR}/openal )
+IF( NOT OPENAL_LIBRARY OR NOT OPENAL_INCLUDE_DIR )
+	ADD_SUBDIRECTORY( ${DOKURO_EXT_DIR}/openal/OpenAL-Soft )
+
+	SET( OPENAL_INCLUDE_DIR "${DOKURO_EXT_DIR}/openal/include" )
+ENDIF(  )
+
+# Add ALUT
+ADD_SUBDIRECTORY( ${DOKURO_EXT_DIR}/openal/alut )
+
+INCLUDE_DIRECTORIES( ${DOKURO_EXT_DIR}/openal/alut/include )
+
 # Add Ext Inlcude
 INCLUDE_DIRECTORIES( ${DOKURO_EXT_DIR}/loki )
 #########################################################
@@ -38,9 +52,9 @@ INCLUDE_DIRECTORIES( ${DOKURO_EXT_DIR}/loki )
 INCLUDE_DIRECTORIES( ${DOKURO_SRC_DIR} )
 
 IF( MSVC )
-	LIST( APPEND DOKURO_LINK_LIBS irrlicht_shared LibOVR Setupapi Winmm )
+	LIST( APPEND DOKURO_LINK_LIBS irrlicht_shared LibOVR alut Setupapi Winmm )
 ELSE()
-	LIST( APPEND DOKURO_LINK_LIBS irrlicht_shared LibOVR )
+	LIST( APPEND DOKURO_LINK_LIBS irrlicht_shared LibOVR alut )
 ENDIF()
 
 IF( APPLE )

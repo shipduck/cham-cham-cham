@@ -16,3 +16,6 @@
 [submodule "cli/ext/loki"]
 	path = cli/ext/loki
 	url = https://github.com/dutor/loki.git
+[submodule "cli/ext/openal"]
+	path = cli/ext/openal
+	url = https://github.com/omniavinco/openal-cmake_modified.git
