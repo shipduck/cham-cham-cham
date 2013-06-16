@@ -3,9 +3,12 @@
 #include "entrypoint.h"
 #include "util/debug_draw_manager.h"
 #include "util/head_tracking.h"
+#include "util/hmd_display.h"
+
+// scene
 #include "game/sample_scene.h"
 #include "game/debug_draw_scene.h"
-#include "util/hmd_display.h"
+#include "game/game_scene.h"
 
 using namespace irr;
 using namespace core;
@@ -49,8 +52,9 @@ int entrypoint(int argc, char* argv[])
 	gNormalFont14 = guienv->getFont("res/font_14.xml");
 
 	//simple scene framework
-	//std::unique_ptr<Scene> scene(new SampleScene(device));
-	std::unique_ptr<Scene> scene(new DebugDrawScene(device));
+	std::unique_ptr<Scene> scene(new SampleScene(device));
+	//std::unique_ptr<Scene> scene(new DebugDrawScene(device));
+	//std::unique_ptr<Scene> scene(new GameScene(device));
 	scene->setUp();
 
 	int lastFPS = -1;

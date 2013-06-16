@@ -19,10 +19,9 @@ namespace scene
 //! constructor
 CSceneNodeAnimatorCameraHMD::CSceneNodeAnimatorCameraHMD(gui::ICursorControl* cursorControl,
 		f32 rotateSpeed, f32 moveSpeed, f32 jumpSpeed,
-		SKeyMap* keyMapArray, u32 keyMapSize, bool noVerticalMovement, bool invertY)
+		SKeyMap* keyMapArray, u32 keyMapSize, bool noVerticalMovement)
 : CursorControl(cursorControl), MaxVerticalAngle(88.0f),
 	MoveSpeed(moveSpeed), RotateSpeed(rotateSpeed), JumpSpeed(jumpSpeed),
-	MouseYDirection(invertY ? -1.0f : 1.0f),
 	LastAnimationTime(0), firstUpdate(true), firstInput(true), NoVerticalMovement(noVerticalMovement),
 	Yaw(0), Pitch(0), Roll(0)
 {
@@ -39,10 +38,6 @@ CSceneNodeAnimatorCameraHMD::CSceneNodeAnimatorCameraHMD(gui::ICursorControl* cu
 	if (!keyMapArray || !keyMapSize)
 	{
 		// create default key map
-		KeyMap.push_back(SKeyMap(EKA_MOVE_FORWARD, irr::KEY_UP));
-		KeyMap.push_back(SKeyMap(EKA_MOVE_BACKWARD, irr::KEY_DOWN));
-		KeyMap.push_back(SKeyMap(EKA_STRAFE_LEFT, irr::KEY_LEFT));
-		KeyMap.push_back(SKeyMap(EKA_STRAFE_RIGHT, irr::KEY_RIGHT));
 		KeyMap.push_back(SKeyMap(EKA_JUMP_UP, irr::KEY_KEY_J));
 
 		KeyMap.push_back(SKeyMap(EKA_MOVE_FORWARD, irr::KEY_KEY_W));
@@ -83,14 +78,6 @@ bool CSceneNodeAnimatorCameraHMD::OnEvent(const SEvent& evt)
 				CursorKeys[KeyMap[i].Action] = evt.KeyInput.PressedDown;
 				return true;
 			}
-		}
-		break;
-
-	case EET_MOUSE_INPUT_EVENT:
-		if (evt.MouseInput.Event == EMIE_MOUSE_MOVED)
-		{
-			CursorPos = CursorControl->getRelativePosition();
-			return true;
 		}
 		break;
 
@@ -150,53 +137,6 @@ void CSceneNodeAnimatorCameraHMD::animateNode(ISceneNode* node, u32 timeMs)
 	// Update rotation
 	core::vector3df target = (camera->getTarget() - camera->getAbsolutePosition());
 	core::vector3df relativeRotation = target.getHorizontalAngle();
-
-	if (CursorControl)
-	{
-		if (CursorPos != CenterCursor)
-		{
-			relativeRotation.Y -= (0.5f - CursorPos.X) * RotateSpeed;
-			relativeRotation.X -= (0.5f - CursorPos.Y) * RotateSpeed * MouseYDirection;
-
-			// X < MaxVerticalAngle or X > 360-MaxVerticalAngle
-
-			if (relativeRotation.X > MaxVerticalAngle*2 &&
-				relativeRotation.X < 360.0f-MaxVerticalAngle)
-			{
-				relativeRotation.X = 360.0f-MaxVerticalAngle;
-			}
-			else
-			if (relativeRotation.X > MaxVerticalAngle &&
-				relativeRotation.X < 360.0f-MaxVerticalAngle)
-			{
-				relativeRotation.X = MaxVerticalAngle;
-			}
-
-			// Do the fix as normal, special case below
-			// reset cursor position to the centre of the window.
-			CursorControl->setPosition(0.5f, 0.5f);
-			CenterCursor = CursorControl->getRelativePosition();
-
-			// needed to avoid problems when the event receiver is disabled
-			CursorPos = CenterCursor;
-		}
-
-		// Special case, mouse is whipped outside of window before it can update.
-		video::IVideoDriver* driver = smgr->getVideoDriver();
-		core::vector2d<u32> mousepos(u32(CursorControl->getPosition().X), u32(CursorControl->getPosition().Y));
-		core::rect<u32> screenRect(0, 0, driver->getScreenSize().Width, driver->getScreenSize().Height);
-
-		// Only if we are moving outside quickly.
-		bool reset = !screenRect.isPointInside(mousepos);
-
-		if(reset)
-		{
-			// Force a reset.
-			CursorControl->setPosition(0.5f, 0.5f);
-			CenterCursor = CursorControl->getRelativePosition();
-			CursorPos = CenterCursor;
- 		}
-	}
 
 	// set target
 
@@ -345,16 +285,6 @@ const core::array<SKeyMap>& CSceneNodeAnimatorCameraHMD::getKeyMap() const
 void CSceneNodeAnimatorCameraHMD::setVerticalMovement(bool allow)
 {
 	NoVerticalMovement = !allow;
-}
-
-
-//! Sets whether the Y axis of the mouse should be inverted.
-void CSceneNodeAnimatorCameraHMD::setInvertMouse(bool invert)
-{
-	if (invert)
-		MouseYDirection = -1.0f;
-	else
-		MouseYDirection = 1.0f;
 }
 
 

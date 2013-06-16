@@ -107,8 +107,6 @@ void SampleScene::setUp()
     bill->setMaterialFlag(video::EMF_ZBUFFER, false);
     bill->setSize(core::dimension2d<f32>(20.0f, 20.0f));
     bill->setID(ID_IsNotPickable); // This ensures that we don't accidentally ray-pick it
-	
-	Device->getCursorControl()->setVisible(false);
 }
 
 void SampleScene::shutDown()
