@@ -5,6 +5,8 @@
 #include "hmd_display.h"
 #include "scene_node_animator_camera_hmd.h"
 
+class JoystickEventReceiver;
+
 enum
 {
     // I use this ISceneNode ID to indicate a scene node that is
@@ -21,13 +23,6 @@ enum
     IDFlag_IsHighlightable = 1 << 1
 };
 
-class MyEventReceiver : public irr::IEventReceiver {
-public:
-	bool OnEvent(const irr::SEvent& event);
-	irr::IrrlichtDevice* device;
-	irr::gui::ICursorControl* cursor;
-};
-
 class SampleScene : public Scene {
 public:
 	SampleScene(irr::IrrlichtDevice *dev);
@@ -38,13 +33,17 @@ public:
 	virtual void shutDown();
 
 private:
-	MyEventReceiver receiver;
-
 	irr::scene::IBillboardSceneNode *bill;
 	irr::scene::ICameraSceneNode* camNode;
 	irr::scene::CSceneNodeAnimatorCameraHMD *hmdCam;
 
+	JoystickEventReceiver *Receiver;
+	irr::core::array<irr::SJoystickInfo> JoystickInfo;
+
 	HMDDisplay display;
+
+	float mouseSpeed;
+	float walkSpeed;
 
 	// Remember which scene node is highlighted
     irr::scene::ISceneNode* highlightedSceneNode;
