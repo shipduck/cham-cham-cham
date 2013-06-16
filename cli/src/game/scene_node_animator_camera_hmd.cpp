@@ -17,7 +17,7 @@ namespace scene
 {
 
 //! constructor
-CSceneNodeAnimatorCameraHMD::CSceneNodeAnimatorCameraHMD(gui::ICursorControl* cursorControl,
+SceneNodeAnimatorCameraHMD::SceneNodeAnimatorCameraHMD(gui::ICursorControl* cursorControl,
 		f32 rotateSpeed, f32 moveSpeed, f32 jumpSpeed,
 		SKeyMap* keyMapArray, u32 keyMapSize, bool noVerticalMovement)
 : CursorControl(cursorControl), MaxVerticalAngle(88.0f),
@@ -54,7 +54,7 @@ CSceneNodeAnimatorCameraHMD::CSceneNodeAnimatorCameraHMD(gui::ICursorControl* cu
 
 
 //! destructor
-CSceneNodeAnimatorCameraHMD::~CSceneNodeAnimatorCameraHMD()
+SceneNodeAnimatorCameraHMD::~SceneNodeAnimatorCameraHMD()
 {
 	if (CursorControl)
 		CursorControl->drop();
@@ -66,7 +66,7 @@ CSceneNodeAnimatorCameraHMD::~CSceneNodeAnimatorCameraHMD()
 //! example with scene::ISceneManager::addMayaCameraSceneNode or
 //! scene::ISceneManager::addFPSCameraSceneNode, may want to get this input
 //! for changing their position, look at target or whatever.
-bool CSceneNodeAnimatorCameraHMD::OnEvent(const SEvent& evt)
+bool SceneNodeAnimatorCameraHMD::OnEvent(const SEvent& evt)
 {
 	switch(evt.EventType)
 	{
@@ -89,7 +89,7 @@ bool CSceneNodeAnimatorCameraHMD::OnEvent(const SEvent& evt)
 }
 
 
-void CSceneNodeAnimatorCameraHMD::animateNode(ISceneNode* node, u32 timeMs)
+void SceneNodeAnimatorCameraHMD::animateNode(ISceneNode* node, u32 timeMs)
 {
 	if (!node || node->getType() != ESNT_CAMERA)
 		return;
@@ -215,7 +215,7 @@ void CSceneNodeAnimatorCameraHMD::animateNode(ISceneNode* node, u32 timeMs)
 }
 
 
-void CSceneNodeAnimatorCameraHMD::allKeysUp()
+void SceneNodeAnimatorCameraHMD::allKeysUp()
 {
 	for (u32 i=0; i<EKA_COUNT; ++i)
 		CursorKeys[i] = false;
@@ -223,33 +223,33 @@ void CSceneNodeAnimatorCameraHMD::allKeysUp()
 
 
 //! Sets the rotation speed
-void CSceneNodeAnimatorCameraHMD::setRotateSpeed(f32 speed)
+void SceneNodeAnimatorCameraHMD::setRotateSpeed(f32 speed)
 {
 	RotateSpeed = speed;
 }
 
 
 //! Sets the movement speed
-void CSceneNodeAnimatorCameraHMD::setMoveSpeed(f32 speed)
+void SceneNodeAnimatorCameraHMD::setMoveSpeed(f32 speed)
 {
 	MoveSpeed = speed;
 }
 
 
 //! Gets the rotation speed
-f32 CSceneNodeAnimatorCameraHMD::getRotateSpeed() const
+f32 SceneNodeAnimatorCameraHMD::getRotateSpeed() const
 {
 	return RotateSpeed;
 }
 
 
 // Gets the movement speed
-f32 CSceneNodeAnimatorCameraHMD::getMoveSpeed() const
+f32 SceneNodeAnimatorCameraHMD::getMoveSpeed() const
 {
 	return MoveSpeed;
 }
 
-void CSceneNodeAnimatorCameraHMD::setHeadTrackingValue(f32 yaw, f32 pitch, f32 roll)
+void SceneNodeAnimatorCameraHMD::setHeadTrackingValue(f32 yaw, f32 pitch, f32 roll)
 {
 	Yaw = yaw;
 	Pitch = pitch;
@@ -258,7 +258,7 @@ void CSceneNodeAnimatorCameraHMD::setHeadTrackingValue(f32 yaw, f32 pitch, f32 r
 }
 
 //! Sets the keyboard mapping for this animator
-void CSceneNodeAnimatorCameraHMD::setKeyMap(SKeyMap *map, u32 count)
+void SceneNodeAnimatorCameraHMD::setKeyMap(SKeyMap *map, u32 count)
 {
 	// clear the keymap
 	KeyMap.clear();
@@ -270,28 +270,28 @@ void CSceneNodeAnimatorCameraHMD::setKeyMap(SKeyMap *map, u32 count)
 	}
 }
 
-void CSceneNodeAnimatorCameraHMD::setKeyMap(const core::array<SKeyMap>& keymap)
+void SceneNodeAnimatorCameraHMD::setKeyMap(const core::array<SKeyMap>& keymap)
 {
 	KeyMap=keymap;
 }
 
-const core::array<SKeyMap>& CSceneNodeAnimatorCameraHMD::getKeyMap() const
+const core::array<SKeyMap>& SceneNodeAnimatorCameraHMD::getKeyMap() const
 {
 	return KeyMap;
 }
 
 
 //! Sets whether vertical movement should be allowed.
-void CSceneNodeAnimatorCameraHMD::setVerticalMovement(bool allow)
+void SceneNodeAnimatorCameraHMD::setVerticalMovement(bool allow)
 {
 	NoVerticalMovement = !allow;
 }
 
 
-ISceneNodeAnimator* CSceneNodeAnimatorCameraHMD::createClone(ISceneNode* node, ISceneManager* newManager)
+ISceneNodeAnimator* SceneNodeAnimatorCameraHMD::createClone(ISceneNode* node, ISceneManager* newManager)
 {
-	CSceneNodeAnimatorCameraHMD * newAnimator =
-		new CSceneNodeAnimatorCameraHMD(CursorControl,	RotateSpeed, MoveSpeed, JumpSpeed,
+	SceneNodeAnimatorCameraHMD * newAnimator =
+		new SceneNodeAnimatorCameraHMD(CursorControl,	RotateSpeed, MoveSpeed, JumpSpeed,
 											0, 0, NoVerticalMovement);
 	newAnimator->setKeyMap(KeyMap);
 	return newAnimator;

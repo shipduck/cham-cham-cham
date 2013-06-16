@@ -36,7 +36,7 @@ public:
 private:
 	irr::scene::IBillboardSceneNode *bill;
 	irr::scene::ICameraSceneNode* camNode;
-	irr::scene::CSceneNodeAnimatorCameraHMD *hmdCam;
+	irr::scene::SceneNodeAnimatorCameraHMD *hmdCam;
 
 	JoystickEventReceiver *Receiver;
 	irr::core::array<irr::SJoystickInfo> JoystickInfo;

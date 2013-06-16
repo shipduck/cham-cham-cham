@@ -22,17 +22,17 @@ namespace scene
 {
 
 	//! Special scene node animator for FPS cameras
-	class CSceneNodeAnimatorCameraHMD : public ISceneNodeAnimator
+	class SceneNodeAnimatorCameraHMD : public ISceneNodeAnimator
 	{
 	public:
 
 		//! Constructor
-		CSceneNodeAnimatorCameraHMD(gui::ICursorControl* cursorControl,
+		SceneNodeAnimatorCameraHMD(gui::ICursorControl* cursorControl,
 			f32 rotateSpeed = 100.0f, f32 moveSpeed = .5f, f32 jumpSpeed=0.f,
 			SKeyMap* keyMapArray=0, u32 keyMapSize=0, bool noVerticalMovement=false);
 
 		//! Destructor
-		virtual ~CSceneNodeAnimatorCameraHMD();
+		virtual ~SceneNodeAnimatorCameraHMD();
 
 		//! Animates the scene node, currently only works on cameras
 		virtual void animateNode(ISceneNode* node, u32 timeMs);

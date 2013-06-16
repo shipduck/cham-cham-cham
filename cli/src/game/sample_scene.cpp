@@ -16,7 +16,7 @@ ICameraSceneNode* initCamera(IrrlichtDevice *device, ISceneManager *smgr, scene:
 {
 	ICameraSceneNode* camNode = smgr->addCameraSceneNode();
 	auto cursorControl = device->getCursorControl();
-	CSceneNodeAnimatorCameraHMD* hmdCam = new CSceneNodeAnimatorCameraHMD(cursorControl);
+	SceneNodeAnimatorCameraHMD* hmdCam = new SceneNodeAnimatorCameraHMD(cursorControl);
 	camNode->addAnimator(hmdCam);
 	camNode->setID(ID_IsNotPickable);
 	camNode->setPosition(core::vector3df(2700*2,255*2 + 100,2600*2));
@@ -85,7 +85,7 @@ void SampleScene::setUp()
 	// Create Camera
 	camNode = initCamera(Device, smgr, terrain);
 	auto camAnim = *camNode->getAnimators().begin();
-	hmdCam = static_cast<CSceneNodeAnimatorCameraHMD*>(camAnim);
+	hmdCam = static_cast<SceneNodeAnimatorCameraHMD*>(camAnim);
 
 	// load a dwarf
 	IAnimatedMesh* dwarf = smgr->getMesh("ext/irrlicht/media/dwarf.x");
