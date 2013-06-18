@@ -47,7 +47,7 @@ int entrypoint(int argc, char* argv[])
 	headTracking.startUp();
 
 	//set debug tool
-	gDebugDrawMgr.setUp(device);
+	gDebugDrawMgr->setUp(device);
 	gNormalFont12 = guienv->getFont("res/font_12.xml");
 	gNormalFont14 = guienv->getFont("res/font_14.xml");
 
@@ -99,13 +99,13 @@ int entrypoint(int argc, char* argv[])
 		scene->draw();
 
 		// debug render
-		gDebugDrawMgr.drawAll();
+		gDebugDrawMgr->drawAll();
 		guienv->drawAll();
 		driver->endScene();	//render end
 
 		//debug draw mgr의 업데이트를 나중에 처리해야 1프레임만 렌더링되는 객체도
 		//제대로 렌더링된다
-		gDebugDrawMgr.updateAll(frameDeltaTime);
+		gDebugDrawMgr->updateAll(frameDeltaTime);
 		
 		int fps = driver->getFPS();
 		if (lastFPS != fps) {
@@ -122,7 +122,7 @@ int entrypoint(int argc, char* argv[])
 	scene->shutDown();
 
 	//clean debug tool
-	gDebugDrawMgr.shutDown();
+	gDebugDrawMgr->shutDown();
 
 	device->drop();	
 	

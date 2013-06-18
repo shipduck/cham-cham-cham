@@ -3,20 +3,6 @@
 
 #include "Typelist.h"
 
-typedef enum {
-	kDebugDrawNone = -1,
-	kDebugDrawLine2D,
-	kDebugDrawCross2D,
-	kDebugDrawString2D,
-	kDebugDrawCircle2D,
-	kDebugDrawLine3D,
-	kDebugDrawCross3D,
-	kDebugDrawSphere3D,
-	kDebugDrawAxis3D,
-	kDebugDrawString3D,
-	kDebugDrawCount,
-} DebugDrawType;
-
 struct DebugDraw;
 struct DebugDraw_Line3D;
 struct DebugDraw_Cross3D;
@@ -39,88 +25,73 @@ typedef TYPELIST_9(
 	DebugDraw_Cross2D,
 	DebugDraw_String2D,
 	DebugDraw_Circle2D) DebugDrawCmdTypeList;
-static_assert(kDebugDrawCount == Loki::TL::Length<DebugDrawCmdTypeList>::value, "type list - type enum not same"); 
 
 struct DebugDraw {
 	typedef std::wstring string_type;
 	typedef std::wstring::value_type value_type;
 
-	DebugDraw() : Type(kDebugDrawNone), Duration(0), Node(nullptr) {}
-	DebugDraw(DebugDrawType type)  : Type(type), Duration(0), Node(nullptr) {}
-	virtual ~DebugDraw() {}
-	DebugDrawType Type;
+	DebugDraw() : Duration(0), Node(nullptr) {}
 	irr::video::SColor Color;
 	int Duration;	//millisecond
 	irr::scene::ISceneNode *Node;
 };
 
 struct DebugDraw3D : public DebugDraw {
-	DebugDraw3D() : DebugDraw() {}
-	DebugDraw3D(DebugDrawType type)  : DebugDraw(type), DepthEnable(true) {}
-	virtual ~DebugDraw3D() {}
+	DebugDraw3D() : DepthEnable(true) {}
 	bool DepthEnable;
 };
 
 struct DebugDraw_Line2D : public DebugDraw {
-	DebugDraw_Line2D() : DebugDraw(kDebugDrawLine2D), LineWidth(1.0f) {}
-	virtual ~DebugDraw_Line2D() {}
+	DebugDraw_Line2D() : LineWidth(1.0f) {}
 	irr::core::vector2di P1;
 	irr::core::vector2di P2;
 	float LineWidth;
 };
 struct DebugDraw_Cross2D : public DebugDraw {
-	DebugDraw_Cross2D() : DebugDraw(kDebugDrawCross2D), Size(5.0f) {}
-	virtual ~DebugDraw_Cross2D() {}
+	DebugDraw_Cross2D() : Size(5.0f) {}
 	irr::core::vector2di Pos;
 	float Size;
 };
 
 struct DebugDraw_String2D : public DebugDraw {
-	DebugDraw_String2D() : DebugDraw(kDebugDrawString2D), Scale(1.0f) {}
-	virtual ~DebugDraw_String2D() {}
+	DebugDraw_String2D() : Scale(1.0f) {}
 	irr::core::vector2di Pos;
 	DebugDraw::string_type Msg;
 	float Scale;
 };
 struct DebugDraw_Circle2D: public DebugDraw {
-	DebugDraw_Circle2D() : DebugDraw(kDebugDrawCircle2D), Radius(1.0f) {}
-	virtual ~DebugDraw_Circle2D() {}
+	DebugDraw_Circle2D() : Radius(1.0f) {}
 	float Radius;
 	irr::core::vector2di Pos;  //cross, sphere, string
 };
 
 struct DebugDraw_Line3D : public DebugDraw3D {
-	DebugDraw_Line3D() : DebugDraw3D(kDebugDrawLine3D), LineWidth(1.0f) {}
-	virtual ~DebugDraw_Line3D() {}
+	DebugDraw_Line3D() : LineWidth(1.0f) {}
 	float LineWidth;
 	irr::core::vector3df P1;
 	irr::core::vector3df P2;
 };
 
 struct DebugDraw_Cross3D : public DebugDraw3D {
-	DebugDraw_Cross3D() : DebugDraw3D(kDebugDrawCross3D), Size(1.0f) {}
-	virtual ~DebugDraw_Cross3D() {}
+	DebugDraw_Cross3D() : Size(1.0f) {}
 	float Size;
 	irr::core::vector3df Pos;  //cross
 	
 };
 struct DebugDraw_Sphere3D : public DebugDraw3D {
-	DebugDraw_Sphere3D() : DebugDraw3D(kDebugDrawSphere3D), Radius(1.0f) {}
-	virtual ~DebugDraw_Sphere3D() {}
+	DebugDraw_Sphere3D() : Radius(1.0f) {}
 	float Radius;
 	irr::core::vector3df Pos;  //sphere
 };
 
 struct DebugDraw_String3D : public DebugDraw3D {
-	DebugDraw_String3D() : DebugDraw3D(kDebugDrawString3D), Scale(1.0f) {}
-	virtual ~DebugDraw_String3D() {}
+	DebugDraw_String3D() : Scale(1.0f) {}
 	DebugDraw::string_type Msg;
 	float Scale;
 	irr::core::vector3df Pos;  //string
 };
 struct DebugDraw_Axis3D : public DebugDraw3D {
-	DebugDraw_Axis3D() : DebugDraw3D(kDebugDrawAxis3D), Size(1.0f) {}
-	virtual ~DebugDraw_Axis3D() {}
+	DebugDraw_Axis3D() : Size(1.0f) {}
 	float Size;
 	irr::core::matrix4 Xf;   //axis
 };
@@ -228,7 +199,7 @@ private:
 };
 
 // 주력으로 사용할것을 전역변수로 걸어놔야 속편하다
-extern DebugDrawManager gDebugDrawMgr;
+extern DebugDrawManager *gDebugDrawMgr;
 
 extern irr::gui::IGUIFont *gNormalFont12;
 extern irr::gui::IGUIFont *gNormalFont14;

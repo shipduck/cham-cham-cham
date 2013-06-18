@@ -9,7 +9,10 @@ using namespace scene;
 using namespace core;
 using namespace gui;
 
-DebugDrawManager gDebugDrawMgr;
+//singleton
+DebugDrawManager debugDrawMgrLocal;
+DebugDrawManager *gDebugDrawMgr = &debugDrawMgrLocal;
+
 irr::gui::IGUIFont *gNormalFont12 = nullptr;
 irr::gui::IGUIFont *gNormalFont14 = nullptr;
 
