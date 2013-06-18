@@ -23,6 +23,7 @@ int SCREEN_WIDTH = 1280;
 int SCREEN_HEIGHT = 800;
 bool fullscreen = false;
 bool vsync = true;
+bool useSound;
 
 int entrypoint(int argc, char* argv[])
 {
@@ -63,7 +64,24 @@ int entrypoint(int argc, char* argv[])
 	// 씬 변환이후 첫번쨰 프레임은 dt=0으로 생각하고 돌린다
 	bool isFirstRun = true;
 	u32 then = device->getTimer()->getTime();
-
+    
+    ALuint bgmBuf = 0, bgmSrc = 0;
+    
+    if (!(useSound = alutInit(NULL, nullptr))) {
+        puts(alutGetErrorString(alutGetError()));
+        puts("Failed to init sound");
+    }
+    
+    if (useSound) {
+        if((bgmBuf = alutCreateBufferFromFile("res/sound/bg_.wav")) == AL_NONE) {
+            puts(alutGetErrorString(alutGetError()));
+        } else {
+            alGenSources(1, &bgmSrc);
+            alSourcei(bgmSrc, AL_BUFFER, bgmBuf);
+            alSourcePlay(bgmSrc);
+        }
+    }
+    
 	// Render loop
 	while(device->run()) {
 		int frameDeltaTime = 0;
@@ -123,6 +141,13 @@ int entrypoint(int argc, char* argv[])
 
 	//clean debug tool
 	gDebugDrawMgr->shutDown();
+    
+    if (useSound) {
+        if (bgmSrc != 0) {
+            alSourcePause(bgmSrc);
+        }
+        alutExit();
+    }
 
 	device->drop();	
 	
