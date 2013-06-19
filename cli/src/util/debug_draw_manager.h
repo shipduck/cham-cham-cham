@@ -2,54 +2,42 @@
 #pragma once
 
 #include "Typelist.h"
+#include "base/template_lib.h"
 
-struct DebugDraw;
-struct DebugDraw_Line3D;
-/*
-struct DebugDraw_Cross3D;
-struct DebugDraw_Sphere3D;
-struct DebugDraw_String3D;
-struct DebugDraw_Axis3D;
-struct DebugDraw_Line2D;
-struct DebugDraw_Cross2D;
-struct DebugDraw_String2D;
-struct DebugDraw_Circle2D;
-*/
-
-// 로직 돌릴 순서대로 쓰기
-typedef TYPELIST_1(
-	DebugDraw_Line3D
-	/*
-	DebugDraw_Cross3D,
-	DebugDraw_Sphere3D,
-	DebugDraw_String3D,
-	DebugDraw_Axis3D,
-	DebugDraw_Line2D,
-	DebugDraw_Cross2D,
-	DebugDraw_String2D,
-	DebugDraw_Circle2D*/) DebugDrawCmdTypeList;
-
-struct DebugDraw {
+struct DebugDrawList {
 	typedef std::wstring string_type;
 	typedef std::wstring::value_type value_type;
-
-	DebugDraw() : Duration(0), Node(nullptr) {}
-	irr::video::SColor Color;
-	int Duration;	//millisecond
-	irr::scene::ISceneNode *Node;
 };
 
-struct DebugDraw3D : public DebugDraw {
-	DebugDraw3D() : DepthEnable(true) {}
-	bool DepthEnable;
+struct DebugDrawListMixin_Color {
+	std::vector<irr::video::SColor> ColorList;	
+	void clear();
+	void pop_back();
+	int size() const;
 };
+
+struct DebugDrawListMixin_Node {
+	std::vector<irr::scene::ISceneNode*> NodeList;
+	void clear();
+	void pop_back();
+	int size() const;
+};
+
+struct DebugDrawListMixin_3D {
+	std::vector<bool> DepthEnable;
+	void clear();
+	void pop_back();
+	int size() const;
+};
+
+struct DebugDrawListMixin_LineWidth {
+	std::vector<float> LineWidthList;
+	void clear();
+	void pop_back();
+	int size() const;
+};
+
 /*
-struct DebugDraw_Line2D : public DebugDraw {
-	DebugDraw_Line2D() : LineWidth(1.0f) {}
-	irr::core::vector2di P1;
-	irr::core::vector2di P2;
-	float LineWidth;
-};
 struct DebugDraw_Cross2D : public DebugDraw {
 	DebugDraw_Cross2D() : Size(5.0f) {}
 	irr::core::vector2di Pos;
@@ -68,12 +56,76 @@ struct DebugDraw_Circle2D: public DebugDraw {
 	irr::core::vector2di Pos;  //cross, sphere, string
 };
 */
-struct DebugDraw_Line3D : public DebugDraw3D {
-	DebugDraw_Line3D() : LineWidth(1.0f) {}
-	float LineWidth;
-	irr::core::vector3df P1;
-	irr::core::vector3df P2;
+
+template<typename T>
+struct DebugDrawListMixin_Line {
+	std::vector<T> P1List;
+	std::vector<T> P2List;
+
+	void clear()
+	{
+		P1List.clear();
+		P2List.clear();
+	}
+	void pop_back()
+	{
+		P1List.pop_back();
+		P2List.pop_back();
+	}
+	int size() const
+	{
+		return P1List.size();
+	}
 };
+
+template<typename TList> struct DebugDrawListPolicy;
+
+template<>
+struct DebugDrawListPolicy<Loki::NullType> {
+	static void clear(GenSimpleHierarchy<Loki::NullType> &obj) {}
+	static void pop_back(GenSimpleHierarchy<Loki::NullType> &obj) {}
+};
+
+template<typename T, typename U>
+struct DebugDrawListPolicy< Loki::Typelist<T, U> > {
+	static void clear(GenSimpleHierarchy< Loki::Typelist<T, U> > &obj)
+	{
+		static_cast<T&>(obj).clear();
+		DebugDrawListPolicy<U>::clear(obj);
+	};
+	static void pop_back(GenSimpleHierarchy< Loki::Typelist<T, U> > &obj)
+	{
+		static_cast<T&>(obj).pop_back();
+		DebugDrawListPolicy<U>::pop_back(obj);
+	};
+};
+
+template<typename TList>
+struct DebugDrawListT : public GenSimpleHierarchy<TList> {
+	typedef DebugDrawListPolicy<TList> Policy;
+	void clear() { Policy::clear(*this); }
+	void pop_back() { Policy::pop_back(*this); }
+	int size() const { return ((TList::Head*)this)->size();	}
+};
+
+typedef TYPELIST_5(
+	DebugDrawListMixin_Color,
+	DebugDrawListMixin_Node, 
+	DebugDrawListMixin_3D,
+	DebugDrawListMixin_LineWidth,
+	DebugDrawListMixin_Line<irr::core::vector3df>
+	) DebugDrawListMixinList_Line3D;
+struct DebugDrawList_Line3D : public DebugDrawListT<DebugDrawListMixinList_Line3D> {};
+
+typedef TYPELIST_3(
+	DebugDrawListMixin_Line<irr::core::vector2di>,
+	DebugDrawListMixin_Color,
+	DebugDrawListMixin_LineWidth
+	) DebugDrawListMixinList_Line2D;
+struct DebugDrawList_Line2D : public DebugDrawListT<DebugDrawListMixinList_Line2D> {};
+
+
+
 /*
 struct DebugDraw_Cross3D : public DebugDraw3D {
 	DebugDraw_Cross3D() : Size(1.0f) {}
@@ -103,23 +155,29 @@ struct DebugDraw_Axis3D : public DebugDraw3D {
 template<class T>
 class DebugDrawListHolder {
 public:
-	typedef std::list<T> list_type;
 	typedef T value_type;
 
-	list_type &getList() {
-		return ListValue; 
-	}
-	const list_type &getList() const { 
-		return ListValue; 
-	}
-private:
-	list_type ListValue;
+	value_type ImmediateDrawList;
+	value_type DurationDrawList;
+	std::vector<int> DurationList;	//millisecond
 };
 
-class DebugDrawManager : public Loki::GenScatterHierarchy<DebugDrawCmdTypeList, DebugDrawListHolder> {
-public:
-	typedef std::list<std::unique_ptr<DebugDraw>> DebugDrawList;
 
+// 로직 돌릴 순서대로 쓰기
+typedef TYPELIST_2(
+	DebugDrawList_Line3D,
+	DebugDrawList_Line2D
+	/*
+	DebugDraw_Cross3D,
+	DebugDraw_Sphere3D,
+	DebugDraw_String3D,
+	DebugDraw_Axis3D,
+	DebugDraw_Line2D,
+	DebugDraw_Cross2D,
+	DebugDraw_String2D,
+	DebugDraw_Circle2D*/) DebugDrawCmdTypeList;
+
+class DebugDrawManager : public Loki::GenScatterHierarchy<DebugDrawCmdTypeList, DebugDrawListHolder> {
 public:
 	DebugDrawManager() : Device(nullptr) {}
 	~DebugDrawManager() {}
@@ -129,7 +187,7 @@ public:
 	void drawAll();
 	void updateAll(int ms);
 	void clear();
-	int count() const;
+	int size() const;
 
 	//add 3d
 public:
@@ -163,14 +221,14 @@ public:
 		int duration = 0,
 		bool depthEnable = true);
 	*/
-	/*
+	
 	//add 2d
 public:
 	void addLine(const irr::core::vector2di &p1, const irr::core::vector2di &p2,
 		const irr::video::SColor &color,
 		float lineWidth = 1.0f,
 		int duration = 0);
-
+	/*
 	void addCross(const irr::core::vector2di &pos, 
 		const irr::video::SColor &color,
 		float size,
@@ -188,18 +246,18 @@ public:
 		*/
 	//draw
 public:
+	void drawList(const DebugDrawList_Line2D &cmd);
 	/*
-	void drawElem(const DebugDraw_Line2D *cmd);
-	void drawElem(const DebugDraw_Cross2D *cmd);
-	void drawElem(const DebugDraw_Circle2D *cmd);
-	void drawElem(const DebugDraw_String2D *cmd);
+	void drawList(const DebugDraw_Cross2D *cmd);
+	void drawList(const DebugDraw_Circle2D *cmd);
+	void drawList(const DebugDraw_String2D *cmd);
 	*/
-	void drawElem(const DebugDraw_Line3D *cmd);
+	void drawList(const DebugDrawList_Line3D &cmd);
 	/*
-	void drawElem(const DebugDraw_Cross3D *cmd);
-	void drawElem(const DebugDraw_Sphere3D *cmd);
-	void drawElem(const DebugDraw_Axis3D *cmd);
-	void drawElem(const DebugDraw_String3D *cmd);
+	void drawList(const DebugDraw_Cross3D *cmd);
+	void drawList(const DebugDraw_Sphere3D *cmd);
+	void drawList(const DebugDraw_Axis3D *cmd);
+	void drawList(const DebugDraw_String3D *cmd);
 	*/
 
 private:
