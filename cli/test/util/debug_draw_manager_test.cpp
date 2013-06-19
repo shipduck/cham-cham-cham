@@ -23,8 +23,10 @@ TEST_F(DebugDrawManagerTest, updateAll)
 	EXPECT_EQ(0, mgr.count());
 
 	SColor color;
-	mgr.addCross(vector2di(0, 0), color, 1);	// without duration
-	mgr.addCross(vector2di(0, 0), color, 1, 1000);	// with duration
+	//mgr.addCross(vector2di(0, 0), color, 1);	// without duration
+	//mgr.addCross(vector2di(0, 0), color, 1, 1000);	// with duration
+	mgr.addLine(vector3df(0, 0, 0), vector3df(0, 0, 0), color, 1);	// without duration
+	mgr.addLine(vector3df(0, 0, 0), vector3df(0, 0, 0), color, 1, 1000);	// with duration
 	EXPECT_EQ(2, mgr.count());
 
 	mgr.updateAll(500);

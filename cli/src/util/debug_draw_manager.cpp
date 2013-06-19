@@ -152,6 +152,7 @@ void DebugDrawManager::addLine(const irr::core::vector3df &p1, const irr::core::
 	Field<CmdType>(*this).getList().push_back(cmd);
 }
 
+/*
 void DebugDrawManager::addCross(const irr::core::vector3df &pos, 
 		const irr::video::SColor &color,
 		float size,
@@ -353,7 +354,7 @@ void DebugDrawManager::drawElem(const DebugDraw_Circle2D *cmd)
 {
 	SR_ASSERT(false && "NotImplemented");
 }
-
+*/
 void DebugDrawManager::drawElem(const DebugDraw_Line3D *cmd)
 {
 	IVideoDriver* driver = Device->getVideoDriver();
@@ -364,7 +365,7 @@ void DebugDrawManager::drawElem(const DebugDraw_Line3D *cmd)
 	driver->setTransform(video::ETS_WORLD, core::matrix4());             
 	driver->draw3DLine(cmd->P1, cmd->P2, cmd->Color);
 }
-
+/*
 void DebugDrawManager::drawElem(const DebugDraw_Cross3D *cmd)
 {
 	//항상 동일한 크기로 보이게 적절히 렌더링하기
@@ -404,3 +405,4 @@ void DebugDrawManager::drawElem(const DebugDraw_Axis3D *cmd)
 	driver->draw3DLine(zero, y, green);
 	driver->draw3DLine(zero, z, blue);
 }
+*/

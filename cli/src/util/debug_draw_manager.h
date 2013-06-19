@@ -5,6 +5,7 @@
 
 struct DebugDraw;
 struct DebugDraw_Line3D;
+/*
 struct DebugDraw_Cross3D;
 struct DebugDraw_Sphere3D;
 struct DebugDraw_String3D;
@@ -13,10 +14,12 @@ struct DebugDraw_Line2D;
 struct DebugDraw_Cross2D;
 struct DebugDraw_String2D;
 struct DebugDraw_Circle2D;
+*/
 
 // 로직 돌릴 순서대로 쓰기
-typedef TYPELIST_9(
-	DebugDraw_Line3D,
+typedef TYPELIST_1(
+	DebugDraw_Line3D
+	/*
 	DebugDraw_Cross3D,
 	DebugDraw_Sphere3D,
 	DebugDraw_String3D,
@@ -24,7 +27,7 @@ typedef TYPELIST_9(
 	DebugDraw_Line2D,
 	DebugDraw_Cross2D,
 	DebugDraw_String2D,
-	DebugDraw_Circle2D) DebugDrawCmdTypeList;
+	DebugDraw_Circle2D*/) DebugDrawCmdTypeList;
 
 struct DebugDraw {
 	typedef std::wstring string_type;
@@ -40,7 +43,7 @@ struct DebugDraw3D : public DebugDraw {
 	DebugDraw3D() : DepthEnable(true) {}
 	bool DepthEnable;
 };
-
+/*
 struct DebugDraw_Line2D : public DebugDraw {
 	DebugDraw_Line2D() : LineWidth(1.0f) {}
 	irr::core::vector2di P1;
@@ -64,14 +67,14 @@ struct DebugDraw_Circle2D: public DebugDraw {
 	float Radius;
 	irr::core::vector2di Pos;  //cross, sphere, string
 };
-
+*/
 struct DebugDraw_Line3D : public DebugDraw3D {
 	DebugDraw_Line3D() : LineWidth(1.0f) {}
 	float LineWidth;
 	irr::core::vector3df P1;
 	irr::core::vector3df P2;
 };
-
+/*
 struct DebugDraw_Cross3D : public DebugDraw3D {
 	DebugDraw_Cross3D() : Size(1.0f) {}
 	float Size;
@@ -95,7 +98,7 @@ struct DebugDraw_Axis3D : public DebugDraw3D {
 	float Size;
 	irr::core::matrix4 Xf;   //axis
 };
-
+*/
 
 template<class T>
 class DebugDrawListHolder {
@@ -135,7 +138,7 @@ public:
 		float lineWidth = 1.0f,
 		int duration = 0,
 		bool depthEnable = true);
-
+	/*
 	void addCross(const irr::core::vector3df &pos, 
 		const irr::video::SColor &color,
 		float size,
@@ -159,7 +162,8 @@ public:
 		float scale = 1.0f,
 		int duration = 0,
 		bool depthEnable = true);
-
+	*/
+	/*
 	//add 2d
 public:
 	void addLine(const irr::core::vector2di &p1, const irr::core::vector2di &p2,
@@ -181,18 +185,22 @@ public:
 	void addCircle(const irr::core::vector2di &pos, float radius,
 		const irr::video::SColor &color,
 		int duration = 0);
-
+		*/
 	//draw
 public:
+	/*
 	void drawElem(const DebugDraw_Line2D *cmd);
 	void drawElem(const DebugDraw_Cross2D *cmd);
 	void drawElem(const DebugDraw_Circle2D *cmd);
 	void drawElem(const DebugDraw_String2D *cmd);
+	*/
 	void drawElem(const DebugDraw_Line3D *cmd);
+	/*
 	void drawElem(const DebugDraw_Cross3D *cmd);
 	void drawElem(const DebugDraw_Sphere3D *cmd);
 	void drawElem(const DebugDraw_Axis3D *cmd);
 	void drawElem(const DebugDraw_String3D *cmd);
+	*/
 
 private:
 	irr::IrrlichtDevice *Device;	
