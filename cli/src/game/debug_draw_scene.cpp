@@ -36,6 +36,7 @@ void DebugDrawScene::setUp()
 	smgr->addCameraSceneNodeFPS();
 	Device->getCursorControl()->setVisible(false);
 
+	//duration based는 아직
 	//gDebugDrawMgr->addSphere(core::vector3df(30,0,30), 5, green, 5000);
 }
 
@@ -51,13 +52,12 @@ void DebugDrawScene::update(int ms)
 
 	std::wstring msg(L"hello world");
 
-	//gDebugDrawMgr->addSphere(core::vector3df(0,0,30), 10, red);
+	gDebugDrawMgr->addSphere(core::vector3df(0,0,30), 10, red);
 	gDebugDrawMgr->addLine(vector3df(10, 0, 30), vector3df(10, 200, 200), green, 2.0f);
 	matrix4 axisMat = core::matrix4();
 	axisMat.setTranslation(vector3df(-20, 0, 30));
-	//axisMat.setRotationDegrees(vector3df(0, 0, 45));
+	axisMat.setRotationDegrees(vector3df(0, 0, 45));
 
-	/*
 	gDebugDrawMgr->addAxis(axisMat, 5);
 	gDebugDrawMgr->addCross(vector3df(-10, 0, 30), blue, 5);
 	gDebugDrawMgr->addString(vector3df(0, 0, 30), msg, blue, 2.0f);
@@ -65,7 +65,6 @@ void DebugDrawScene::update(int ms)
 	gDebugDrawMgr->addLine(vector2di(0, 0), vector2di(50, 100), blue, 5.0f);
 	gDebugDrawMgr->addCross(vector2di(50, 100), red, 5.0f);
 	gDebugDrawMgr->addString(vector2di(50, 100), msg, white);
-	*/
 }
 
 void DebugDrawScene::draw()

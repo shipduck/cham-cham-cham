@@ -16,23 +16,6 @@ DebugDrawManager *gDebugDrawMgr = &debugDrawMgrLocal;
 irr::gui::IGUIFont *gNormalFont12 = nullptr;
 irr::gui::IGUIFont *gNormalFont14 = nullptr;
 
-void DebugDrawListMixin_Color::clear() 
-{
-	ColorList.clear();
-}
-void DebugDrawListMixin_Color::pop_back() 
-{
-	ColorList.pop_back();
-}
-int DebugDrawListMixin_Color::size() const
-{
-	return ColorList.size();
-}
-
-void DebugDrawListMixin_Node::clear() 
-{
-	NodeList.clear();
-}
 void DebugDrawListMixin_Node::pop_back() 
 {
 	auto node = NodeList.back();
@@ -41,36 +24,6 @@ void DebugDrawListMixin_Node::pop_back()
 		node->drop();
 	}
 	NodeList.pop_back();
-}
-int DebugDrawListMixin_Node::size() const
-{
-	return NodeList.size();
-}
-
-void DebugDrawListMixin_3D::clear() 
-{
-	DepthEnable.clear();
-}
-void DebugDrawListMixin_3D::pop_back()
-{
-	DepthEnable.pop_back();
-}
-int DebugDrawListMixin_3D::size() const
-{
-	return DepthEnable.size();
-}
-
-void DebugDrawListMixin_LineWidth::clear()
-{
-	LineWidthList.clear();
-}
-void DebugDrawListMixin_LineWidth::pop_back()
-{
-	LineWidthList.pop_back();
-}
-int DebugDrawListMixin_LineWidth::size() const
-{
-	return LineWidthList.size();
 }
 
 void DebugDrawManager::setUp(irr::IrrlichtDevice *dev)
@@ -105,8 +58,12 @@ struct DebugDrawListFunctor< Typelist<T, U> > {
 	{
 		const auto &immediateList = Field<T>(mgr).ImmediateDrawList;
 		const auto &durationList = Field<T>(mgr).DurationDrawList;
-		mgr.drawList(immediateList);
-		mgr.drawList(durationList);
+		if(immediateList.size() > 0) {
+			mgr.drawList(immediateList);
+		}
+		if(durationList.size() > 0) {
+			mgr.drawList(durationList);
+		}
 		DebugDrawListFunctor<U>::draw(mgr);
 	}
 	static void clear(DebugDrawManager &mgr)
@@ -124,6 +81,7 @@ struct DebugDrawListFunctor< Typelist<T, U> > {
 		auto &durationDrawList = Field<T>(mgr).DurationDrawList;
 
 		//TODO DurationDrawList-DurationList 시간 내림차순으로 정렬
+		SR_ASSERT(durationList.size() == 0 && "duration based is not implemented yet");
 
 		//시간지난거 삭제
 		for(size_t i = 0 ; i < durationList.size() ; ++i) {
@@ -171,40 +129,53 @@ void DebugDrawManager::addLine(const irr::core::vector3df &p1, const irr::core::
 		int duration,
 		bool depthEnable)
 {
-	DebugDrawList_Line3D *drawList = nullptr;
+	typedef DebugDrawList_Line3D ListType;
+	ListType *drawList = nullptr;
 	SR_ASSERT(duration >= 0);
 	if(duration == 0) {
-		drawList = &Field<DebugDrawList_Line3D>(*this).ImmediateDrawList;
+		drawList = &Field<ListType>(*this).ImmediateDrawList;
 	} else {
-		drawList = &Field<DebugDrawList_Line3D>(*this).DurationDrawList;
+		drawList = &Field<ListType>(*this).DurationDrawList;
 	}
 	
 	drawList->P1List.push_back(p1);
 	drawList->P2List.push_back(p2);
 	drawList->ColorList.push_back(color);
-	drawList->LineWidthList.push_back(lineWidth);
-	drawList->DepthEnable.push_back(depthEnable);
+	drawList->ScaleList.push_back(lineWidth);
+	drawList->DepthEnableList.push_back(depthEnable);
 
 	if(duration > 0) {
-		Field<DebugDrawList_Line3D>(*this).DurationList.push_back(duration);
+		Field<ListType>(*this).DurationList.push_back(duration);
 	}
+
+	SR_ASSERT(drawList->validate() == true);
 }
 
-/*
 void DebugDrawManager::addCross(const irr::core::vector3df &pos, 
 		const irr::video::SColor &color,
 		float size,
 		int duration,
 		bool depthEnable)
 {
-	typedef DebugDraw_Cross3D CmdType;
-	CmdType cmd;
-	cmd.Pos = pos;
-	cmd.Color = color;
-	cmd.Size = size;
-	cmd.Duration = duration;
-	cmd.DepthEnable = depthEnable;
-	Field<CmdType>(*this).getList().push_back(cmd);
+	typedef DebugDrawList_Cross3D ListType;
+	ListType *drawList = nullptr;
+	SR_ASSERT(duration >= 0);
+	if(duration == 0) {
+		drawList = &Field<ListType>(*this).ImmediateDrawList;
+	} else {
+		drawList = &Field<ListType>(*this).DurationDrawList;
+	}
+	
+	drawList->PosList.push_back(pos);
+	drawList->ColorList.push_back(color);
+	drawList->ScaleList.push_back(size);
+	drawList->DepthEnableList.push_back(depthEnable);
+
+	if(duration > 0) {
+		Field<ListType>(*this).DurationList.push_back(duration);
+	}
+
+	SR_ASSERT(drawList->validate() == true);
 }
 
 void DebugDrawManager::addSphere(const irr::core::vector3df &pos, 
@@ -213,13 +184,19 @@ void DebugDrawManager::addSphere(const irr::core::vector3df &pos,
 		int duration,
 		bool depthEnable)
 {
-	typedef DebugDraw_Sphere3D CmdType;
-	CmdType cmd;
-	cmd.Pos = pos;
-	cmd.Radius = radius;
-	cmd.Color = color;
-	cmd.Duration = duration;
-	cmd.DepthEnable = depthEnable;
+	typedef DebugDrawList_Sphere3D ListType;
+	ListType *drawList = nullptr;
+	SR_ASSERT(duration >= 0);
+	if(duration == 0) {
+		drawList = &Field<ListType>(*this).ImmediateDrawList;
+	} else {
+		drawList = &Field<ListType>(*this).DurationDrawList;
+	}
+	
+	drawList->PosList.push_back(pos);
+	drawList->ColorList.push_back(color);
+	drawList->ScaleList.push_back(radius);
+	drawList->DepthEnableList.push_back(depthEnable);
 
 	//create scene node
 	ISceneManager* smgr = Device->getSceneManager();
@@ -235,9 +212,13 @@ void DebugDrawManager::addSphere(const irr::core::vector3df &pos,
 	}
 	node->setPosition(pos);
 	node->grab();
-	cmd.Node = node;
+	drawList->NodeList.push_back(node);
 
-	Field<CmdType>(*this).getList().push_back(cmd);
+	if(duration > 0) {
+		Field<ListType>(*this).DurationList.push_back(duration);
+	}
+
+	SR_ASSERT(drawList->validate() == true);
 }
 
 void DebugDrawManager::addAxis(const irr::core::matrix4 &xf,
@@ -245,30 +226,47 @@ void DebugDrawManager::addAxis(const irr::core::matrix4 &xf,
 		int duration,
 		bool depthEnable)
 {
-	typedef DebugDraw_Axis3D CmdType;
-	CmdType cmd;
-	cmd.Xf = xf;
-	cmd.Size = size;
-	cmd.Duration = duration;
-	cmd.DepthEnable = depthEnable;
-	Field<CmdType>(*this).getList().push_back(cmd);
+	typedef DebugDrawList_Axis3D ListType;
+	ListType *drawList = nullptr;
+	SR_ASSERT(duration >= 0);
+	if(duration == 0) {
+		drawList = &Field<ListType>(*this).ImmediateDrawList;
+	} else {
+		drawList = &Field<ListType>(*this).DurationDrawList;
+	}
+	
+	drawList->XfList.push_back(xf);
+	drawList->ScaleList.push_back(size);
+	drawList->DepthEnableList.push_back(depthEnable);
+
+	if(duration > 0) {
+		Field<ListType>(*this).DurationList.push_back(duration);
+	}
+
+	SR_ASSERT(drawList->validate() == true);
 }
 
 void DebugDrawManager::addString(const irr::core::vector3df &pos, 
-		const DebugDraw::string_type &msg,
+		const DebugDrawListMixin_String::string_type &msg,
 		const irr::video::SColor &color,
 		float scale,
 		int duration,
 		bool depthEnable)
 {
-	typedef DebugDraw_String3D CmdType;
-	CmdType cmd;
-	cmd.Pos = pos;
-	cmd.Msg = msg;
-	cmd.Color = color;
-	cmd.Scale = scale;
-	cmd.Duration = duration;
-	cmd.DepthEnable = depthEnable;
+	typedef DebugDrawList_String3D ListType;
+	ListType *drawList = nullptr;
+	SR_ASSERT(duration >= 0);
+	if(duration == 0) {
+		drawList = &Field<ListType>(*this).ImmediateDrawList;
+	} else {
+		drawList = &Field<ListType>(*this).DurationDrawList;
+	}
+	
+	drawList->PosList.push_back(pos);
+	drawList->ColorList.push_back(color);
+	drawList->ScaleList.push_back(scale);
+	drawList->MsgList.push_back(msg);
+	drawList->DepthEnableList.push_back(depthEnable);
 
 	//create scene node
 	ISceneManager* smgr = Device->getSceneManager();
@@ -284,11 +282,15 @@ void DebugDrawManager::addString(const irr::core::vector3df &pos,
 	node->setScale(vector3df(scale, scale, scale));
 	node->setPosition(pos);
 	node->grab();
-	cmd.Node = node;
+	drawList->NodeList.push_back(node);
 
-	Field<CmdType>(*this).getList().push_back(cmd);
+	if(duration > 0) {
+		Field<ListType>(*this).DurationList.push_back(duration);
+	}
+
+	SR_ASSERT(drawList->validate() == true);
 }
-*/
+
 void DebugDrawManager::addLine(const irr::core::vector2di &p1, const irr::core::vector2di &p2,
 		const irr::video::SColor &color,
 		float lineWidth,
@@ -305,56 +307,91 @@ void DebugDrawManager::addLine(const irr::core::vector2di &p1, const irr::core::
 	drawList->P1List.push_back(p1);
 	drawList->P2List.push_back(p2);
 	drawList->ColorList.push_back(color);
-	drawList->LineWidthList.push_back(lineWidth);
+	drawList->ScaleList.push_back(lineWidth);
 
 	if(duration > 0) {
 		Field<DebugDrawList_Line2D>(*this).DurationList.push_back(duration);
 	}
+
+	SR_ASSERT(drawList->validate() == true);
 }
-/*
+
 void DebugDrawManager::addCross(const irr::core::vector2di &pos, 
 		const irr::video::SColor &color,
 		float size,
 		int duration)
 {
-	typedef DebugDraw_Cross2D CmdType;
-	CmdType cmd;
-	cmd.Pos = pos;
-	cmd.Color = color;
-	cmd.Size = size;
-	cmd.Duration = duration;
-	Field<CmdType>(*this).getList().push_back(cmd);
+	typedef DebugDrawList_Cross2D ListType;
+	ListType *drawList = nullptr;
+	SR_ASSERT(duration >= 0);
+	if(duration == 0) {
+		drawList = &Field<ListType>(*this).ImmediateDrawList;
+	} else {
+		drawList = &Field<ListType>(*this).DurationDrawList;
+	}
+	
+	drawList->PosList.push_back(pos);
+	drawList->ColorList.push_back(color);
+	drawList->ScaleList.push_back(size);
+
+	if(duration > 0) {
+		Field<ListType>(*this).DurationList.push_back(duration);
+	}
+
+	SR_ASSERT(drawList->validate() == true);
 }
 
 void DebugDrawManager::addString(const irr::core::vector2di &pos, 
-								   const DebugDraw::string_type &msg,
+								   const DebugDrawListMixin_String::string_type &msg,
 								   const irr::video::SColor &color,
 								   float scale,
 								   int duration)
 {
-	typedef DebugDraw_String2D CmdType;
-	CmdType cmd;
-	cmd.Pos = pos;
-	cmd.Msg = msg;
-	cmd.Color = color;
-	cmd.Scale = scale;
-	cmd.Duration = duration;
-	Field<CmdType>(*this).getList().push_back(cmd);
+	typedef DebugDrawList_String2D ListType;
+	ListType *drawList = nullptr;
+	SR_ASSERT(duration >= 0);
+	if(duration == 0) {
+		drawList = &Field<ListType>(*this).ImmediateDrawList;
+	} else {
+		drawList = &Field<ListType>(*this).DurationDrawList;
+	}
+	
+	drawList->PosList.push_back(pos);
+	drawList->ColorList.push_back(color);
+	drawList->ScaleList.push_back(scale);
+	drawList->MsgList.push_back(msg);
+
+	if(duration > 0) {
+		Field<ListType>(*this).DurationList.push_back(duration);
+	}
+
+	SR_ASSERT(drawList->validate() == true);
 }
 
 void DebugDrawManager::addCircle(const irr::core::vector2di &pos, float radius,
 		const irr::video::SColor &color,
 		int duration)
 {
-	typedef DebugDraw_Circle2D CmdType;
-	CmdType cmd;
-	cmd.Pos = pos;
-	cmd.Radius = radius;
-	cmd.Color = color;
-	cmd.Duration = duration;
-	Field<CmdType>(*this).getList().push_back(cmd);
+	typedef DebugDrawList_Circle2D ListType;
+	ListType *drawList = nullptr;
+	SR_ASSERT(duration >= 0);
+	if(duration == 0) {
+		drawList = &Field<ListType>(*this).ImmediateDrawList;
+	} else {
+		drawList = &Field<ListType>(*this).DurationDrawList;
+	}
+	
+	drawList->PosList.push_back(pos);
+	drawList->ColorList.push_back(color);
+	drawList->ScaleList.push_back(radius);
+
+	if(duration > 0) {
+		Field<ListType>(*this).DurationList.push_back(duration);
+	}
+
+	SR_ASSERT(drawList->validate() == true);
 }
-*/
+
 void DebugDrawManager::drawList(const DebugDrawList_Line2D &cmd)
 {
 	IVideoDriver* driver = Device->getVideoDriver();
@@ -364,47 +401,62 @@ void DebugDrawManager::drawList(const DebugDrawList_Line2D &cmd)
 	for(int i = 0 ; i < loopCount ; ++i) {
 		video::SMaterial m; 
 		m.Lighting = false;
-		m.Thickness = cmd.LineWidthList[i];
+		m.Thickness = cmd.ScaleList[i];
 		driver->setMaterial(m);
 		driver->draw2DLine(cmd.P1List[i], cmd.P2List[i], cmd.ColorList[i]);
 	}
 }
-/*
-void DebugDrawManager::drawElem(const DebugDraw_Cross2D *cmd)
+
+void DebugDrawManager::drawList(const DebugDrawList_Cross2D &cmd)
 {
 	IVideoDriver* driver = Device->getVideoDriver();
 	video::SMaterial m; 
 	m.Lighting = false;
-
-	vector2di top = cmd->Pos + vector2di(0, (int)cmd->Size);
-	vector2di bottom = cmd->Pos - vector2di(0, (int)cmd->Size);
-	vector2di right = cmd->Pos + vector2di((int)cmd->Size, 0);
-	vector2di left = cmd->Pos - vector2di((int)cmd->Size, 0);
-
 	driver->setMaterial(m);
 	driver->setTransform(video::ETS_WORLD, core::matrix4());             
-	driver->draw2DLine(top, bottom, cmd->Color);
-	driver->draw2DLine(right, left, cmd->Color);
-}
 
-void DebugDrawManager::drawElem(const DebugDraw_String2D *cmd)
+	int loopCount = cmd.size();
+	for(int i = 0 ; i < loopCount ; ++i) {
+		auto pos = cmd.PosList[i];
+		auto size = static_cast<int>(cmd.ScaleList[i]);
+		auto color = cmd.ColorList[i];
+
+		vector2di top = pos + vector2di(0, size);
+		vector2di bottom = pos - vector2di(0, size);
+		vector2di right = pos + vector2di(size, 0);
+		vector2di left = pos - vector2di(size, 0);
+
+		driver->draw2DLine(top, bottom, color);
+		driver->draw2DLine(right, left, color);
+	}
+}
+void DebugDrawManager::drawList(const DebugDrawList_String2D &cmd)
 {
-	if(gNormalFont14) {
-		auto driver = Device->getVideoDriver();
-		const irr::core::dimension2du& screenSize = driver->getScreenSize();
-		int x = cmd->Pos.X;
-		int y = cmd->Pos.Y;
-		int w = screenSize.Width;
-		int h = screenSize.Height;
-		gNormalFont14->draw(cmd->Msg.data(), rect<s32>(x, y, w, h), cmd->Color);
+	if(!gNormalFont14) {
+		return;
+	}
+
+	auto driver = Device->getVideoDriver();
+	const irr::core::dimension2du& screenSize = driver->getScreenSize();
+	int w = screenSize.Width;
+	int h = screenSize.Height;
+
+	int loopCount = cmd.size();
+	for(int i = 0 ; i < loopCount ; ++i) {
+		auto pos = cmd.PosList[i];
+		auto color = cmd.ColorList[i];
+		auto msg = cmd.MsgList[i];
+		int x = pos.X;
+		int y = pos.Y;
+		gNormalFont14->draw(msg.data(), rect<s32>(x, y, w, h), color);
 	}
 }
 
-void DebugDrawManager::drawElem(const DebugDraw_Circle2D *cmd)
+void DebugDrawManager::drawList(const DebugDrawList_Circle2D &cmd)
 {
 	SR_ASSERT(false && "NotImplemented");
 }
-*/
+
 void DebugDrawManager::drawList(const DebugDrawList_Line3D &cmd)
 {
 	IVideoDriver* driver = Device->getVideoDriver();
@@ -414,49 +466,55 @@ void DebugDrawManager::drawList(const DebugDrawList_Line3D &cmd)
 	for(int i = 0 ; i < loopCount ; ++i) {
 		video::SMaterial m; 
 		m.Lighting = false;
-		m.Thickness = cmd.LineWidthList[i];
+		m.Thickness = cmd.ScaleList[i];
 		driver->setMaterial(m);
 		driver->draw3DLine(cmd.P1List[i], cmd.P2List[i], cmd.ColorList[i]);
 	}
 }
-/*
-void DebugDrawManager::drawElem(const DebugDraw_Cross3D *cmd)
+
+void DebugDrawManager::drawList(const DebugDrawList_Cross3D &cmd)
 {
 	//항상 동일한 크기로 보이게 적절히 렌더링하기
 }
 
-void DebugDrawManager::drawElem(const DebugDraw_Sphere3D *cmd)
+void DebugDrawManager::drawList(const DebugDrawList_Sphere3D &cmd)
 {
 	//use scene node based
 }
-void DebugDrawManager::drawElem(const DebugDraw_String3D *cmd)
+void DebugDrawManager::drawList(const DebugDrawList_String3D &cmd)
 {
 	//use scene node based
 }
-void DebugDrawManager::drawElem(const DebugDraw_Axis3D *cmd)
+
+void DebugDrawManager::drawList(const DebugDrawList_Axis3D &cmd)
 {
 	IVideoDriver* driver = Device->getVideoDriver();
 	video::SMaterial m; 
 	m.Lighting = false;
 	driver->setMaterial(m);
-	driver->setTransform(video::ETS_WORLD, core::matrix4());             
-
-	vector3df zero(0, 0, 0);
-	vector3df x(cmd->Size, 0, 0);
-	vector3df y(0, cmd->Size, 0);
-	vector3df z(0, 0, cmd->Size);
-
-	cmd->Xf.transformVect(zero);
-	cmd->Xf.transformVect(x);
-	cmd->Xf.transformVect(y);
-	cmd->Xf.transformVect(z);
+	driver->setTransform(video::ETS_WORLD, core::matrix4());
 
 	SColor red(255, 255, 0, 0);
 	SColor green(255, 0, 255, 0);
 	SColor blue(255, 0, 0, 255);
 
-	driver->draw3DLine(zero, x, red);
-	driver->draw3DLine(zero, y, green);
-	driver->draw3DLine(zero, z, blue);
+	int loopCount = cmd.size();
+	for(int i = 0 ; i < loopCount ; ++i) {
+		auto size = cmd.ScaleList[i];
+		auto xf = cmd.XfList[i];
+
+		vector3df zero(0, 0, 0);
+		vector3df x(size, 0, 0);
+		vector3df y(0, size, 0);
+		vector3df z(0, 0, size);
+
+		xf.transformVect(zero);
+		xf.transformVect(x);
+		xf.transformVect(y);
+		xf.transformVect(z);
+
+		driver->draw3DLine(zero, x, red);
+		driver->draw3DLine(zero, y, green);
+		driver->draw3DLine(zero, z, blue);
+	}
 }
-*/
