@@ -16,6 +16,11 @@ DebugDrawManager *gDebugDrawMgr = &debugDrawMgrLocal;
 irr::gui::IGUIFont *gNormalFont12 = nullptr;
 irr::gui::IGUIFont *gNormalFont14 = nullptr;
 
+
+DebugDrawListMixin_Node::~DebugDrawListMixin_Node()
+{
+	clear();
+}
 void DebugDrawListMixin_Node::pop_back() 
 {
 	auto node = NodeList.back();
@@ -24,6 +29,19 @@ void DebugDrawListMixin_Node::pop_back()
 		node->drop();
 	}
 	NodeList.pop_back();
+}
+void DebugDrawListMixin_Node::clear() 
+{
+	auto it = NodeList.begin();
+	auto endit = NodeList.end();
+	for( ; it != endit ; ++it) {
+		auto node = *it;
+		if(node) {
+			node->remove();
+			node->drop();
+		}
+	}
+	NodeList.clear(); 
 }
 
 void DebugDrawManager::setUp(irr::IrrlichtDevice *dev)

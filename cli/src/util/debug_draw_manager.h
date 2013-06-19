@@ -12,8 +12,9 @@ struct DebugDrawListMixin_Color {
 };
 
 struct DebugDrawListMixin_Node {
+	~DebugDrawListMixin_Node();
 	std::vector<irr::scene::ISceneNode*> NodeList;
-	void clear() { NodeList.clear(); }
+	void clear();
 	void pop_back();
 	int size() const { return NodeList.size(); }
 };
