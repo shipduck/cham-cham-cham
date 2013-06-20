@@ -20,4 +20,4 @@ template<class T>
 class GenSimpleHierarchy : public T { };
 
 template<>
-class GenSimpleHierarchy<Loki::NullType> : public Loki::NullType { };
+class GenSimpleHierarchy<Loki::NullType> { };
