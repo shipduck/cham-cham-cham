@@ -100,7 +100,9 @@ ADD_EXECUTABLE( dokuro_test
 	${DOKURO_TEST_SRC_FILES}
 	${DOKURO_TEST_BASE_SRC_FILES}
 	${DOKURO_TEST_GAME_SRC_FILES}
-	${DOKURO_TEST_UTIL_SRC_FILES} )
+	${DOKURO_TEST_UTIL_SRC_FILES}
+	"${DOKURO_SRC_DIR}/stdafx.h"
+    "${DOKURO_SRC_DIR}/stdafx.cpp" )
 
 SOURCE_GROUP( "" FILES ${DOKURO_TEST_SRC_FILES} )
 SOURCE_GROUP( base FILES ${DOKURO_TEST_BASE_SRC_FILES} )
@@ -114,8 +116,8 @@ TARGET_LINK_LIBRARIES( dokuro_test
 	dokuro )
 
 MSVC_SET_PCH( dokuro_test
-    "${DOKURO_TEST_DIR}/test_stdafx.h"
-    "${DOKURO_TEST_DIR}/test_stdafx.cpp")
+    "${DOKURO_SRC_DIR}/stdafx.h"
+    "${DOKURO_SRC_DIR}/stdafx.cpp")
 
 USE_CPP11( TARGET dokuro LibOVR gtest dokuro_exe dokuro_test )
 

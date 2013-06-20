@@ -1,5 +1,5 @@
 ﻿// Ŭnicode please
-#include "test_stdafx.h"
+#include "stdafx.h"
 #include "base/string_hash.h"
 
 TEST(StringHash, CRC32)

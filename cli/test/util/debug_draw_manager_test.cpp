@@ -1,5 +1,5 @@
 // Ŭnicode please
-#include "test_stdafx.h"
+#include "stdafx.h"
 #include "util/debug_draw_manager.h"
 
 using namespace Loki;
