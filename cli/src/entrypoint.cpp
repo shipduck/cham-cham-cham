@@ -73,7 +73,7 @@ int entrypoint(int argc, char* argv[])
     }
     
     if (useSound) {
-        if((bgmBuf = alutCreateBufferFromFile("res/sound/bg_.wav")) == AL_NONE) {
+        if((bgmBuf = alutCreateBufferFromFile("res/sound/bg.wav")) == AL_NONE) {
             puts(alutGetErrorString(alutGetError()));
         } else {
             alGenSources(1, &bgmSrc);
