@@ -36,3 +36,8 @@ ext/*
 *.pbxproj
 *.xcworkspacedata
 *.xcodeproj
+
+# cmake auto-gen code
+config.h
+CMakeTmp/
+admin/
