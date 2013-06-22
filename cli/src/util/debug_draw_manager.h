@@ -210,6 +210,47 @@ public:
 	value_type ImmediateDrawList;
 	value_type DurationDrawList;
 	std::vector<int> DurationList;	//millisecond
+
+	const value_type &getList(int duration) const
+	{
+		const value_type *drawList = nullptr;
+		SR_ASSERT(duration >= 0);
+		if(duration == 0) {
+			drawList = &ImmediateDrawList;
+		} else {
+			drawList = &DurationDrawList;
+			
+		}
+		return *drawList;
+	}
+
+	value_type &getListAndPushDuration(int duration)
+	{
+		value_type &drawList = const_cast<value_type&>(getList(duration));
+		if(duration > 0) {
+			DurationList.push_back(duration);
+		}
+		return drawList;
+	}
+
+	bool runValidateOnce(int duration) const
+	{
+		static bool immediateValidateRun = false;
+		static bool durationValidateRun = false;
+
+		const value_type &drawList = getList(duration);
+		if(duration > 0 && durationValidateRun) {
+			durationValidateRun = true;
+		} else if(duration == 0 && immediateValidateRun) {
+			immediateValidateRun = true;
+		} else {
+			return true;
+		}
+
+		bool validateResult = drawList.validate();
+		SR_ASSERT(validateResult == true);
+		return validateResult;
+	}
 };
 
 

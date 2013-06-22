@@ -148,25 +148,15 @@ void DebugDrawManager::addLine(const irr::core::vector3df &p1, const irr::core::
 		bool depthEnable)
 {
 	typedef DebugDrawList_Line3D ListType;
-	ListType *drawList = nullptr;
-	SR_ASSERT(duration >= 0);
-	if(duration == 0) {
-		drawList = &Field<ListType>(*this).ImmediateDrawList;
-	} else {
-		drawList = &Field<ListType>(*this).DurationDrawList;
-	}
-	
-	drawList->P1List.push_back(p1);
-	drawList->P2List.push_back(p2);
-	drawList->ColorList.push_back(color);
-	drawList->ScaleList.push_back(lineWidth);
-	drawList->DepthEnableList.push_back(depthEnable);
+	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 
-	if(duration > 0) {
-		Field<ListType>(*this).DurationList.push_back(duration);
-	}
+	drawList.P1List.push_back(p1);
+	drawList.P2List.push_back(p2);
+	drawList.ColorList.push_back(color);
+	drawList.ScaleList.push_back(lineWidth);
+	drawList.DepthEnableList.push_back(depthEnable);
 
-	SR_ASSERT(drawList->validate() == true);
+	Field<ListType>(*this).runValidateOnce(duration);
 }
 
 void DebugDrawManager::addCross(const irr::core::vector3df &pos, 
@@ -176,24 +166,14 @@ void DebugDrawManager::addCross(const irr::core::vector3df &pos,
 		bool depthEnable)
 {
 	typedef DebugDrawList_Cross3D ListType;
-	ListType *drawList = nullptr;
-	SR_ASSERT(duration >= 0);
-	if(duration == 0) {
-		drawList = &Field<ListType>(*this).ImmediateDrawList;
-	} else {
-		drawList = &Field<ListType>(*this).DurationDrawList;
-	}
+	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
-	drawList->PosList.push_back(pos);
-	drawList->ColorList.push_back(color);
-	drawList->ScaleList.push_back(size);
-	drawList->DepthEnableList.push_back(depthEnable);
+	drawList.PosList.push_back(pos);
+	drawList.ColorList.push_back(color);
+	drawList.ScaleList.push_back(size);
+	drawList.DepthEnableList.push_back(depthEnable);
 
-	if(duration > 0) {
-		Field<ListType>(*this).DurationList.push_back(duration);
-	}
-
-	SR_ASSERT(drawList->validate() == true);
+	Field<ListType>(*this).runValidateOnce(duration);
 }
 
 void DebugDrawManager::addSphere(const irr::core::vector3df &pos, 
@@ -203,18 +183,12 @@ void DebugDrawManager::addSphere(const irr::core::vector3df &pos,
 		bool depthEnable)
 {
 	typedef DebugDrawList_Sphere3D ListType;
-	ListType *drawList = nullptr;
-	SR_ASSERT(duration >= 0);
-	if(duration == 0) {
-		drawList = &Field<ListType>(*this).ImmediateDrawList;
-	} else {
-		drawList = &Field<ListType>(*this).DurationDrawList;
-	}
+	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
-	drawList->PosList.push_back(pos);
-	drawList->ColorList.push_back(color);
-	drawList->ScaleList.push_back(radius);
-	drawList->DepthEnableList.push_back(depthEnable);
+	drawList.PosList.push_back(pos);
+	drawList.ColorList.push_back(color);
+	drawList.ScaleList.push_back(radius);
+	drawList.DepthEnableList.push_back(depthEnable);
 
 	//create scene node
 	ISceneManager* smgr = Device->getSceneManager();
@@ -230,13 +204,9 @@ void DebugDrawManager::addSphere(const irr::core::vector3df &pos,
 	}
 	node->setPosition(pos);
 	node->grab();
-	drawList->NodeList.push_back(node);
+	drawList.NodeList.push_back(node);
 
-	if(duration > 0) {
-		Field<ListType>(*this).DurationList.push_back(duration);
-	}
-
-	SR_ASSERT(drawList->validate() == true);
+	Field<ListType>(*this).runValidateOnce(duration);
 }
 
 void DebugDrawManager::addAxis(const irr::core::matrix4 &xf,
@@ -257,11 +227,7 @@ void DebugDrawManager::addAxis(const irr::core::matrix4 &xf,
 	drawList->ScaleList.push_back(size);
 	drawList->DepthEnableList.push_back(depthEnable);
 
-	if(duration > 0) {
-		Field<ListType>(*this).DurationList.push_back(duration);
-	}
-
-	SR_ASSERT(drawList->validate() == true);
+	Field<ListType>(*this).runValidateOnce(duration);
 }
 
 void DebugDrawManager::addString(const irr::core::vector3df &pos, 
@@ -272,19 +238,13 @@ void DebugDrawManager::addString(const irr::core::vector3df &pos,
 		bool depthEnable)
 {
 	typedef DebugDrawList_String3D ListType;
-	ListType *drawList = nullptr;
-	SR_ASSERT(duration >= 0);
-	if(duration == 0) {
-		drawList = &Field<ListType>(*this).ImmediateDrawList;
-	} else {
-		drawList = &Field<ListType>(*this).DurationDrawList;
-	}
+	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
-	drawList->PosList.push_back(pos);
-	drawList->ColorList.push_back(color);
-	drawList->ScaleList.push_back(scale);
-	drawList->MsgList.push_back(msg);
-	drawList->DepthEnableList.push_back(depthEnable);
+	drawList.PosList.push_back(pos);
+	drawList.ColorList.push_back(color);
+	drawList.ScaleList.push_back(scale);
+	drawList.MsgList.push_back(msg);
+	drawList.DepthEnableList.push_back(depthEnable);
 
 	//create scene node
 	ISceneManager* smgr = Device->getSceneManager();
@@ -300,13 +260,9 @@ void DebugDrawManager::addString(const irr::core::vector3df &pos,
 	node->setScale(vector3df(scale, scale, scale));
 	node->setPosition(pos);
 	node->grab();
-	drawList->NodeList.push_back(node);
+	drawList.NodeList.push_back(node);
 
-	if(duration > 0) {
-		Field<ListType>(*this).DurationList.push_back(duration);
-	}
-
-	SR_ASSERT(drawList->validate() == true);
+	Field<ListType>(*this).runValidateOnce(duration);
 }
 
 void DebugDrawManager::addLine(const irr::core::vector2di &p1, const irr::core::vector2di &p2,
@@ -314,24 +270,15 @@ void DebugDrawManager::addLine(const irr::core::vector2di &p1, const irr::core::
 		float lineWidth,
 		int duration)
 {
-	DebugDrawList_Line2D *drawList = nullptr;
-	SR_ASSERT(duration >= 0);
-	if(duration == 0) {
-		drawList = &Field<DebugDrawList_Line2D>(*this).ImmediateDrawList;
-	} else {
-		drawList = &Field<DebugDrawList_Line2D>(*this).DurationDrawList;
-	}
+	typedef DebugDrawList_Line2D ListType;
+	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
-	drawList->P1List.push_back(p1);
-	drawList->P2List.push_back(p2);
-	drawList->ColorList.push_back(color);
-	drawList->ScaleList.push_back(lineWidth);
+	drawList.P1List.push_back(p1);
+	drawList.P2List.push_back(p2);
+	drawList.ColorList.push_back(color);
+	drawList.ScaleList.push_back(lineWidth);
 
-	if(duration > 0) {
-		Field<DebugDrawList_Line2D>(*this).DurationList.push_back(duration);
-	}
-
-	SR_ASSERT(drawList->validate() == true);
+	Field<ListType>(*this).runValidateOnce(duration);
 }
 
 void DebugDrawManager::addCross(const irr::core::vector2di &pos, 
@@ -340,23 +287,13 @@ void DebugDrawManager::addCross(const irr::core::vector2di &pos,
 		int duration)
 {
 	typedef DebugDrawList_Cross2D ListType;
-	ListType *drawList = nullptr;
-	SR_ASSERT(duration >= 0);
-	if(duration == 0) {
-		drawList = &Field<ListType>(*this).ImmediateDrawList;
-	} else {
-		drawList = &Field<ListType>(*this).DurationDrawList;
-	}
-	
-	drawList->PosList.push_back(pos);
-	drawList->ColorList.push_back(color);
-	drawList->ScaleList.push_back(size);
+	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 
-	if(duration > 0) {
-		Field<ListType>(*this).DurationList.push_back(duration);
-	}
+	drawList.PosList.push_back(pos);
+	drawList.ColorList.push_back(color);
+	drawList.ScaleList.push_back(size);
 
-	SR_ASSERT(drawList->validate() == true);
+	Field<ListType>(*this).runValidateOnce(duration);
 }
 
 void DebugDrawManager::addString(const irr::core::vector2di &pos, 
@@ -366,24 +303,14 @@ void DebugDrawManager::addString(const irr::core::vector2di &pos,
 								   int duration)
 {
 	typedef DebugDrawList_String2D ListType;
-	ListType *drawList = nullptr;
-	SR_ASSERT(duration >= 0);
-	if(duration == 0) {
-		drawList = &Field<ListType>(*this).ImmediateDrawList;
-	} else {
-		drawList = &Field<ListType>(*this).DurationDrawList;
-	}
+	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
-	drawList->PosList.push_back(pos);
-	drawList->ColorList.push_back(color);
-	drawList->ScaleList.push_back(scale);
-	drawList->MsgList.push_back(msg);
+	drawList.PosList.push_back(pos);
+	drawList.ColorList.push_back(color);
+	drawList.ScaleList.push_back(scale);
+	drawList.MsgList.push_back(msg);
 
-	if(duration > 0) {
-		Field<ListType>(*this).DurationList.push_back(duration);
-	}
-
-	SR_ASSERT(drawList->validate() == true);
+	Field<ListType>(*this).runValidateOnce(duration);
 }
 
 void DebugDrawManager::addCircle(const irr::core::vector2di &pos, float radius,
@@ -391,23 +318,13 @@ void DebugDrawManager::addCircle(const irr::core::vector2di &pos, float radius,
 		int duration)
 {
 	typedef DebugDrawList_Circle2D ListType;
-	ListType *drawList = nullptr;
-	SR_ASSERT(duration >= 0);
-	if(duration == 0) {
-		drawList = &Field<ListType>(*this).ImmediateDrawList;
-	} else {
-		drawList = &Field<ListType>(*this).DurationDrawList;
-	}
+	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
-	drawList->PosList.push_back(pos);
-	drawList->ColorList.push_back(color);
-	drawList->ScaleList.push_back(radius);
+	drawList.PosList.push_back(pos);
+	drawList.ColorList.push_back(color);
+	drawList.ScaleList.push_back(radius);
 
-	if(duration > 0) {
-		Field<ListType>(*this).DurationList.push_back(duration);
-	}
-
-	SR_ASSERT(drawList->validate() == true);
+	Field<ListType>(*this).runValidateOnce(duration);
 }
 
 void DebugDrawManager::drawList(const DebugDrawList_Line2D &cmd)
