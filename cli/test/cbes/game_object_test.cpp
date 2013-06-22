@@ -43,5 +43,73 @@ TEST(InheritanceComponentList, test)
 	int sphereIdB = compList.add(sphereB);
 
 	compList.destroy(sphereIdA);
-	compList.update(0);
+}
+
+TEST(World, test)
+{
+	World world;
+	
+	Object *a = world.create();
+	Object *b = world.create();
+	EXPECT_EQ(2, world.size());
+
+	world.remove(b);
+	EXPECT_EQ(1, world.size());
+
+	world.remove(a);
+	EXPECT_EQ(0, world.size());
+}
+
+TEST(Object, createComponent)
+{
+	World world;
+	Object *obj = world.create();
+
+	EXPECT_EQ(false, obj->hasComponent(kFamilySimpleHP));
+	EXPECT_EQ(false, obj->hasComponent(kFamilyHealth));
+	EXPECT_EQ(false, obj->hasComponent(kFamilyVisual));
+
+	{
+		SimpleHPCompCreator creator(obj);
+		int compId = creator.create(10);
+	}
+
+	EXPECT_EQ(true, obj->hasComponent(kFamilySimpleHP));
+
+	{
+		HealthCompCreator creator(obj);
+		int compId = creator.create(10);
+	}
+
+	EXPECT_EQ(true, obj->hasComponent(kFamilyHealth));
+
+	{
+		VisualCompCreator creator(obj);
+		int compId = creator.createSphere(5);
+	}
+
+	EXPECT_EQ(true, obj->hasComponent(kFamilyVisual));
+}
+
+TEST(Object, removeComponent)
+{
+	World world;
+	Object *obj = world.create();
+
+	SimpleHPCompCreator simpleHPCreator(obj);
+	simpleHPCreator.create(10);
+	HealthCompCreator healthCreator(obj);
+	healthCreator.create(10);
+	VisualCompCreator visualCreator(obj);
+	visualCreator.createSphere(5);
+
+	std::array<int, 3> familyTypeList = {
+		kFamilySimpleHP, kFamilyHealth, kFamilyVisual
+	};
+
+	for(auto familyType : familyTypeList) {
+		EXPECT_EQ(true, obj->hasComponent(familyType));
+		obj->removeComponent(familyType);
+		EXPECT_EQ(false, obj->hasComponent(familyType));
+	}
 }

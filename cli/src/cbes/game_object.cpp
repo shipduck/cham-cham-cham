@@ -4,7 +4,7 @@
 
 using namespace std;
 
-ComponentList::ComponentList(int poolSize)
+BaseComponentList::BaseComponentList(int poolSize)
 {
 	ActiveList.resize(poolSize);
 	std::fill(ActiveList.begin(), ActiveList.end(), false);
@@ -17,7 +17,7 @@ ComponentList::ComponentList(int poolSize)
 	}
 	SR_ASSERT(CompPool.back() == 0);
 }
-int ComponentList::create()
+int BaseComponentList::create()
 {
 	SR_ASSERT(CompPool.empty() == false);
 	int compId = CompPool.back();
@@ -26,7 +26,7 @@ int ComponentList::create()
 	return compId;
 }
 
-void ComponentList::destroy(int compId)
+void BaseComponentList::destroy(int compId)
 {
 	SR_ASSERT(compId >= 0 && compId < (int)ActiveList.size());
 	CompPool.push_back(compId);
@@ -41,7 +41,7 @@ CompHealthProxy::CompHealthProxy()
 }
 
 CompHealthList::CompHealthList(int poolSize)
-	: ComponentList(poolSize)
+	: BaseComponentList(poolSize)
 {
 	InitialHPList_Head.resize(poolSize);
 	InitialHPList_Torso.resize(poolSize);
@@ -51,7 +51,7 @@ CompHealthList::CompHealthList(int poolSize)
 
 int CompHealthList::create(const healt_value_t hp)
 {
-	int compId = ComponentList::create();
+	int compId = BaseComponentList::create();
 	CompHealthProxy comp = getComp(compId);
 	for(int i = 0 ; i < cNumBodyParts ; ++i) {
 		*comp.InitialHP[i] = hp;
@@ -173,4 +173,152 @@ void CompVisualSphere::render() const
 void CompVisualSphere::update(int ms)
 {
 	render();
+}
+
+Object::Object(World *world)
+	: WorldPtr(world), id(world->NextId())
+{
+	std::fill(CompIdList.begin(), CompIdList.end(), -1);
+}
+Object::~Object()
+{
+	clearComponents();
+}
+BaseComponentList *Object::getCompList(comp_id_type familyType)
+{
+	return WorldPtr->getCompList(familyType);
+}
+void Object::setComponent(comp_id_type familyType, int compId)
+{
+	CompIdList[familyType] = compId;
+}
+bool Object::hasComponent(comp_id_type familyType) const
+{
+	if(CompIdList[familyType] < 0) {
+		return false;
+	}
+	return true;
+}
+
+bool Object::removeComponent(comp_id_type familyType)
+{
+	if(CompIdList[familyType] < 0) {
+		return false;
+	}
+	auto compList = getCompList(familyType);
+	compList->destroy(CompIdList[familyType]);
+	CompIdList[familyType] = -1;
+	return true;
+}
+
+void Object::clearComponents()
+{
+	for(int familyType = 0 ; familyType < cNumFamily ; ++familyType) {
+		int compId = CompIdList[familyType];
+		if(compId < 0) {
+			continue;
+		}
+		BaseComponentList *compList = WorldPtr->getCompList(familyType);
+		compList->destroy(compId);
+		CompIdList[familyType] = -1;
+	}
+}
+
+World::World()
+	: nextId(1)
+{
+}
+World::~World()
+{
+	auto it = ObjectMap.begin();
+	auto endit = ObjectMap.end();
+	for( ; it != endit ; ++it) {
+		delete(it->second);
+	}
+}
+BaseComponentList *World::getCompList(comp_id_type familyType)
+{
+	BaseComponentList *compList = nullptr;
+	switch(familyType) {
+	case kFamilyHealth:
+		compList = &HealthList;
+		break;
+	case kFamilySimpleHP:
+		compList = &SimpleHealthList;
+		break;
+	case kFamilyVisual:
+		compList = &VisualList;
+		break;
+	default:
+		SR_ASSERT(!"not valid");
+		return nullptr;
+	}
+	SR_ASSERT(compList->getFamilyId() == familyType);
+	return compList;
+}
+
+obj_id_type World::NextId()
+{
+	int val = nextId;
+	nextId++;
+	return val;
+}
+
+Object *World::create()
+{
+	Object *obj = new Object(this);
+	ObjectMap[obj->getId()] = obj;	
+	return obj;
+}
+void World::remove(Object *obj)
+{
+	auto found = ObjectMap.find(obj->getId());
+	if(found != ObjectMap.end()) {
+		ObjectMap.erase(found);
+		delete(obj);
+	}
+}
+
+int World::size() const
+{
+	return ObjectMap.size();
+}
+
+
+int SimpleHPCompCreator::create(int hp)
+{
+	typedef SimpleComponentList<CompHealth> CompListType;
+	CompListType *compList = getCompList<CompListType>();
+
+	int compId = compList->create();
+	compList->getComp(compId)->init(hp);
+
+	setComponent(compId);
+	return compId;
+}
+
+int HealthCompCreator::create(int hp)
+{
+	typedef CompHealthList CompListType;
+	CompListType *compList = getCompList<CompListType>();
+
+	int compId = compList->create(hp);
+
+	setComponent(compId);
+	return compId;
+}
+
+int VisualCompCreator::createSphere(float radius)
+{
+	typedef InheritanceComponentList<ICompVisual> CompListType;
+	CompListType *compList = getCompList<CompListType>();
+
+	CompVisualSphere *sphere = new CompVisualSphere();
+	sphere->init(radius);
+
+	int compId = compList->add(sphere);
+
+	setComponent(compId);
+	return compId;
+
 }
