@@ -77,7 +77,7 @@ CompHealthProxy CompHealthList::getComp(int compId) const
 	return comp;
 }
 
-healt_value_t CompHealthList::getInitialHealthAt(int compId, const bodyPart_e part) const
+CompHealthList::healt_value_t CompHealthList::getInitialHealthAt(int compId, const bodyPart_e part) const
 {
 	CompHealthProxy comp = getComp(compId);
 	return *comp.InitialHP[part];
@@ -89,7 +89,7 @@ void CompHealthList::setInitialHealthAt(int compId, const bodyPart_e part, const
 	*comp.InitialHP[part] = hp;
 }
 
-healt_value_t CompHealthList::getHealthAt(int compId, const bodyPart_e part) const 
+CompHealthList::healt_value_t CompHealthList::getHealthAt(int compId, const bodyPart_e part) const 
 {
 	CompHealthProxy comp = getComp(compId);
 	return *comp.CurrentHP[part];
@@ -127,7 +127,7 @@ void CompHealth::init(int hp)
 	std::fill(CurrentHP.begin(), CurrentHP.end(), hp);
 }
 
-healt_value_t CompHealth::getInitialHealthAt(const bodyPart_e part) const
+CompHealth::healt_value_t CompHealth::getInitialHealthAt(const bodyPart_e part) const
 {
 	return InitialHP[part];
 }
@@ -136,7 +136,7 @@ void CompHealth::setInitialHealthAt(const bodyPart_e part, const healt_value_t h
 	InitialHP[part] = hp;
 }
 
-healt_value_t CompHealth::getHealthAt(const bodyPart_e part) const
+CompHealth::healt_value_t CompHealth::getHealthAt(const bodyPart_e part) const
 {
 	return CurrentHP[part];
 }
@@ -159,4 +159,18 @@ void CompHealth::reset()
 	for(int i = 0 ; i < cNumBodyParts ; ++i) {
 		CurrentHP[i] = InitialHP[i];
 	}
+}
+
+void CompVisualSphere::init(float radius)
+{
+	this->radius = radius;
+}
+
+void CompVisualSphere::render() const
+{
+	printf("render sphere with radius %f\n", radius);
+}
+void CompVisualSphere::update(int ms)
+{
+	render();
 }

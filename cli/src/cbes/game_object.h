@@ -4,21 +4,21 @@
 class Object;
 typedef int comp_id_type;
 
-typedef int healt_value_t;
-enum bodyPart_e {
-	head = 0, torso, cNumBodyParts 
-};
+const int kFamilyNone = 0;
+const int kFamilyHealth = 1;
+const int kFamilyVisual = 2;
 
 const int kCompNone = 0;
-const int kCompHealth = 0;
+const int kCompHealth = 1;
+const int kCompVisualSphere = 2;
+
 
 class ComponentList {
 public:
 	ComponentList(int poolSize=32);
 	virtual ~ComponentList() {}
 
-	virtual const comp_id_type &getComponentId() const = 0;
-	virtual const comp_id_type &getFamilyId() const = 0;
+	virtual const comp_id_type getFamilyId() const = 0;
 
 	virtual void update(int ms) {}
 
@@ -40,12 +40,18 @@ public:
 
 class CompHealthList : public ComponentList {
 public:
+	typedef int healt_value_t;
+	enum bodyPart_e {
+		head = 0, torso, cNumBodyParts 
+	};
+
+public:
 	CompHealthList(int poolSize=32);
 	
 	int create(const healt_value_t hp);
 
-	virtual const comp_id_type &getComponentId() const { return kCompHealth; }
-	virtual const comp_id_type &getFamilyId() const { return kCompHealth; }
+	virtual const comp_id_type getComponentId() const { return kCompHealth; }
+	virtual const comp_id_type getFamilyId() const { return kFamilyHealth; }
 
 	virtual void update(int ms);
 
@@ -75,13 +81,34 @@ public:
 	virtual void setUp() = 0;
 	virtual void shutDown() = 0;
 	virtual void update(int ms) = 0;
+
+	virtual comp_id_type getComponentId() const = 0;
+	virtual comp_id_type getFamilyId() const = 0;
 };
 
-class CompHealth : public BaseComponent {
+template<int FamilyCode, int CompCode>
+class BaseComponentT : public BaseComponent {
 public:
-	void setUp() {}
-	void shutDown() {}
-	void update(int ms) {}
+	enum {
+		kFamily = FamilyCode,
+		kComp = CompCode
+	};
+public:
+	virtual comp_id_type getComponentId() const { return CompCode; }
+	virtual comp_id_type getFamilyId() const { return FamilyCode; }
+};
+
+class CompHealth : public BaseComponentT<kFamilyHealth, kCompHealth> {
+public:
+	typedef int healt_value_t;
+	enum bodyPart_e {
+		head = 0, torso, cNumBodyParts 
+	};
+
+public:
+	virtual void setUp() {}
+	virtual void shutDown() {}
+	virtual void update(int ms) {}
 
 	void init(int hp);
 
@@ -99,8 +126,40 @@ private:
 	std::array<int, 2> CurrentHP;
 };
 
+class ICompVisual : public BaseComponent {
+public:
+	enum {
+		kFamily = kFamilyVisual,
+	};
+public:
+	virtual void render() const = 0;
+
+	virtual comp_id_type getFamilyId() const { return kFamily; }
+};
+
+class CompVisualSphere : public ICompVisual {
+public:
+	virtual void setUp() {}
+	virtual void shutDown() {}
+	virtual void update(int ms);
+
+	virtual comp_id_type getComponentId() const { return kCompVisualSphere; }
+
+	void init(float radius);
+
+	virtual void render() const;
+
+	const float getRadius() const { return radius; }
+	void setRadius(const float r) { radius = r; }
+private:
+	float radius;
+};
+
 template<typename T>
 class SimpleComponentList : public ComponentList {
+public:
+	typedef T value_type;
+
 public:
 	SimpleComponentList(int poolSize=32)
 		: ComponentList(poolSize)
@@ -108,10 +167,7 @@ public:
 		CompList.resize(poolSize);
 	}
 
-	typedef T value_type;
-
-	virtual const comp_id_type &getComponentId() const { return kCompHealth; }
-	virtual const comp_id_type &getFamilyId() const { return kCompHealth; }
+	virtual const comp_id_type getFamilyId() const { return T::kFamily; }
 	
 	T *getComp(int compId)
 	{
@@ -133,6 +189,7 @@ public:
 		obj.shutDown();
 		ComponentList::destroy(compId);
 	}
+	
 
 	void update(int ms)
 	{
@@ -148,4 +205,67 @@ public:
 
 public:
 	std::vector<T> CompList;
+};
+
+template<typename T>
+class InheritanceComponentList : public ComponentList {
+public:
+	typedef T value_type;
+
+public:
+	InheritanceComponentList(int poolSize=32)
+		: ComponentList(poolSize)
+	{
+		CompList.resize(poolSize);
+	}
+	~InheritanceComponentList() 
+	{
+		for(size_t i = 0 ; i < ActiveList.size() ; ++i) {
+			int active = ActiveList[i];
+			if(active == 0) {
+				continue;
+			}
+			T *comp = getComp(i);
+			delete(comp);
+		}
+	}
+
+	virtual const comp_id_type getFamilyId() const { return T::kFamily; }
+
+	T *getComp(int compId)
+	{
+		SR_ASSERT(compId >= 0 && compId < (int)CompList.size());
+		return CompList[compId];
+	}
+
+	int add(T *obj)
+	{
+		int compId = ComponentList::create();
+		CompList[compId] = obj;
+		obj->setUp();
+		return compId;
+	}
+
+	void destroy(int compId)
+	{
+		T *obj = CompList[compId];
+		obj->shutDown();
+		delete(obj);
+		ComponentList::destroy(compId);
+	}
+
+	void update(int ms)
+	{
+		for(size_t i = 0 ; i < ActiveList.size() ; ++i) {
+			int active = ActiveList[i];
+			if(active == 0) {
+				continue;
+			}
+			T *comp = getComp(i);
+			comp->update(ms);
+		}
+	}
+
+public:
+	std::vector<T*> CompList;
 };

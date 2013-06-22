@@ -8,10 +8,10 @@ TEST(CompHealthList, test)
 	int compIdA = compList.create(10);
 	int compIdB = compList.create(20);
 
-	EXPECT_EQ(10, compList.getInitialHealthAt(compIdA, head));
-	EXPECT_EQ(20, compList.getInitialHealthAt(compIdB, torso));
+	EXPECT_EQ(10, compList.getInitialHealthAt(compIdA, CompHealthList::head));
+	EXPECT_EQ(20, compList.getInitialHealthAt(compIdB, CompHealthList::torso));
 
-	compList.setHealthAt(compIdA, head, 5);
+	compList.setHealthAt(compIdA, CompHealthList::head, 5);
 	EXPECT_EQ(true, compList.isWounded(compIdA));
 	EXPECT_EQ(false, compList.isWounded(compIdB));
 }
@@ -28,4 +28,20 @@ TEST(SimpleComponentList, test)
 
 	compList.destroy(compIdA);
 	compList.destroy(compIdB);
+}
+
+TEST(InheritanceComponentList, test)
+{
+	InheritanceComponentList<ICompVisual> compList;
+	CompVisualSphere *sphereA = new CompVisualSphere();
+	sphereA->init(10);
+
+	CompVisualSphere *sphereB = new CompVisualSphere();
+	sphereB->init(20);
+
+	int sphereIdA = compList.add(sphereA);
+	int sphereIdB = compList.add(sphereB);
+
+	compList.destroy(sphereIdA);
+	compList.update(0);
 }
