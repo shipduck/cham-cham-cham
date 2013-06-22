@@ -16,6 +16,7 @@
 
 #include <sstream>
 
+#include <array>
 #include <list>
 #include <vector>
 #include <map>
