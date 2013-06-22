@@ -215,17 +215,11 @@ void DebugDrawManager::addAxis(const irr::core::matrix4 &xf,
 		bool depthEnable)
 {
 	typedef DebugDrawList_Axis3D ListType;
-	ListType *drawList = nullptr;
-	SR_ASSERT(duration >= 0);
-	if(duration == 0) {
-		drawList = &Field<ListType>(*this).ImmediateDrawList;
-	} else {
-		drawList = &Field<ListType>(*this).DurationDrawList;
-	}
+	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
-	drawList->XfList.push_back(xf);
-	drawList->ScaleList.push_back(size);
-	drawList->DepthEnableList.push_back(depthEnable);
+	drawList.XfList.push_back(xf);
+	drawList.ScaleList.push_back(size);
+	drawList.DepthEnableList.push_back(depthEnable);
 
 	Field<ListType>(*this).runValidateOnce(duration);
 }

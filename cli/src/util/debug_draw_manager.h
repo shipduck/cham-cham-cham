@@ -241,15 +241,23 @@ public:
 		const value_type &drawList = getList(duration);
 		if(duration > 0 && durationValidateRun) {
 			durationValidateRun = true;
+			bool validateResult = drawList.validate();
+			SR_ASSERT(validateResult == true);
+			
+			if(drawList.size() == DurationDrawList.size()) {
+				validateResult = false;
+			}
+			SR_ASSERT(validateResult == true);
+
+			return validateResult;
 		} else if(duration == 0 && immediateValidateRun) {
 			immediateValidateRun = true;
+			bool validateResult = drawList.validate();
+			SR_ASSERT(validateResult == true);
+			return validateResult;
 		} else {
 			return true;
 		}
-
-		bool validateResult = drawList.validate();
-		SR_ASSERT(validateResult == true);
-		return validateResult;
 	}
 };
 
