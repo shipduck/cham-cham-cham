@@ -53,8 +53,8 @@ int entrypoint(int argc, char* argv[])
 	gNormalFont14 = guienv->getFont("res/font_14.xml");
 
 	//simple scene framework
-	std::unique_ptr<Scene> scene(new SampleScene(device));
-	//std::unique_ptr<Scene> scene(new DebugDrawScene(device));
+	//std::unique_ptr<Scene> scene(new SampleScene(device));
+	std::unique_ptr<Scene> scene(new DebugDrawScene(device));
 	//std::unique_ptr<Scene> scene(new GameScene(device));
 	scene->setUp();
 

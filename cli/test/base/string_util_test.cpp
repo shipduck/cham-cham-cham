@@ -1,5 +1,5 @@
 ﻿// Ŭnicode please 
-#include "test_stdafx.h"
+#include "stdafx.h"
 #include "base/string_util.h"
 
 using std::string;

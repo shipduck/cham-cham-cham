@@ -26,6 +26,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include <type_traits>
+
 #include "irrlicht.h"
 #include <OVR.h>
 
@@ -45,6 +47,8 @@
 #include "Typelist.h"
 #include "HierarchyGenerators.h"
 
+// for unit test
+#include <gtest/gtest.h>
 #else
 #error "NEED PCH"
 #endif

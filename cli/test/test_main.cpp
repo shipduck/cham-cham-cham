@@ -1,5 +1,5 @@
 ﻿// Ŭnicode please 
-#include "test_stdafx.h"
+#include "stdafx.h"
 
 int main(int argc, char *argv[])
 {
