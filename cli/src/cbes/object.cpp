@@ -3,6 +3,7 @@
 #include "object.h"
 #include "world.h"
 #include "component_list.h"
+#include "sample_component.h"
 
 using namespace std;
 

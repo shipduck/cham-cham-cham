@@ -3,8 +3,7 @@
 #include "world.h"
 #include "object.h"
 #include "component_list.h"
-
-#include "Typelist.h"
+#include "sample_component.h"
 
 using namespace std;
 using namespace Loki;

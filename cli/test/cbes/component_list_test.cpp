@@ -1,6 +1,7 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
 #include "cbes/component_list.h"
+#include "cbes/sample_component.h"
 
 TEST(CompHealthList, test)
 {
@@ -43,4 +44,34 @@ TEST(InheritanceComponentList, test)
 	int sphereIdB = compList.add(sphereB);
 
 	compList.destroy(sphereIdA);
+}
+
+TEST(BaseComponentList, getFamilyId_getCompoonentId)
+{
+	{
+		typedef CompHealthList CompListType;
+		CompListType compList;
+		EXPECT_EQ(kFamilyHealth, CompListType::kFamily);
+		EXPECT_EQ(kFamilyHealth, compList.getFamilyId());
+		EXPECT_EQ(kCompHealth, (int)CompListType::kComp);
+		EXPECT_EQ(kCompHealth, compList.getComponentId());
+	}
+
+	{
+		typedef SimpleComponentList<CompHealth> CompListType;
+		CompListType compList;
+		EXPECT_EQ(kFamilySimpleHP, CompListType::kFamily);
+		EXPECT_EQ(kFamilySimpleHP, compList.getFamilyId());
+		EXPECT_EQ(kCompHealth, (int)CompListType::kComp);
+		EXPECT_EQ(kCompHealth, compList.getComponentId());
+	}
+
+	{
+		typedef InheritanceComponentList<ICompVisual> CompListType;
+		CompListType compList;
+		EXPECT_EQ(kFamilyVisual, CompListType::kFamily);
+		EXPECT_EQ(kFamilyVisual, compList.getFamilyId());
+		EXPECT_EQ(kCompNone, (int)CompListType::kComp);
+		EXPECT_EQ(kCompNone, compList.getComponentId());
+	}
 }
