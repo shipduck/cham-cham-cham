@@ -79,10 +79,11 @@ class ICompVisual : public BaseComponent {
 public:
 	enum {
 		kFamily = kFamilyVisual,
+		kComp = kCompNone,
 	};
 public:
 	virtual comp_id_type getFamilyId() const { return kFamily; }
-	virtual comp_id_type getComponentId() const { return kCompNone; }
+	virtual comp_id_type getComponentId() const { return kComp; }
 public:
 	virtual void render() const = 0;
 };

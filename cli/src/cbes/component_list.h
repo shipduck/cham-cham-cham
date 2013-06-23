@@ -23,10 +23,10 @@ public:
 	BaseComponentList(int poolSize=kDefaultPoolSize);
 	virtual ~BaseComponentList() {}
 
-	virtual void update(int ms) {}
+	virtual void update(int ms) = 0;
 
-	int create();
-	void destroy(int compId);
+	virtual int create();
+	virtual void destroy(int compId);
 
 	int remainPoolSize() const { return CompPool.size(); }
 
@@ -70,10 +70,37 @@ public:
 	virtual comp_id_type getComponentId() const { return CompCode; }
 };
 
+template<typename T, int Comp>
+struct ComponentListTypeHolder {
+	enum { kComp = Comp };
+	typedef std::vector<T> list_type;
+
+	static T *getComp(list_type &val, int idx) 
+	{
+		SR_ASSERT(idx >= 0 && idx < (int)val.size());
+		return &val[idx];	
+	}
+};
+
 template<typename T>
-class SimpleComponentList : public BaseComponentList {
+struct ComponentListTypeHolder<T, kCompNone> {
+	enum { kComp = kCompNone };
+	typedef std::vector<T*> list_type;
+
+	static T *getComp(list_type &val, int idx) 
+	{
+		SR_ASSERT(idx >= 0 && idx < (int)val.size());
+		return val[idx];	
+	}
+};
+
+
+template<typename T>
+class ObjectBasedComponentList : public BaseComponentList {
 public:
 	typedef T value_type;
+	typedef ComponentListTypeHolder<T, T::kComp> ListTypeHolder;
+
 	enum {
 		kFamily = T::kFamily,
 		kComp = T::kComp,
@@ -81,22 +108,35 @@ public:
 
 	static_assert(std::is_base_of<BaseComponent, T>::value == 1, "support only BaseComponent");
 	static_assert(kFamily > kFamilyNone && kFamily < cNumFamily, "not valid family code");
-	static_assert(kComp > kCompNone && kComp < cNumComp, "not valid comp code");
+	static_assert(kComp >= kCompNone && kComp < cNumComp, "not valid comp code");
 
 public:
 	virtual comp_id_type getFamilyId() const { return kFamily; }
 	virtual comp_id_type getComponentId() const { return kComp; }
 
 public:
-	SimpleComponentList(int poolSize=kDefaultPoolSize);
+	ObjectBasedComponentList(int poolSize=kDefaultPoolSize) 
+		: BaseComponentList(poolSize) { CompList.resize(poolSize); }
 	
-	T *getComp(int compId);
-	int create();
-	void destroy(int compId);
+	void clear();
 	void update(int ms);
+	T *getComp(int compId) { return ListTypeHolder::getComp(CompList, compId); }
+	virtual void destroy(int compId) = 0;
 
+protected:
+	typename ListTypeHolder::list_type CompList;
+};
+
+template<typename T>
+class SimpleComponentList : public ObjectBasedComponentList<T> {
 public:
-	std::vector<T> CompList;
+	typedef ObjectBasedComponentList<T> Parent;
+public:
+	SimpleComponentList(int poolSize=kDefaultPoolSize) : Parent(poolSize) {}
+	virtual ~SimpleComponentList() { clear(); }
+	
+	int create();
+	virtual void destroy(int compId);
 };
 
 
@@ -105,49 +145,43 @@ public:
 그래서 이 경우는 kCompNone을 사용해서 Family Type만 명확한거로 설정
 */
 template<typename T>
-class InheritanceComponentList : public BaseComponentList {
+class InheritanceComponentList : public ObjectBasedComponentList<T> {
 public:
-	typedef T value_type;
-	enum {
-		kFamily = T::kFamily,
-		kComp = kCompNone,
-	};
-
-	static_assert(std::is_base_of<BaseComponent, T>::value == 1, "support only BaseComponent");
-	static_assert(kFamily > kFamilyNone && kFamily < cNumFamily, "not valid family code");
+	typedef ObjectBasedComponentList<T> Parent;
 
 public:
-	virtual comp_id_type getComponentId() const { return kComp; }
-	virtual comp_id_type getFamilyId() const { return kFamily; }
-
-public:
-	InheritanceComponentList(int poolSize=kDefaultPoolSize);
-	~InheritanceComponentList();
+	InheritanceComponentList(int poolSize=kDefaultPoolSize) : Parent(poolSize) {}
+	virtual ~InheritanceComponentList() { clear(); }
 	
-	T *getComp(int compId);
 	int add(T *obj);
-	void destroy(int compId);
-	void update(int ms);
-
-public:
-	std::vector<T*> CompList;
+	virtual void destroy(int compId);
 };
 
 /////////////////////////////////////////
 // template implement
-
 template<typename T>
-SimpleComponentList<T>::SimpleComponentList(int poolSize)
-	: BaseComponentList(poolSize)
+void ObjectBasedComponentList<T>::clear()
 {
-	CompList.resize(poolSize);
+	for(size_t i = 0 ; i < ActiveList.size() ; ++i) {
+		int active = ActiveList[i];
+		if(active == false) {
+			continue;
+		}
+		destroy(i);
+	}
 }
 
 template<typename T>
-T *SimpleComponentList<T>::getComp(int compId)
+void ObjectBasedComponentList<T>::update(int ms)
 {
-	SR_ASSERT(compId >= 0 && compId < (int)CompList.size());
-	return &CompList[compId];
+	for(size_t i = 0 ; i < ActiveList.size() ; ++i) {
+		int active = ActiveList[i];
+		if(active == false) {
+			continue;
+		}
+		T *comp = getComp(i);
+		comp->update(ms);
+	}
 }
 
 template<typename T>
@@ -166,46 +200,7 @@ void SimpleComponentList<T>::destroy(int compId)
 	obj.shutDown();
 	BaseComponentList::destroy(compId);
 }
-	
-template<typename T>
-void SimpleComponentList<T>::update(int ms)
-{
-	for(size_t i = 0 ; i < ActiveList.size() ; ++i) {
-		int active = ActiveList[i];
-		if(active == false) {
-			continue;
-		}
-		T *comp = getComp(i);
-		comp->update(ms);
-	}
-}
 
-template<typename T>	
-InheritanceComponentList<T>::InheritanceComponentList(int poolSize)
-	: BaseComponentList(poolSize)
-{
-	CompList.resize(poolSize);
-}
-
-template<typename T>
-InheritanceComponentList<T>::~InheritanceComponentList() 
-{
-	for(size_t i = 0 ; i < ActiveList.size() ; ++i) {
-		int active = ActiveList[i];
-		if(active == false) {
-			continue;
-		}
-		T *comp = getComp(i);
-		delete(comp);
-	}
-}
-
-template<typename T>
-T *InheritanceComponentList<T>::getComp(int compId)
-{
-	SR_ASSERT(compId >= 0 && compId < (int)CompList.size());
-	return CompList[compId];
-}
 
 template<typename T>
 int InheritanceComponentList<T>::add(T *obj)
@@ -223,17 +218,4 @@ void InheritanceComponentList<T>::destroy(int compId)
 	obj->shutDown();
 	delete(obj);
 	BaseComponentList::destroy(compId);
-}
-
-template<typename T>
-void InheritanceComponentList<T>::update(int ms)
-{
-	for(size_t i = 0 ; i < ActiveList.size() ; ++i) {
-		int active = ActiveList[i];
-		if(active == false) {
-			continue;
-		}
-		T *comp = getComp(i);
-		comp->update(ms);
-	}
 }

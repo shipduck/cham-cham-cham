@@ -3,6 +3,8 @@
 #include "cbes/component_list.h"
 #include "cbes/sample_component.h"
 
+using namespace std;
+
 TEST(BaseComponentList, getFamilyId_getCompoonentId)
 {
 	{
@@ -118,4 +120,24 @@ TEST(InheritanceComponentList, test)
 	int sphereIdB = compList.add(sphereB);
 
 	compList.destroy(sphereIdA);
+}
+
+TEST(ComponentListTypeHolder, list_type)
+{
+	{
+		typedef ICompVisual CompType;
+		typedef ComponentListTypeHolder<CompType, CompType::kComp> HolderType;
+		typedef vector<CompType*> ExpectType;
+
+		static_assert(HolderType::kComp == kCompNone, "not valid component type");
+		static_assert(std::is_same<HolderType::list_type, ExpectType>::value == 1, "expected not same");
+	}
+	{
+		typedef CompHealth CompType;
+		typedef ComponentListTypeHolder<CompType, CompType::kComp> HolderType;
+		typedef vector<CompType> ExpectType;
+
+		static_assert(HolderType::kComp != kCompNone, "not valid component type");
+		static_assert(std::is_same<HolderType::list_type, ExpectType>::value == 1, "expected not same");
+	}
 }
