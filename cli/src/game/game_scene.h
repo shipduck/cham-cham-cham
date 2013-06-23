@@ -20,8 +20,9 @@ public:
 	irr::scene::ITerrainSceneNode* initTerrain();
 
 	void initTargetableObject();
-	void initWallObject();
+
 	irr::scene::ISceneNode *initColosseum();
+	void initObstacleList();
 
 private:
 	irr::scene::IBillboardSceneNode *bill;

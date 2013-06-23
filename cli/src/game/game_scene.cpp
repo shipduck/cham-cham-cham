@@ -11,18 +11,9 @@ using namespace core;
 using namespace scene;
 
 enum {
-    // I use this ISceneNode ID to indicate a scene node that is
-    // not pickable by getSceneNodeAndCollisionPointFromRay()
     ID_IsNotPickable = 0,
-
-    // I use this flag in ISceneNode IDs to indicate that the
-    // scene node can be picked by ray selection.
-    IDFlag_IsPickable = 1 << 0,
-
-    // I use this flag in ISceneNode IDs to indicate that the
-    // scene node can be highlighted.  In this example, the
-    // homonids can be highlighted, but the level mesh can't.
-    IDFlag_IsHighlightable = 1 << 1
+    IDFlag_Wall = 1 << 0,
+	IDFlag_IsPickable = 1 << 1,
 };
 
 
@@ -51,8 +42,8 @@ void GameScene::setUp()
 	initSky();
 	initCam();
 	//initTargetableObject();
-	//initWallObject();
 	initColosseum();
+	initObstacleList();
 	
 	{
 		auto terrain = initTerrain();
@@ -180,7 +171,7 @@ irr::scene::ISceneNode *GameScene::initColosseum()
 			height = wallHeightLow;
 		}
 		float wallWidth = rad * radius * 0.1f;
-		node->setScale(vector3df(0.1, height, wallWidth));
+		node->setScale(vector3df(0.1f, height, wallWidth));
 
 		//벽은 못지나간다
 		auto selector = smgr->createTriangleSelector(node->getMesh(), node);
@@ -199,34 +190,45 @@ irr::scene::ISceneNode *GameScene::initColosseum()
 	return root;
 }
 
-void GameScene::initWallObject()
+/*
+충돌 테스트용 객체를 적절히 배치
+이런것도 지원한다 라는걸 보여주는것이 목표니까 간단하게 구현
+진짜 객체로 감싸는건 나중에
+*/
+void GameScene::initObstacleList()
 {
-	//충돌 테스트용 객체를 적절히 배치
 	ISceneManager* smgr = Device->getSceneManager();
+	IVideoDriver* driver = Device->getVideoDriver();
 
 	SMaterial material;
 	material.Lighting = false;
 	material.AmbientColor = SColor(255, 255, 0, 0);
+	material.setTexture(0, driver->getTexture("ext/irrlicht/media/wall.jpg"));
 
-	for(float x = 20 ; x <= 1000 ; x += 100) {
-		for(float z = 20 ; z <= 1000 ; z += 100) {
-			auto node = smgr->addCubeSceneNode();
-			node->setPosition(vector3df(x, 0, z));
-			node->getMaterial(0) = material;
+	std::vector<vector3df> posList;
+	posList.push_back(vector3df(-100, 0, 100));
+	posList.push_back(vector3df(100, 0, 100));
+	posList.push_back(vector3df(100, 0, -100));
+	posList.push_back(vector3df(-100, 0, -100));
 
-			auto selector = smgr->createTriangleSelector(node->getMesh(), node);
-			node->setTriangleSelector(selector);
+	for(auto pos : posList) {
+		auto node = smgr->addCubeSceneNode();
+		node->setPosition(pos);
+		node->getMaterial(0) = material;
+
+		node->setScale(vector3df(2, 5, 2));
+
+		auto selector = smgr->createTriangleSelector(node->getMesh(), node);
+		node->setTriangleSelector(selector);
 				
-			// create collision response animator and attach it to the camera
-			scene::ISceneNodeAnimator* anim = smgr->createCollisionResponseAnimator(
-				selector, camNode, core::vector3df(10, 10, 10),
-				core::vector3df(0, 0, 0),
-				core::vector3df(0, 0, 0));
+		scene::ISceneNodeAnimator* anim = smgr->createCollisionResponseAnimator(
+			selector, camNode, core::vector3df(10, 10, 10),
+			core::vector3df(0, 0, 0),
+			core::vector3df(0, 0, 0));
 				
-			camNode->addAnimator(anim);
-			anim->drop();
-			selector->drop();
-		}
+		camNode->addAnimator(anim);
+		anim->drop();
+		selector->drop();
 	}
 }
 
