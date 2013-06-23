@@ -159,7 +159,7 @@ public:
 	typedef ObjectBasedComponentList<T> Parent;
 public:
 	SimpleComponentList(int poolSize=kDefaultPoolSize) : Parent(poolSize) {}
-	virtual ~SimpleComponentList() { clear(); }
+	virtual ~SimpleComponentList() { Parent::clear(); }
 	
 	int create();
 	virtual void destroy(int compId);
@@ -177,7 +177,7 @@ public:
 
 public:
 	InheritanceComponentList(int poolSize=kDefaultPoolSize) : Parent(poolSize) {}
-	virtual ~InheritanceComponentList() { clear(); }
+	virtual ~InheritanceComponentList() { Parent::clear(); }
 	
 	int add(T *obj);
 	virtual void destroy(int compId);
@@ -214,7 +214,7 @@ template<typename T>
 int SimpleComponentList<T>::create()
 {
 	int compId = BaseComponentList::create();
-	T &obj = CompList[compId];
+	T &obj = Parent::CompList[compId];
 	obj.setUp();
 	return compId;
 }
@@ -222,7 +222,7 @@ int SimpleComponentList<T>::create()
 template<typename T>
 void SimpleComponentList<T>::destroy(int compId)
 {
-	T &obj = CompList[compId];
+	T &obj = Parent::CompList[compId];
 	obj.shutDown();
 	BaseComponentList::destroy(compId);
 }
@@ -232,7 +232,7 @@ template<typename T>
 int InheritanceComponentList<T>::add(T *obj)
 {
 	int compId = BaseComponentList::create();
-	CompList[compId] = obj;
+	Parent::CompList[compId] = obj;
 	obj->setUp();
 	return compId;
 }
@@ -240,7 +240,7 @@ int InheritanceComponentList<T>::add(T *obj)
 template<typename T>
 void InheritanceComponentList<T>::destroy(int compId)
 {
-	T *obj = CompList[compId];
+	T *obj = Parent::CompList[compId];
 	obj->shutDown();
 	delete(obj);
 	BaseComponentList::destroy(compId);

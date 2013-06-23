@@ -127,7 +127,7 @@ struct DebugDrawListT : public GenSimpleHierarchy<TList> {
 	typedef DebugDrawListPolicy<TList> Policy;
 	void clear() { Policy::clear(*this); }
 	void pop_back() { Policy::pop_back(*this); }
-	int size() const { return ((TList::Head*)this)->size(); }
+	int size() const { return ((typename TList::Head*)this)->size(); }
 	bool validate() const { return Policy::validate(*this); }
 };
 
