@@ -55,7 +55,7 @@ void GameScene::setUp()
 	
 	{
 		auto terrain = initTerrain();
-
+	
 		// create triangle selector for the terrain	
 		auto selector = smgr->createTerrainTriangleSelector(terrain, 0);
 		terrain->setTriangleSelector(selector);
@@ -65,9 +65,10 @@ void GameScene::setUp()
 			selector, camNode, core::vector3df(10, 10, 10),
 			core::vector3df(0, -10, 0),
 			core::vector3df(0, 10, 0));
-		selector->drop();
 		camNode->addAnimator(anim);
+
 		anim->drop();
+		selector->drop();
 	}
 
 	//선택한거 표시용 billboard
@@ -95,6 +96,7 @@ void GameScene::initCam()
 	camNode->setPosition(core::vector3df(0, 100, 0));
 	camNode->setTarget(core::vector3df(0, 0, 1));
 	camNode->setFarValue(1000.0f);
+	hmdCam->drop();
 }
 
 void GameScene::initTargetableObject()
@@ -159,10 +161,10 @@ irr::scene::ITerrainSceneNode* GameScene::initTerrain()
 
 	// 하이트맵의 가운데 == 0,0,0이 되도록 만든다. 게임로직을 시작할떄
 	// 중심에 모아놔야 디버깅하기 쉬우니까
+	float scaleVal = 20.0f;
 	auto position = core::vector3df(0.f, 0.0f, 0.f);
 	auto rotation = core::vector3df(0.f, 0.f, 0.f);
-	//auto scale = core::vector3df(40.0f, 1.0f, 40.0f);
-	auto scale = core::vector3df(1.0f, 1.0f, 1.0f);
+	auto scale = core::vector3df(scaleVal, 1.0f, scaleVal);
 	auto vertexColor = video::SColor(255, 255, 255, 255);	
 	s32 maxLOD = 5;
 	E_TERRAIN_PATCH_SIZE patchSize = scene::ETPS_17;
@@ -184,6 +186,9 @@ irr::scene::ITerrainSceneNode* GameScene::initTerrain()
 		smoothFactor
 		);
 	SR_ASSERT(terrain != nullptr);
+
+	auto terrainCenter = terrain->getTerrainCenter();
+	terrain->setPosition(-terrainCenter);
 
 	terrain->setMaterialFlag(video::EMF_LIGHTING, false);
 	terrain->setMaterialTexture(0,
@@ -210,9 +215,6 @@ void GameScene::initSky()
 void GameScene::shutDown()
 {
 	Scene::shutDown();
-
-	//delete(hmdCam);
-	//hmdCam = nullptr;
 }
 void GameScene::draw()
 {
@@ -268,6 +270,4 @@ void GameScene::update(int ms)
 	auto camPosMsg = (wformat(L"CamPos : %.2f, %.2f, %.2f") % camPos.X % camPos.Y % camPos.Z).str();
 	SColor white(255, 255, 255, 255);
 	gDebugDrawMgr->addString(vector2di(0, 0), camPosMsg, white);
-
-	
 }
