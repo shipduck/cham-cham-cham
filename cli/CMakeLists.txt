@@ -63,6 +63,10 @@ APPEND_LINK_LIBS( alut )
 
 # Add Ext Inlcude
 INCLUDE_DIRECTORIES( ${DOKURO_EXT_DIR}/loki )
+
+# Add boost Include
+INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/boost )
+
 #########################################################
 
 # Set Include Path

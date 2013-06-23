@@ -262,14 +262,12 @@ void GameScene::update(int ms)
 		bill->setVisible(true);
 	}
 
-	//카메라 현재 위치 찍기 + TODO 소수점 정밀도 조정하기
+	//카메라 현재 위치 찍기
+	using boost::wformat;
 	auto camPos = camNode->getPosition();
-	std::wostringstream oss;
-	oss << "Cam Pos : ";
-	oss << camPos.X << ", ";
-	oss << camPos.Y << ", ";
-	oss << camPos.Z;
-	std::wstring camPosMsg(oss.str());
+	auto camPosMsg = (wformat(L"CamPos : %.2f, %.2f, %.2f") % camPos.X % camPos.Y % camPos.Z).str();
 	SColor white(255, 255, 255, 255);
 	gDebugDrawMgr->addString(vector2di(0, 0), camPosMsg, white);
+
+	
 }

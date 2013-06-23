@@ -46,9 +46,12 @@
 #include <AL/alc.h>
 #endif
 
-
+// loki
 #include "Typelist.h"
 #include "HierarchyGenerators.h"
+
+// boost
+#include <boost/format.hpp>
 
 // for unit test
 #include <gtest/gtest.h>

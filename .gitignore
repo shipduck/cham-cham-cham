@@ -41,3 +41,6 @@ ext/*
 config.h
 CMakeTmp/
 admin/
+
+# boost
+cli/boost
