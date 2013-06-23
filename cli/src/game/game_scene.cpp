@@ -73,14 +73,14 @@ void GameScene::initSky()
 
 	// create skybox and skydome
 	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
-	scene::ISceneNode* skybox = smgr->addSkyBoxSceneNode(
-		driver->getTexture("ext/irrlicht/media/irrlicht2_up.jpg"),
-		driver->getTexture("ext/irrlicht/media/irrlicht2_dn.jpg"),
-		driver->getTexture("ext/irrlicht/media/irrlicht2_lf.jpg"),
-		driver->getTexture("ext/irrlicht/media/irrlicht2_rt.jpg"),
-		driver->getTexture("ext/irrlicht/media/irrlicht2_ft.jpg"),
-		driver->getTexture("ext/irrlicht/media/irrlicht2_bk.jpg"));
-	//scene::ISceneNode* skydome=smgr->addSkyDomeSceneNode(driver->getTexture("ext/irrlicht/media/skydome.jpg"),16,8,0.95f,2.0f);
+	//scene::ISceneNode* skybox = smgr->addSkyBoxSceneNode(
+	//	driver->getTexture("ext/irrlicht/media/irrlicht2_up.jpg"),
+	//	driver->getTexture("ext/irrlicht/media/irrlicht2_dn.jpg"),
+	//	driver->getTexture("ext/irrlicht/media/irrlicht2_lf.jpg"),
+	//	driver->getTexture("ext/irrlicht/media/irrlicht2_rt.jpg"),
+	//	driver->getTexture("ext/irrlicht/media/irrlicht2_ft.jpg"),
+	//	driver->getTexture("ext/irrlicht/media/irrlicht2_bk.jpg"));
+	scene::ISceneNode* skydome = smgr->addSkyDomeSceneNode(driver->getTexture("ext/irrlicht/media/skydome.jpg"),16,8,0.95f,2.0f);
 	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, true);
 }
 
