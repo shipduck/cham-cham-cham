@@ -102,7 +102,7 @@ void SceneNodeAnimatorCameraHMD::animateNode(ISceneNode* node, u32 timeMs)
 
 	YView = 0.0f; //temp
 
-	const f32 DEAD_ZONE = 0.12f;
+	const f32 DEAD_ZONE = 0.20f;
 
 	if(fabs(XMovement) < DEAD_ZONE) {
 		XMovement = 0.0f;
