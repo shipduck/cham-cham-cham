@@ -30,3 +30,8 @@ void BaseComponentList::destroy(int compId)
 	CompPool.push_back(compId);
 	ActiveList[compId] = 0;
 }
+
+void BaseComponentList::onMessage(int compId, const BaseMessage *msg)
+{
+	MsgHandler.HandleMsg(compId, msg);
+}

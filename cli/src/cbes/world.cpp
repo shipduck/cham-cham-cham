@@ -25,8 +25,12 @@ template<typename T, typename U>
 struct CompListFunctor< Typelist<T, U> > {
 	static void setUp(World *world)
 	{
+		static_assert(std::is_base_of<BaseComponentList, T>::value == 1, "not valid component list class");
+
 		auto familyCode = T::kFamily;
-		world->setCompList(familyCode, new T());
+		T *compList = new T();
+		compList->setUp();
+		world->setCompList(familyCode, compList);
 		CompListFunctor<U>::setUp(world);
 	}
 };

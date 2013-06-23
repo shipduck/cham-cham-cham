@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "cbes/component_list.h"
 #include "cbes/sample_component.h"
+#include "cbes/message.h"
 
 using namespace std;
 
@@ -140,4 +141,22 @@ TEST(ComponentListTypeHolder, list_type)
 		static_assert(HolderType::kComp != kCompNone, "not valid component type");
 		static_assert(std::is_same<HolderType::list_type, ExpectType>::value == 1, "expected not same");
 	}
+}
+
+TEST(CompHealthList, onMessage)
+{
+	CompHealthList compList;
+	compList.setUp();
+
+	int compIdA = compList.create(1);
+	int compIdB = compList.create(1);
+
+	EXPECT_EQ(1, compList.getHealthAt(compIdA, CompHealthList::head));
+	EXPECT_EQ(1, compList.getHealthAt(compIdB, CompHealthList::head));
+
+	DestroyMessage msg = DestroyMessage::create(compIdA);
+	compList.onMessage(compIdA, &msg);
+
+	EXPECT_EQ(0, compList.getHealthAt(compIdA, CompHealthList::head));
+	EXPECT_EQ(1, compList.getHealthAt(compIdB, CompHealthList::head));
 }

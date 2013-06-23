@@ -4,7 +4,7 @@
 
 
 CompHealthProxy::CompHealthProxy()
-	: Active(nullptr)
+	: Active(false)
 {
 	std::fill(InitialHP.begin(), InitialHP.end(), nullptr);
 	std::fill(CurrentHP.begin(), CurrentHP.end(), nullptr);
@@ -30,7 +30,31 @@ int CompHealthList::create(const healt_value_t hp)
 	return compId;
 }
 
+void CompHealthList::initMsgHandler()
+{
+	registerMsgFunc(this, &CompHealthList::onDestroyMessage);
+}
+void CompHealthList::onDestroyMessage(int compId, DestroyMessage *msg)
+{
+	//component message 사용 예제 코드
+	CompHealthProxy comp = getComp(compId);
+	if(comp.Active == false) {
+		return;
+	}
 
+	for(int i = 0 ; i < cNumBodyParts ; ++i) {
+		*comp.CurrentHP[i] = 0;
+	}
+}
+
+void CompHealthList::setUp()
+{
+	initMsgHandler();
+}
+
+void CompHealthList::shutDown()
+{
+}
 
 void CompHealthList::update(int ms)
 {
@@ -40,10 +64,13 @@ CompHealthProxy CompHealthList::getComp(int compId) const
 {
 	CompHealthProxy comp;
 	if(ActiveList[compId] == true) {
+		comp.Active = true;
 		comp.InitialHP[head] = const_cast<int*>(&InitialHPList_Head[compId]);
 		comp.InitialHP[torso] = const_cast<int*>(&InitialHPList_Torso[compId]);
 		comp.CurrentHP[head] = const_cast<int*>(&CurrentHPList_Head[compId]);
 		comp.CurrentHP[torso] = const_cast<int*>(&CurrentHPList_Torso[compId]);
+	} else {
+		comp.Active = false;
 	}
 	return comp;
 }

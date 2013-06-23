@@ -1,11 +1,12 @@
 ﻿// Ŭnicode please 
 #pragma once
 #include "component_list.h"
+#include "message.h"
 
 class CompHealthProxy {
 public:
 	CompHealthProxy();
-	int *Active;
+	bool Active;
 	std::array<int*, 2> InitialHP;
 	std::array<int*, 2> CurrentHP;
 };
@@ -25,6 +26,11 @@ public:
 	int create(const healt_value_t hp);
 
 	virtual void update(int ms);
+	virtual void setUp();
+	virtual void shutDown();
+
+	virtual void initMsgHandler();
+	void onDestroyMessage(int compId, DestroyMessage *msg);
 
 	//Health interface
 public:

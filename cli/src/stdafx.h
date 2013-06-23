@@ -9,6 +9,8 @@
 #include <cassert>
 #include <climits>
 
+#include <typeinfo>
+
 #include <locale>   // wstring_convert
 #include <codecvt>  // codecvt_utf8
 #include <iostream> // cout

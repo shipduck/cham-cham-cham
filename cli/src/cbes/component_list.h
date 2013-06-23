@@ -2,6 +2,7 @@
 #pragma once
 
 #include "cbes_globals.h"
+#include "message_handler.h"
 
 const int kDefaultPoolSize = 32;
 
@@ -24,11 +25,25 @@ public:
 	virtual ~BaseComponentList() {}
 
 	virtual void update(int ms) = 0;
+	virtual void setUp() = 0;
+	virtual void shutDown() = 0;
 
 	virtual int create();
 	virtual void destroy(int compId);
 
 	int remainPoolSize() const { return CompPool.size(); }
+
+public:
+	virtual void initMsgHandler() = 0;
+	virtual void onMessage(int compId, const BaseMessage *msg);
+
+protected:
+	template<typename T, typename MsgT>
+	void registerMsgFunc(T *instance, void (T::*mem_fn)(int, MsgT*)) {
+		MsgHandler.RegisterMessageFunc(instance, mem_fn);
+	}
+	MessageHandler MsgHandler;
+
 
 protected:
 	std::vector<int> CompPool;
@@ -122,6 +137,14 @@ public:
 	void update(int ms);
 	T *getComp(int compId) { return ListTypeHolder::getComp(CompList, compId); }
 	virtual void destroy(int compId) = 0;
+
+	// 메세지 처리가 필요한 컴포넌트 리스트의 경우
+	// 해당 클래스에 관련된것을 상속한 다음에 메세지 관련 함수를 구현하면 된다
+	// CompHealthList를 참고
+	virtual void initMsgHandler() { /* TODO implement */ }
+
+	virtual void setUp() { initMsgHandler(); }
+	virtual void shutDown() { }
 
 protected:
 	typename ListTypeHolder::list_type CompList;
