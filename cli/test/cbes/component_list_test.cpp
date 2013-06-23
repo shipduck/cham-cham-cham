@@ -3,6 +3,80 @@
 #include "cbes/component_list.h"
 #include "cbes/sample_component.h"
 
+TEST(BaseComponentList, getFamilyId_getCompoonentId)
+{
+	{
+		typedef CompHealthList CompListType;
+		CompListType compList;
+		const int family = kFamilyHealth;
+		const int comp = kCompHealth;
+		EXPECT_EQ(family, CompListType::kFamily);
+		EXPECT_EQ(family, compList.getFamilyId());
+		EXPECT_EQ(comp, (int)CompListType::kComp);
+		EXPECT_EQ(comp, compList.getComponentId());
+	}
+
+	{
+		typedef SimpleComponentList<CompHealth> CompListType;
+		CompListType compList;
+		const int family = kFamilySimpleHP;
+		const int comp = kCompHealth;
+		EXPECT_EQ(family, CompListType::kFamily);
+		EXPECT_EQ(family, compList.getFamilyId());
+		EXPECT_EQ(comp, (int)CompListType::kComp);
+		EXPECT_EQ(comp, compList.getComponentId());
+	}
+
+	{
+		typedef InheritanceComponentList<ICompVisual> CompListType;
+		CompListType compList;
+		const int family = kFamilyVisual;
+		const int comp = kCompNone;
+		EXPECT_EQ(family, CompListType::kFamily);
+		EXPECT_EQ(family, compList.getFamilyId());
+		EXPECT_EQ(comp, (int)CompListType::kComp);
+		EXPECT_EQ(comp, compList.getComponentId());
+	}
+}
+
+TEST(BaseComponentList, remainPoolSize)
+{
+	{
+		CompHealthList compList;
+		int origPoolSize = compList.remainPoolSize();
+
+		int compIdA = compList.create(10);
+		EXPECT_EQ(origPoolSize - 1, compList.remainPoolSize());
+
+		compList.destroy(compIdA);
+		EXPECT_EQ(origPoolSize, compList.remainPoolSize());
+	}
+	{
+		SimpleComponentList<CompHealth> compList;
+		int origPoolSize = compList.remainPoolSize();
+
+		int compIdA = compList.create();
+		compList.getComp(compIdA)->init(10);
+		EXPECT_EQ(origPoolSize - 1, compList.remainPoolSize());
+
+		compList.destroy(compIdA);
+		EXPECT_EQ(origPoolSize, compList.remainPoolSize());
+
+	}
+	{
+		InheritanceComponentList<ICompVisual> compList;
+		int origPoolSize = compList.remainPoolSize();
+
+		CompVisualSphere *sphereA = new CompVisualSphere();
+		sphereA->init(10);
+		int sphereIdA = compList.add(sphereA);
+		EXPECT_EQ(origPoolSize - 1, compList.remainPoolSize());
+
+		compList.destroy(sphereIdA);
+		EXPECT_EQ(origPoolSize, compList.remainPoolSize());
+	}
+}
+
 TEST(CompHealthList, test)
 {
 	CompHealthList compList;
@@ -44,34 +118,4 @@ TEST(InheritanceComponentList, test)
 	int sphereIdB = compList.add(sphereB);
 
 	compList.destroy(sphereIdA);
-}
-
-TEST(BaseComponentList, getFamilyId_getCompoonentId)
-{
-	{
-		typedef CompHealthList CompListType;
-		CompListType compList;
-		EXPECT_EQ(kFamilyHealth, CompListType::kFamily);
-		EXPECT_EQ(kFamilyHealth, compList.getFamilyId());
-		EXPECT_EQ(kCompHealth, (int)CompListType::kComp);
-		EXPECT_EQ(kCompHealth, compList.getComponentId());
-	}
-
-	{
-		typedef SimpleComponentList<CompHealth> CompListType;
-		CompListType compList;
-		EXPECT_EQ(kFamilySimpleHP, CompListType::kFamily);
-		EXPECT_EQ(kFamilySimpleHP, compList.getFamilyId());
-		EXPECT_EQ(kCompHealth, (int)CompListType::kComp);
-		EXPECT_EQ(kCompHealth, compList.getComponentId());
-	}
-
-	{
-		typedef InheritanceComponentList<ICompVisual> CompListType;
-		CompListType compList;
-		EXPECT_EQ(kFamilyVisual, CompListType::kFamily);
-		EXPECT_EQ(kFamilyVisual, compList.getFamilyId());
-		EXPECT_EQ(kCompNone, (int)CompListType::kComp);
-		EXPECT_EQ(kCompNone, compList.getComponentId());
-	}
 }

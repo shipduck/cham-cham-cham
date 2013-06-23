@@ -3,6 +3,8 @@
 
 #include "cbes_globals.h"
 
+const int kDefaultPoolSize = 32;
+
 class IFamilyComponentIdSupport {
 public:
 	virtual comp_id_type getFamilyId() const = 0;
@@ -18,13 +20,15 @@ public:
 
 class BaseComponentList : public IFamilyComponentIdSupport {
 public:
-	BaseComponentList(int poolSize=32);
+	BaseComponentList(int poolSize=kDefaultPoolSize);
 	virtual ~BaseComponentList() {}
 
 	virtual void update(int ms) {}
 
 	int create();
 	void destroy(int compId);
+
+	int remainPoolSize() const { return CompPool.size(); }
 
 protected:
 	std::vector<int> CompPool;
@@ -60,7 +64,7 @@ public:
 	};
 
 public:
-	BaseComponentListT(int poolSize=32) : BaseComponentList(poolSize) {}
+	BaseComponentListT(int poolSize=kDefaultPoolSize) : BaseComponentList(poolSize) {}
 
 	virtual comp_id_type getFamilyId() const { return FamilyCode; }
 	virtual comp_id_type getComponentId() const { return CompCode; }
@@ -84,7 +88,7 @@ public:
 	virtual comp_id_type getComponentId() const { return kComp; }
 
 public:
-	SimpleComponentList(int poolSize=32);
+	SimpleComponentList(int poolSize=kDefaultPoolSize);
 	
 	T *getComp(int compId);
 	int create();
@@ -117,7 +121,7 @@ public:
 	virtual comp_id_type getFamilyId() const { return kFamily; }
 
 public:
-	InheritanceComponentList(int poolSize=32);
+	InheritanceComponentList(int poolSize=kDefaultPoolSize);
 	~InheritanceComponentList();
 	
 	T *getComp(int compId);

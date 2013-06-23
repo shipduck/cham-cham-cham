@@ -17,7 +17,7 @@ BaseComponentList::BaseComponentList(int poolSize)
 }
 int BaseComponentList::create()
 {
-	SR_ASSERT(CompPool.empty() == false);
+	SR_ASSERT(remainPoolSize() > 0);
 	int compId = CompPool.back();
 	CompPool.pop_back();
 	ActiveList[compId] = 1;
