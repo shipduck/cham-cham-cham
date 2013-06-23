@@ -18,6 +18,7 @@ public:
 	virtual void initCam();
 	virtual void initSky();
 private:
+	irr::scene::IBillboardSceneNode *bill;
 	irr::scene::ICameraSceneNode* camNode;
 	SceneNodeAnimatorCameraHMD *hmdCam;
 };
