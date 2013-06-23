@@ -23,7 +23,11 @@ BaseComponentList *Object::getCompList(comp_id_type familyType)
 }
 void Object::setComponent(comp_id_type familyType, int compId)
 {
+	SR_ASSERT(compId >= 0);
 	CompIdList[familyType] = compId;
+
+	//component가 object에 바로 접근할 수 있도록 연결
+	WorldPtr->getCompList(familyType)->registerObject(compId, this);
 }
 bool Object::hasComponent(comp_id_type familyType) const
 {

@@ -27,6 +27,8 @@ public:
 	virtual void update(int ms) = 0;
 	virtual void setUp() = 0;
 	virtual void shutDown() = 0;
+	void registerObject(int compId, Object *obj);
+	Object *getGameObject(int compId) { return GameObjectList[compId]; }
 
 	virtual int create();
 	virtual void destroy(int compId);
@@ -48,6 +50,7 @@ protected:
 protected:
 	std::vector<int> CompPool;
 	std::vector<bool> ActiveList;
+	std::vector<Object*> GameObjectList;
 };
 
 template<int FamilyCode, int CompCode>

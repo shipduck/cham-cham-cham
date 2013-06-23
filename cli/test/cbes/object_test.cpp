@@ -35,6 +35,22 @@ TEST(Object, createComponent)
 	EXPECT_EQ(true, obj->hasComponent(kFamilyVisual));
 }
 
+//component id를 가지고 해당 컴포넌트를 소유하는 object 얻기
+TEST(Object, componentObjectConnect)
+{
+	World world;
+	Object *obj = world.create();
+	
+	const int family = kFamilySimpleHP;
+	SimpleHPCompCreator creator(obj);
+	int compId = creator.create(10);
+	EXPECT_EQ(obj, world.getCompList(family)->getGameObject(compId));
+		
+	obj->removeComponent(kFamilySimpleHP);
+	EXPECT_EQ(nullptr, world.getCompList(family)->getGameObject(compId));
+}
+
+
 TEST(Object, removeComponent)
 {
 	World world;
