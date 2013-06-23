@@ -52,6 +52,7 @@ void GameScene::setUp()
 	initCam();
 	//initTargetableObject();
 	//initWallObject();
+	initColosseum();
 	
 	{
 		auto terrain = initTerrain();
@@ -121,6 +122,81 @@ void GameScene::initTargetableObject()
 			selector->drop();
 		}
 	}
+}
+
+irr::scene::ISceneNode *GameScene::initColosseum()
+{
+	ISceneManager* smgr = Device->getSceneManager();
+	IVideoDriver* driver = Device->getVideoDriver();
+
+	float radius = 500;
+	const int numSegment = 32;
+	float rad = 2 * PI / numSegment;
+	float wallHeightHigh = 60;
+	float wallHeightLow = 50;
+
+	struct WallSegment {
+		std::array<float, 2> P1;
+		std::array<float, 2> P2;
+		float rot;
+	};
+
+	std::array<WallSegment, numSegment> segmentList;
+	for(int i = 0 ; i < numSegment ; i++) {
+		int a = i;
+		int b = (i + 1) % numSegment;
+
+		WallSegment &seg = segmentList[i];
+		seg.P1[0] = radius * cos(rad * a);
+		seg.P1[1] = radius * sin(rad * a);
+		seg.P2[0] = radius * cos(rad * b);
+		seg.P2[1] = radius * sin(rad * b);
+		seg.rot = (a + b) * 0.5f * rad;
+	}
+
+	//create scene node
+	auto root = smgr->addEmptySceneNode();
+
+	SMaterial material;
+	material.setTexture(0, driver->getTexture("ext/irrlicht/media/wall.bmp"));
+	material.Lighting = false;
+
+	for(int i = 0 ; i < numSegment ; ++i) {
+		const WallSegment &seg = segmentList[i];
+
+		float x = (seg.P1[0] + seg.P2[0]) * 0.5f;
+		float z = (seg.P1[1] + seg.P2[1]) * 0.5f;
+
+		auto node = smgr->addCubeSceneNode(10.0f, root);
+		node->setPosition(vector3df(x, 0, z));
+		float deg = irr::core::radToDeg(seg.rot);
+		node->setRotation(vector3df(0, -deg, 0));
+
+		node->getMaterial(0) = material;
+
+		//높이를 다르게 하면 벽이 톱니바퀴같은 느낌이 될거다
+		float height = wallHeightHigh;
+		if(i % 2 == 0) {
+			height = wallHeightLow;
+		}
+		float wallWidth = rad * radius * 0.1f;
+		node->setScale(vector3df(0.1, height, wallWidth));
+
+		//벽은 못지나간다
+		auto selector = smgr->createTriangleSelector(node->getMesh(), node);
+		node->setTriangleSelector(selector);
+				
+		// create collision response animator and attach it to the camera
+		scene::ISceneNodeAnimator* anim = smgr->createCollisionResponseAnimator(
+			selector, camNode, core::vector3df(10, 10, 10),
+			core::vector3df(0, 0, 0),
+			core::vector3df(0, 0, 0));
+				
+		camNode->addAnimator(anim);
+		anim->drop();
+		selector->drop();
+	}
+	return root;
 }
 
 void GameScene::initWallObject()

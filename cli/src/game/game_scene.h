@@ -21,6 +21,8 @@ public:
 
 	void initTargetableObject();
 	void initWallObject();
+	irr::scene::ISceneNode *initColosseum();
+
 private:
 	irr::scene::IBillboardSceneNode *bill;
 	irr::scene::ICameraSceneNode* camNode;
