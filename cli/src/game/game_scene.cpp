@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "game_scene.h"
 #include "scene_helper.h"
+#include "util/debug_draw_manager.h"
 
 using namespace irr;
 using namespace video;
@@ -47,49 +48,26 @@ void GameScene::setUp()
 	ISceneManager* smgr = Device->getSceneManager();
 	IGUIEnvironment* guienv = Device->getGUIEnvironment();
 
-	guienv->addStaticText(L"Project::Dokuro", rect<s32>(10,10,260,22), true);
-
 	initSky();
 	initCam();
-
-	//충돌 테스트용 객체를 적절히 배치
+	//initTargetableObject();
+	//initWallObject();
+	
 	{
-		SMaterial material;
-		material.Lighting = false;
-		material.AmbientColor = SColor(255, 255, 0, 0);
+		auto terrain = initTerrain();
 
-		for(float x = -1010 ; x <= 1000 ; x += 100) {
-			for(float z = -1010 ; z <= 1000 ; z += 100) {
-				auto node = smgr->addCubeSceneNode();
-				node->setPosition(vector3df(x, 0, z));
-				node->getMaterial(0) = material;
+		// create triangle selector for the terrain	
+		auto selector = smgr->createTerrainTriangleSelector(terrain, 0);
+		terrain->setTriangleSelector(selector);
 
-				auto selector = smgr->createTriangleSelector(node->getMesh(), node);
-				node->setTriangleSelector(selector);
-				selector->drop();
-			}
-		}
-	}
-
-	//선택 테스트용 객체 배치
-	{
-		SMaterial material;
-		material.AmbientColor = SColor(255, 255, 0, 0);
-
-		for(float x = -1050 ; x <= 1000 ; x += 200) {
-			for(float z = -1050 ; z <= 1000 ; z += 200) {
-				auto node = smgr->addCubeSceneNode();
-
-				// id이용해서 특정 노드가 선택가능/불가능을 확인하도록 임시코딩
-				node->setID(IDFlag_IsPickable);
-				node->setPosition(vector3df(x, 0, z));
-				node->getMaterial(0) = material;
-
-				auto selector = smgr->createTriangleSelector(node->getMesh(), node);
-				node->setTriangleSelector(selector);
-				selector->drop();
-			}
-		}
+		// create collision response animator and attach it to the camera
+		scene::ISceneNodeAnimator* anim = smgr->createCollisionResponseAnimator(
+			selector, camNode, core::vector3df(10, 10, 10),
+			core::vector3df(0, -10, 0),
+			core::vector3df(0, 10, 0));
+		selector->drop();
+		camNode->addAnimator(anim);
+		anim->drop();
 	}
 
 	//선택한거 표시용 billboard
@@ -111,15 +89,112 @@ void GameScene::initCam()
 	// Create Camera
 	camNode = smgr->addCameraSceneNode();
 	auto cursorControl = Device->getCursorControl();
-	hmdCam = new SceneNodeAnimatorCameraHMD(Device, cursorControl, 0.3f, 0.05f, 0.0f);
+	hmdCam = new SceneNodeAnimatorCameraHMD(Device, cursorControl, 0.3f, 0.10f, 0.0f);
 
 	camNode->addAnimator(hmdCam);
-	//TODO 카메라 위치 잡기
-	camNode->setPosition(core::vector3df(0, 0, 0));
+	camNode->setPosition(core::vector3df(0, 100, 0));
 	camNode->setTarget(core::vector3df(0, 0, 1));
 	camNode->setFarValue(1000.0f);
 }
 
+void GameScene::initTargetableObject()
+{
+	//선택 테스트용 객체 배치
+	ISceneManager* smgr = Device->getSceneManager();
+	
+	SMaterial material;
+	material.AmbientColor = SColor(255, 255, 0, 0);
+
+	for(float x = 50 ; x <= 1000 ; x += 200) {
+		for(float z = 50 ; z <= 1000 ; z += 200) {
+			auto node = smgr->addCubeSceneNode();
+
+			// id이용해서 특정 노드가 선택가능/불가능을 확인하도록 임시코딩
+			node->setID(IDFlag_IsPickable);
+			node->setPosition(vector3df(x, 0, z));
+			node->getMaterial(0) = material;
+
+			auto selector = smgr->createTriangleSelector(node->getMesh(), node);
+			node->setTriangleSelector(selector);
+			selector->drop();
+		}
+	}
+}
+
+void GameScene::initWallObject()
+{
+	//충돌 테스트용 객체를 적절히 배치
+	ISceneManager* smgr = Device->getSceneManager();
+
+	SMaterial material;
+	material.Lighting = false;
+	material.AmbientColor = SColor(255, 255, 0, 0);
+
+	for(float x = 20 ; x <= 1000 ; x += 100) {
+		for(float z = 20 ; z <= 1000 ; z += 100) {
+			auto node = smgr->addCubeSceneNode();
+			node->setPosition(vector3df(x, 0, z));
+			node->getMaterial(0) = material;
+
+			auto selector = smgr->createTriangleSelector(node->getMesh(), node);
+			node->setTriangleSelector(selector);
+				
+			// create collision response animator and attach it to the camera
+			scene::ISceneNodeAnimator* anim = smgr->createCollisionResponseAnimator(
+				selector, camNode, core::vector3df(10, 10, 10),
+				core::vector3df(0, 0, 0),
+				core::vector3df(0, 0, 0));
+				
+			camNode->addAnimator(anim);
+			anim->drop();
+			selector->drop();
+		}
+	}
+}
+
+irr::scene::ITerrainSceneNode* GameScene::initTerrain()
+{
+	IVideoDriver* driver = Device->getVideoDriver();
+	ISceneManager* smgr = Device->getSceneManager();
+
+	// 하이트맵의 가운데 == 0,0,0이 되도록 만든다. 게임로직을 시작할떄
+	// 중심에 모아놔야 디버깅하기 쉬우니까
+	auto position = core::vector3df(0.f, 0.0f, 0.f);
+	auto rotation = core::vector3df(0.f, 0.f, 0.f);
+	//auto scale = core::vector3df(40.0f, 1.0f, 40.0f);
+	auto scale = core::vector3df(1.0f, 1.0f, 1.0f);
+	auto vertexColor = video::SColor(255, 255, 255, 255);	
+	s32 maxLOD = 5;
+	E_TERRAIN_PATCH_SIZE patchSize = scene::ETPS_17;
+	s32 smoothFactor = 4;
+	int nodeId = 0;
+
+	//지형으로 필요한건 완전평면 하나이다
+	//그래서 검정색=0 으로 구성된 height map를 사용했다
+	scene::ITerrainSceneNode* terrain = smgr->addTerrainSceneNode(
+		"res/terrain-heightmap.png",
+		0,
+		nodeId,
+		position,
+		rotation,
+		scale,
+		vertexColor,
+		maxLOD,
+		patchSize,
+		smoothFactor
+		);
+	SR_ASSERT(terrain != nullptr);
+
+	terrain->setMaterialFlag(video::EMF_LIGHTING, false);
+	terrain->setMaterialTexture(0,
+			driver->getTexture("ext/irrlicht/media/terrain-texture.jpg"));
+	terrain->setMaterialTexture(1,
+			driver->getTexture("ext/irrlicht/media/detailmap3.jpg"));
+	terrain->setMaterialType(video::EMT_DETAIL_MAP);
+	terrain->scaleTexture(100.0f, 100.0f);
+
+	return terrain;
+}
 void GameScene::initSky()
 {
 	IVideoDriver* driver = Device->getVideoDriver();
@@ -127,13 +202,6 @@ void GameScene::initSky()
 
 	// create skybox and skydome
 	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
-	//scene::ISceneNode* skybox = smgr->addSkyBoxSceneNode(
-	//	driver->getTexture("ext/irrlicht/media/irrlicht2_up.jpg"),
-	//	driver->getTexture("ext/irrlicht/media/irrlicht2_dn.jpg"),
-	//	driver->getTexture("ext/irrlicht/media/irrlicht2_lf.jpg"),
-	//	driver->getTexture("ext/irrlicht/media/irrlicht2_rt.jpg"),
-	//	driver->getTexture("ext/irrlicht/media/irrlicht2_ft.jpg"),
-	//	driver->getTexture("ext/irrlicht/media/irrlicht2_bk.jpg"));
 	scene::ISceneNode* skydome = smgr->addSkyDomeSceneNode(driver->getTexture("ext/irrlicht/media/skydome.jpg"),16,8,0.95f,2.0f);
 	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, true);
 }
@@ -193,4 +261,15 @@ void GameScene::update(int ms)
 		bill->setPosition(intersection);
 		bill->setVisible(true);
 	}
+
+	//카메라 현재 위치 찍기 + TODO 소수점 정밀도 조정하기
+	auto camPos = camNode->getPosition();
+	std::wostringstream oss;
+	oss << "Cam Pos : ";
+	oss << camPos.X << ", ";
+	oss << camPos.Y << ", ";
+	oss << camPos.Z;
+	std::wstring camPosMsg(oss.str());
+	SColor white(255, 255, 255, 255);
+	gDebugDrawMgr->addString(vector2di(0, 0), camPosMsg, white);
 }

@@ -15,8 +15,12 @@ public:
 	virtual void update(int ms);
 	virtual void draw();
 
-	virtual void initCam();
-	virtual void initSky();
+	void initCam();
+	void initSky();
+	irr::scene::ITerrainSceneNode* initTerrain();
+
+	void initTargetableObject();
+	void initWallObject();
 private:
 	irr::scene::IBillboardSceneNode *bill;
 	irr::scene::ICameraSceneNode* camNode;
