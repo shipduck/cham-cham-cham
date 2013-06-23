@@ -65,6 +65,9 @@ APPEND_LINK_LIBS( alut )
 INCLUDE_DIRECTORIES( ${DOKURO_EXT_DIR}/loki )
 
 # Add boost Include
+IF(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/boost/boost )
+	MESSAGE( FATAL_ERROR Please\ put\ boost\ library\ in\ “${CMAKE_CURRENT_SOURCE_DIR}/boost/boost” )
+ENDIF(  )
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/boost )
 
 #########################################################
