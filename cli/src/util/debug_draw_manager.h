@@ -372,6 +372,7 @@ public:
 	typedef irr::core::vector3df vector_type;
 	typedef irr::video::SColor color_type;
 	typedef irr::video::S3DVertex vertex_type;
+	typedef irr::core::vector2di vector_2d_type;
 public:
 	DebugDrawSceneNode(irr::scene::ISceneNode *parent, irr::scene::ISceneManager *smgr, irr::s32 id);
 
@@ -382,6 +383,7 @@ public:
 	virtual irr::video::SMaterial &getMaterial(irr::u32 i) { return Material; }
 
 	void addLine(const vector_type &p1, const vector_type &p2, const color_type &color);
+	void addLine(const vector_2d_type &p1, const vector_2d_type &p2, const color_type &color);
 
 	template<typename VertexListType, typename IndexListType>
 	void addIndexedVertices(const VertexListType &vertexList, const IndexListType &indexList)
@@ -398,11 +400,13 @@ public:
 
 private:
 	irr::core::aabbox3d<irr::f32> Box;
-	irr::video::S3DVertex Vertices[4];
 	irr::video::SMaterial Material;
 
 	std::vector<vertex_type> VertexList;
 	std::vector<unsigned short> IndexList;
+
+	std::vector<vertex_type> Vertex2DList;
+	std::vector<unsigned short> Index2DList;
 };
 
 // 주력으로 사용할것을 전역변수로 걸어놔야 속편하다

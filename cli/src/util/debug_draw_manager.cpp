@@ -424,14 +424,24 @@ void DebugDrawManager::addCircle(const irr::core::vector2di &pos, float radius,
 
 void DebugDrawManager::drawList(const DebugDrawList_Line2D &cmd)
 {
-	IVideoDriver* driver = Device->getVideoDriver();
-	driver->setTransform(video::ETS_WORLD, core::matrix4());
-
 	int loopCount = cmd.size();
 	for(int i = 0 ; i < loopCount ; ++i) {
+		float scale = cmd.ScaleList[i];
+		if(scale != 1.0f) {
+			continue;
+		}
+		batchSceneNode->addLine(cmd.P1List[i], cmd.P2List[i], cmd.ColorList[i]);
+	}
+
+	auto driver = Device->getVideoDriver();
+	for(int i = 0 ; i < loopCount ; ++i) {
+		float scale = cmd.ScaleList[i];
+		if(scale == 1.0f) {
+			continue;
+		}
 		video::SMaterial m; 
 		m.Lighting = false;
-		m.Thickness = cmd.ScaleList[i];
+		m.Thickness = scale;
 		driver->setMaterial(m);
 		driver->draw2DLine(cmd.P1List[i], cmd.P2List[i], cmd.ColorList[i]);
 	}
@@ -439,12 +449,6 @@ void DebugDrawManager::drawList(const DebugDrawList_Line2D &cmd)
 
 void DebugDrawManager::drawList(const DebugDrawList_Cross2D &cmd)
 {
-	IVideoDriver* driver = Device->getVideoDriver();
-	video::SMaterial m; 
-	m.Lighting = false;
-	driver->setMaterial(m);
-	driver->setTransform(video::ETS_WORLD, core::matrix4());             
-
 	int loopCount = cmd.size();
 	for(int i = 0 ; i < loopCount ; ++i) {
 		auto pos = cmd.PosList[i];
@@ -456,8 +460,8 @@ void DebugDrawManager::drawList(const DebugDrawList_Cross2D &cmd)
 		vector2di right = pos + vector2di(size, 0);
 		vector2di left = pos - vector2di(size, 0);
 
-		driver->draw2DLine(top, bottom, color);
-		driver->draw2DLine(right, left, color);
+		batchSceneNode->addLine(top, bottom, color);
+		batchSceneNode->addLine(left, right, color);
 	}
 }
 void DebugDrawManager::drawList(const DebugDrawList_String2D &cmd)
@@ -586,18 +590,12 @@ DebugDrawSceneNode::DebugDrawSceneNode(irr::scene::ISceneNode *parent, irr::scen
 	Material.Wireframe = false;
 	Material.Lighting = false;
 
-	Vertices[0] = S3DVertex(0, 0, 10, 1, 1, 1, SColor(255, 0, 255, 255), 0, 1);
-	Vertices[1] = S3DVertex(10, 0, -10, 1, 0, 0, SColor(255, 255, 0, 255), 1, 1);
-	Vertices[2] = S3DVertex(0, 20, 0, 0, 1, 1, SColor(255, 255, 255, 0), 1, 0);
-	Vertices[3] = S3DVertex(-10, 0, -10, 0, 0, 1, SColor(255, 0, 255, 0), 0, 0);
-
-	Box.reset(Vertices[0].Pos);
-	for(size_t i = 0 ; i < 4 ; ++i) {
-		Box.addInternalPoint(Vertices[i].Pos);
-	}
+	Box.reset(vector3df(0, 0, 0));
 
 	VertexList.reserve(1 << 16);
 	IndexList.reserve(1 << 16);
+	Vertex2DList.reserve(1 << 16);
+	Index2DList.reserve(1 << 16);
 }
 
 void DebugDrawSceneNode::OnRegisterSceneNode()
@@ -613,16 +611,8 @@ void DebugDrawSceneNode::render()
 	IVideoDriver *driver = SceneManager->getVideoDriver();
 	driver->setMaterial(Material);
 	driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
-
-	u16 indices[] = {
-		0, 2, 3,
-		2, 1, 3,
-		1, 0, 3,
-		2, 0, 1
-	};
-	driver->drawVertexPrimitiveList(&Vertices[0], 4, &indices[0], 4, video::EVT_STANDARD, scene::EPT_TRIANGLES, video::EIT_16BIT);
-
 	driver->drawVertexPrimitiveList(VertexList.data(), VertexList.size(), IndexList.data(), IndexList.size(), video::EVT_STANDARD, scene::EPT_LINES, video::EIT_16BIT);
+	driver->draw2DVertexPrimitiveList(Vertex2DList.data(), Vertex2DList.size(), Index2DList.data(), Index2DList.size(), video::EVT_STANDARD, scene::EPT_LINES, video::EIT_16BIT);
 }
 
 void DebugDrawSceneNode::addLine(const vector_type &p1, const vector_type &p2, const color_type &color)
@@ -639,8 +629,24 @@ void DebugDrawSceneNode::addLine(const vector_type &p1, const vector_type &p2, c
 	IndexList.push_back(currVertexSize + 1);
 }
 
+void DebugDrawSceneNode::addLine(const vector_2d_type &p1, const vector_2d_type &p2, const color_type &color)
+{
+	vector3df normal(1, 0, 0);
+	vector2df texcoord(0, 0);
+	auto v1 = vertex_type(vector_type(p1.X, p1.Y, 0), normal, color, texcoord);
+	auto v2 = vertex_type(vector_type(p2.X, p2.Y, 0), normal, color, texcoord);
+
+	unsigned short currVertexSize = Vertex2DList.size();
+	Vertex2DList.push_back(v1);
+	Vertex2DList.push_back(v2);
+	Index2DList.push_back(currVertexSize);
+	Index2DList.push_back(currVertexSize + 1);
+}
+
 void DebugDrawSceneNode::clear()
 {
 	VertexList.clear();
 	IndexList.clear();
+	Vertex2DList.clear();
+	Index2DList.clear();
 }
