@@ -188,11 +188,10 @@ typedef TYPELIST_3(
 	) DebugDrawListMixinList_Circle2D;
 struct DebugDrawList_Circle2D : public DebugDrawListT<DebugDrawListMixinList_Circle2D> {};
 
-typedef TYPELIST_5(
+typedef TYPELIST_4(
 	DebugDrawListMixin_Pos<irr::core::vector3df>,
 	DebugDrawListMixin_Scale<float>,
 	DebugDrawListMixin_Color,
-	DebugDrawListMixin_Node,
 	DebugDrawListMixin_3D
 	) DebugDrawListMixinList_Sphere3D;
 struct DebugDrawList_Sphere3D : public DebugDrawListT<DebugDrawListMixinList_Sphere3D> {};
@@ -383,6 +382,18 @@ public:
 	virtual irr::video::SMaterial &getMaterial(irr::u32 i) { return Material; }
 
 	void addLine(const vector_type &p1, const vector_type &p2, const color_type &color);
+
+	template<typename VertexListType, typename IndexListType>
+	void addIndexedVertices(const VertexListType &vertexList, const IndexListType &indexList)
+	{
+		int currVertexSize = VertexList.size();
+		std::copy(vertexList.begin(), vertexList.end(), std::back_inserter(VertexList));
+		for(auto idx : indexList) {
+			auto nextIdx = idx + currVertexSize;
+			IndexList.push_back(nextIdx);
+		}
+	}
+
 	void clear();
 
 private:

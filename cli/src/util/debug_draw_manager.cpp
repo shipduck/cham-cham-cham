@@ -16,6 +16,109 @@ DebugDrawManager *gDebugDrawMgr = &debugDrawMgrLocal;
 irr::gui::IGUIFont *gNormalFont12 = nullptr;
 irr::gui::IGUIFont *gNormalFont14 = nullptr;
 
+class WireSphereFactory {
+public:
+	typedef irr::video::SColor color_type;
+	typedef irr::core::vector3df vector_type;
+	typedef irr::video::S3DVertex vertex_type;
+	typedef unsigned short index_type;
+	typedef std::vector<vertex_type> vertex_list_type;
+	typedef std::vector<index_type> index_list_type;
+
+public:
+	WireSphereFactory(float radius, int slices, int stacks, const color_type &color)
+		: Radius(radius), Slices(slices), Stacks(stacks), Color(color) {}
+	~WireSphereFactory() {}
+
+	void createSimpleMesh(vertex_list_type &vertexList, index_list_type &indexList);
+
+private:
+	float Radius;
+	int Slices;
+	int Stacks;
+	color_type Color;
+};
+
+void WireSphereFactory::createSimpleMesh(vertex_list_type &vertexList, index_list_type &indexList)
+{
+	float nsign = 1.0f;
+	float drho = PI / Stacks;
+	float dtheta = 2.0f * PI / Slices;
+
+	//한방에 그릴수 잇도록하자.
+	//vertex list + index로 구성을 변경한다는 소리
+	//구성 방법은 gl_lines
+
+	// draw stack lines
+	for (int i = 1 ; i < Stacks ; i++) { // stack line at i==stacks-1 was missing here
+		float rho = i * drho;
+
+		vertex_list_type tmp_vert_list;
+		for (int j = 0; j < Slices; j++) {
+			float theta = j * dtheta;
+			float x = cos(theta) * sin(rho);
+			float y = sin(theta) * sin(rho);
+			float z = cos(rho);
+
+			vertex_type vert;
+			//vert.n[0] = x * nsign;
+			//vert.n[1] = y * nsign;
+			//vert.n[2] = z * nsign;
+
+			vert.Pos.X = x * Radius;
+			vert.Pos.Y = y * Radius;
+			vert.Pos.Z = z * Radius;
+			vert.Color = this->Color;
+
+			tmp_vert_list.push_back(vert);
+		}
+		int base_vert_list_size = vertexList.size();
+		//copy vertex
+		std::copy(tmp_vert_list.begin(), tmp_vert_list.end(), std::back_inserter(vertexList));
+
+		for(int i = 0 ; i < (int)tmp_vert_list.size() ; i++) {
+			unsigned short idx1 = base_vert_list_size + i;
+			unsigned short idx2 = base_vert_list_size + ((i + 1) % (int)tmp_vert_list.size());
+			indexList.push_back(idx1);
+			indexList.push_back(idx2);
+		}
+	}
+	// draw slice lines
+	for (int j = 0; j < Slices; j++) {
+		float theta = j * dtheta;
+
+		vertex_list_type tmp_vert_list;
+		for (int i = 0; i <= Stacks ; i++) {
+			float rho = i * drho;
+			float x = cos(theta) * sin(rho);
+			float y = sin(theta) * sin(rho);
+			float z = cos(rho);
+
+			vertex_type vert;
+			//vert.n[0] = x * nsign;
+			//vert.n[1] = y * nsign;
+			//vert.n[2] = z * nsign;
+
+			vert.Pos.X = x * Radius;
+			vert.Pos.Y = y * Radius;
+			vert.Pos.Z = z * Radius;
+			vert.Color = this->Color;
+
+			tmp_vert_list.push_back(vert);
+		}
+		int base_vert_list_size = vertexList.size();
+		std::copy(tmp_vert_list.begin(), tmp_vert_list.end(), std::back_inserter(vertexList));
+
+		for(int i = 0 ; i < (int)tmp_vert_list.size() - 1 ; i++) {
+			unsigned short idx1 = base_vert_list_size + i;
+			unsigned short idx2 = base_vert_list_size + ((i + 1) % (int)tmp_vert_list.size());
+			indexList.push_back(idx1);
+			indexList.push_back(idx2);
+		}
+	}
+}
+
+
 
 DebugDrawListMixin_Node::~DebugDrawListMixin_Node()
 {
@@ -203,22 +306,6 @@ void DebugDrawManager::addSphere(const irr::core::vector3df &pos,
 	drawList.ColorList.push_back(color);
 	drawList.ScaleList.push_back(radius);
 	drawList.DepthEnableList.push_back(depthEnable);
-
-	//create scene node
-	ISceneManager* smgr = Device->getSceneManager();
-	IMeshSceneNode *node = smgr->addSphereSceneNode(radius);
-	if(node) {
-		SMaterial material;
-		material.Wireframe = true;
-		material.Lighting = false;
-		material.BackfaceCulling = false;
-		material.FrontfaceCulling = false;
-		node->getMaterial(0) = material;
-		smgr->getMeshManipulator()->setVertexColors(node->getMesh(), color);
-	}
-	node->setPosition(pos);
-	node->grab();
-	drawList.NodeList.push_back(node);
 
 	Field<ListType>(*this).runValidateOnce(duration);
 }
@@ -434,7 +521,31 @@ void DebugDrawManager::drawList(const DebugDrawList_Cross3D &cmd)
 
 void DebugDrawManager::drawList(const DebugDrawList_Sphere3D &cmd)
 {
-	//use scene node based
+	static WireSphereFactory::vertex_list_type baseVertexList;
+	static WireSphereFactory::index_list_type baseIndexList;
+	if(baseVertexList.empty()) {
+		SColor white(255, 255, 255, 255);
+		WireSphereFactory factory(1, 8, 8, white);
+		factory.createSimpleMesh(baseVertexList, baseIndexList);
+	}
+
+	WireSphereFactory::vertex_list_type vertexList(baseVertexList.size());
+
+	for(size_t i = 0 ; i < cmd.size() ; i++) {
+		auto color = cmd.ColorList[i];
+		auto pos = cmd.PosList[i];
+		auto scale = cmd.ScaleList[i];
+
+		std::copy(baseVertexList.begin(), baseVertexList.end(), vertexList.begin());
+		for(int i = 0 ; i < vertexList.size() ; ++i) {
+			auto &vert = vertexList[i];
+			vert.Color = color;
+			vert.Pos *= scale;
+			vert.Pos += pos;
+		}
+
+		batchSceneNode->addIndexedVertices(vertexList, baseIndexList);
+	}
 }
 void DebugDrawManager::drawList(const DebugDrawList_String3D &cmd)
 {
