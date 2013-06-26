@@ -185,8 +185,8 @@ struct DebugDrawListFunctor< Typelist<T, U> > {
 	}
 	static void draw(DebugDrawManager &mgr)
 	{
-		const auto &immediateList = Field<T>(mgr).ImmediateDrawList;
-		const auto &durationList = Field<T>(mgr).DurationDrawList;
+		const const auto &immediateList = Field<T>(mgr).ImmediateDrawList;
+		const const auto &durationList = Field<T>(mgr).DurationDrawList;
 		if(immediateList.size() > 0) {
 			mgr.drawList(immediateList);
 		}
@@ -451,9 +451,9 @@ void DebugDrawManager::drawList(const DebugDrawList_Cross2D &cmd)
 {
 	int loopCount = cmd.size();
 	for(int i = 0 ; i < loopCount ; ++i) {
-		auto pos = cmd.PosList[i];
+		const auto &pos = cmd.PosList[i];
 		auto size = static_cast<int>(cmd.ScaleList[i]);
-		auto color = cmd.ColorList[i];
+		const auto &color = cmd.ColorList[i];
 
 		vector2di top = pos + vector2di(0, size);
 		vector2di bottom = pos - vector2di(0, size);
@@ -477,8 +477,8 @@ void DebugDrawManager::drawList(const DebugDrawList_String2D &cmd)
 
 	int loopCount = cmd.size();
 	for(int i = 0 ; i < loopCount ; ++i) {
-		auto pos = cmd.PosList[i];
-		auto color = cmd.ColorList[i];
+		const auto &pos = cmd.PosList[i];
+		const auto &color = cmd.ColorList[i];
 		auto msg = cmd.MsgList[i];
 		int x = pos.X;
 		int y = pos.Y;
@@ -488,7 +488,48 @@ void DebugDrawManager::drawList(const DebugDrawList_String2D &cmd)
 
 void DebugDrawManager::drawList(const DebugDrawList_Circle2D &cmd)
 {
-	SR_ASSERT(false && "NotImplemented");
+	static std::vector<S3DVertex> baseVertexList;
+	static std::vector<unsigned short> baseIndexList;
+	if(baseVertexList.empty()) {
+		SColor white(255, 255, 255, 255);
+
+		const int numSegment = 16;
+		const float segRad = 2 * PI / numSegment;
+		for(int i = 0 ; i < numSegment + 1 ; ++i) {
+			float x = cos(segRad * i);
+			float y = sin(segRad * i);
+
+			S3DVertex vert;
+			vert.Pos.X = x;
+			vert.Pos.Y = y;
+			vert.Pos.Z = 0;
+
+			baseVertexList.push_back(vert);
+		}
+
+		for(int i = 0 ; i < numSegment ; i++) {
+			int a = i;
+			int b = (i + 1) % numSegment;
+			baseIndexList.push_back(a);
+			baseIndexList.push_back(b);
+		}
+	}
+
+	std::vector<S3DVertex> vertexList(baseVertexList.size());
+	for(size_t i = 0 ; i < cmd.size() ; ++i) {
+		const auto &pos = cmd.PosList[i];
+		const auto &color = cmd.ColorList[i];
+		float radius = cmd.ScaleList[i];
+
+		std::copy(baseVertexList.begin(), baseVertexList.end(), vertexList.begin());
+		for(auto &vert : vertexList) {
+			vert.Color = color;
+			vert.Pos *= radius;
+			vert.Pos += vector3df(pos.X, pos.Y, 0);
+		}
+
+		batchSceneNode->addIndexedVertices2D(vertexList, baseIndexList);
+	}
 }
 
 void DebugDrawManager::drawList(const DebugDrawList_Line3D &cmd)
@@ -536,13 +577,12 @@ void DebugDrawManager::drawList(const DebugDrawList_Sphere3D &cmd)
 	WireSphereFactory::vertex_list_type vertexList(baseVertexList.size());
 
 	for(size_t i = 0 ; i < cmd.size() ; i++) {
-		auto color = cmd.ColorList[i];
-		auto pos = cmd.PosList[i];
+		const auto &color = cmd.ColorList[i];
+		const auto &pos = cmd.PosList[i];
 		auto scale = cmd.ScaleList[i];
 
 		std::copy(baseVertexList.begin(), baseVertexList.end(), vertexList.begin());
-		for(int i = 0 ; i < vertexList.size() ; ++i) {
-			auto &vert = vertexList[i];
+		for(auto &vert : vertexList) {
 			vert.Color = color;
 			vert.Pos *= scale;
 			vert.Pos += pos;
@@ -649,4 +689,27 @@ void DebugDrawSceneNode::clear()
 	IndexList.clear();
 	Vertex2DList.clear();
 	Index2DList.clear();
+}
+
+void DebugDrawSceneNode::addIndexedVertices(const std::vector<vertex_type> &vertexList, const std::vector<unsigned short> &indexList)
+{
+	addIndexedVertices(vertexList, indexList, &VertexList, &IndexList);
+}
+
+void DebugDrawSceneNode::addIndexedVertices2D(const std::vector<vertex_type> &vertexList, const std::vector<unsigned short> &indexList)
+{
+	addIndexedVertices(vertexList, indexList, &Vertex2DList, &Index2DList);
+}
+
+void DebugDrawSceneNode::addIndexedVertices(const std::vector<vertex_type> &vertexList, 
+		const std::vector<unsigned short> &indexList,
+		std::vector<vertex_type> *targetVertexList,
+		std::vector<unsigned short> *targetIndexList)
+{
+	int currVertexSize = targetVertexList->size();
+	std::copy(vertexList.begin(), vertexList.end(), std::back_inserter(*targetVertexList));
+	for(auto idx : indexList) {
+		auto nextIdx = idx + currVertexSize;
+		targetIndexList->push_back(nextIdx);
+	}
 }

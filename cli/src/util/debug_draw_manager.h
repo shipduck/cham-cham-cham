@@ -385,17 +385,9 @@ public:
 	void addLine(const vector_type &p1, const vector_type &p2, const color_type &color);
 	void addLine(const vector_2d_type &p1, const vector_2d_type &p2, const color_type &color);
 
-	template<typename VertexListType, typename IndexListType>
-	void addIndexedVertices(const VertexListType &vertexList, const IndexListType &indexList)
-	{
-		int currVertexSize = VertexList.size();
-		std::copy(vertexList.begin(), vertexList.end(), std::back_inserter(VertexList));
-		for(auto idx : indexList) {
-			auto nextIdx = idx + currVertexSize;
-			IndexList.push_back(nextIdx);
-		}
-	}
-
+	void addIndexedVertices(const std::vector<vertex_type> &vertexList, const std::vector<unsigned short> &indexList);
+	void addIndexedVertices2D(const std::vector<vertex_type> &vertexList, const std::vector<unsigned short> &indexList);
+	
 	void clear();
 
 private:
@@ -407,6 +399,12 @@ private:
 
 	std::vector<vertex_type> Vertex2DList;
 	std::vector<unsigned short> Index2DList;
+
+private:
+	void addIndexedVertices(const std::vector<vertex_type> &vertexList, 
+		const std::vector<unsigned short> &indexList,
+		std::vector<vertex_type> *targetVertexList,
+		std::vector<unsigned short> *targetIndexList);
 };
 
 // 주력으로 사용할것을 전역변수로 걸어놔야 속편하다

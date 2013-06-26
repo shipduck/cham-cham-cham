@@ -65,6 +65,7 @@ void DebugDrawScene::update(int ms)
 
 	gDebugDrawMgr->addLine(vector2di(0, 0), vector2di(50, 100), blue, 5.0f);
 	gDebugDrawMgr->addCross(vector2di(50, 100), red, 5.0f);
+	gDebugDrawMgr->addCircle(vector2di(50, 100), 10.0f, green);
 	gDebugDrawMgr->addString(vector2di(50, 100), msg, white);
 }
 
