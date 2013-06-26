@@ -4,6 +4,8 @@
 #include "Typelist.h"
 #include "base/template_lib.h"
 
+class DebugDrawSceneNode;
+
 struct DebugDrawListMixin_Color {
 	std::vector<irr::video::SColor> ColorList;	
 	void clear() { ColorList.clear(); }
@@ -277,7 +279,7 @@ typedef TYPELIST_9(
 
 class DebugDrawManager : public Loki::GenScatterHierarchy<DebugDrawCmdTypeList, DebugDrawListHolder> {
 public:
-	DebugDrawManager() : Device(nullptr) {}
+	DebugDrawManager() : Device(nullptr), batchSceneNode(nullptr) {}
 	~DebugDrawManager() {}
 
 	void setUp(irr::IrrlichtDevice *dev);
@@ -354,7 +356,42 @@ public:
 	void drawList(const DebugDrawList_String3D &cmd);
 
 private:
-	irr::IrrlichtDevice *Device;	
+	irr::IrrlichtDevice *Device;
+	DebugDrawSceneNode *batchSceneNode;
+};
+
+/*
+디버깅용으로 쓰이는 씬노드
+DebugDraw에서 필요한 기능의 핵심은
+* 선 그리기에 특화
+* 색+선을 기본으로 사용
+단, 선굵기=1일떄만 해당 기능을 써서 배치 구성이 가능하다
+대부분의 디버깅 렌더링은 선굵기=1을 쓰니까 문제없을거같다
+*/
+class DebugDrawSceneNode : public irr::scene::ISceneNode {
+public:
+	typedef irr::core::vector3df vector_type;
+	typedef irr::video::SColor color_type;
+	typedef irr::video::S3DVertex vertex_type;
+public:
+	DebugDrawSceneNode(irr::scene::ISceneNode *parent, irr::scene::ISceneManager *smgr, irr::s32 id);
+
+	virtual void OnRegisterSceneNode();
+	virtual void render();
+	virtual const irr::core::aabbox3d<irr::f32> &getBoundingBox() const { return Box; }
+	virtual irr::u32 getMaterialCount() const { return 1; }
+	virtual irr::video::SMaterial &getMaterial(irr::u32 i) { return Material; }
+
+	void addLine(const vector_type &p1, const vector_type &p2, const color_type &color);
+	void clear();
+
+private:
+	irr::core::aabbox3d<irr::f32> Box;
+	irr::video::S3DVertex Vertices[4];
+	irr::video::SMaterial Material;
+
+	std::vector<vertex_type> VertexList;
+	std::vector<unsigned short> IndexList;
 };
 
 // 주력으로 사용할것을 전역변수로 걸어놔야 속편하다

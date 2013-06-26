@@ -53,7 +53,8 @@ void DebugDrawScene::update(int ms)
 	std::wstring msg(L"hello world");
 
 	gDebugDrawMgr->addSphere(core::vector3df(0,0,30), 10, red);
-	gDebugDrawMgr->addLine(vector3df(10, 0, 30), vector3df(10, 200, 200), green, 2.0f);
+	gDebugDrawMgr->addLine(vector3df(10, 0, 30), vector3df(10, 200, 200), green, 1.0f);
+	gDebugDrawMgr->addLine(vector3df(10, 0, 30), vector3df(10, 200, 300), red, 2.0f);
 	matrix4 axisMat = core::matrix4();
 	axisMat.setTranslation(vector3df(-20, 0, 30));
 	axisMat.setRotationDegrees(vector3df(0, 0, 45));

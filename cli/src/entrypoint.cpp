@@ -54,8 +54,8 @@ int entrypoint(int argc, char* argv[])
 
 	//simple scene framework
 	//std::unique_ptr<Scene> scene(new SampleScene(device));
-	//std::unique_ptr<Scene> scene(new DebugDrawScene(device));
-	std::unique_ptr<Scene> scene(new GameScene(device));
+	std::unique_ptr<Scene> scene(new DebugDrawScene(device));
+	//std::unique_ptr<Scene> scene(new GameScene(device));
 	scene->setUp();
 
 	int lastFPS = -1;
