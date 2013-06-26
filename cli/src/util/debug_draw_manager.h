@@ -385,8 +385,20 @@ public:
 	void addLine(const vector_type &p1, const vector_type &p2, const color_type &color);
 	void addLine(const vector_2d_type &p1, const vector_2d_type &p2, const color_type &color);
 
-	void addIndexedVertices(const std::vector<vertex_type> &vertexList, const std::vector<unsigned short> &indexList);
-	void addIndexedVertices2D(const std::vector<vertex_type> &vertexList, const std::vector<unsigned short> &indexList);
+	template<typename VertexListType, typename IndexListType>
+	void addIndexedVertices(const VertexListType &vertexList, const IndexListType &indexList)
+	{
+		static_assert(std::is_same<vertex_type, VertexListType::value_type>::value == 1, "");
+		static_assert(std::is_same<unsigned short, IndexListType::value_type>::value == 1, "");
+		addIndexedVertices(vertexList, indexList, &VertexList, &IndexList);
+	}
+	template<typename VertexListType, typename IndexListType>
+	void addIndexedVertices2D(const VertexListType &vertexList, const IndexListType &indexList)
+	{
+		static_assert(std::is_same<vertex_type, VertexListType::value_type>::value == 1, "");
+		static_assert(std::is_same<unsigned short, IndexListType::value_type>::value == 1, "");
+		addIndexedVertices(vertexList, indexList, &Vertex2DList, &Index2DList);
+	}
 	
 	void clear();
 
@@ -401,10 +413,22 @@ private:
 	std::vector<unsigned short> Index2DList;
 
 private:
-	void addIndexedVertices(const std::vector<vertex_type> &vertexList, 
-		const std::vector<unsigned short> &indexList,
+	template<typename InputVertexListType, typename InputIndexListType>
+	void addIndexedVertices(const InputVertexListType &vertexList, 
+		const InputIndexListType &indexList,
 		std::vector<vertex_type> *targetVertexList,
-		std::vector<unsigned short> *targetIndexList);
+		std::vector<unsigned short> *targetIndexList)
+	{
+		static_assert(std::is_same<vertex_type, InputVertexListType::value_type>::value == 1, "");
+		static_assert(std::is_same<unsigned short, InputIndexListType::value_type>::value == 1, "");
+
+		int currVertexSize = targetVertexList->size();
+		std::copy(vertexList.begin(), vertexList.end(), std::back_inserter(*targetVertexList));
+		for(auto idx : indexList) {
+			auto nextIdx = idx + currVertexSize;
+			targetIndexList->push_back(nextIdx);
+		}
+	}
 };
 
 // 주력으로 사용할것을 전역변수로 걸어놔야 속편하다

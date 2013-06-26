@@ -488,34 +488,33 @@ void DebugDrawManager::drawList(const DebugDrawList_String2D &cmd)
 
 void DebugDrawManager::drawList(const DebugDrawList_Circle2D &cmd)
 {
-	static std::vector<S3DVertex> baseVertexList;
-	static std::vector<unsigned short> baseIndexList;
-	if(baseVertexList.empty()) {
-		SColor white(255, 255, 255, 255);
+	const int numSegment = 16;
+	static std::array<S3DVertex, numSegment> baseVertexList;
+	static std::array<unsigned short, numSegment * 2> baseIndexList;
+	static bool init = false;
+	if(init == false) {
+		init = true;
 
-		const int numSegment = 16;
+		SColor white(255, 255, 255, 255);
 		const float segRad = 2 * PI / numSegment;
-		for(int i = 0 ; i < numSegment + 1 ; ++i) {
+		for(int i = 0 ; i < numSegment ; ++i) {
+			auto &vert = baseVertexList[i];
 			float x = cos(segRad * i);
 			float y = sin(segRad * i);
-
-			S3DVertex vert;
 			vert.Pos.X = x;
 			vert.Pos.Y = y;
 			vert.Pos.Z = 0;
-
-			baseVertexList.push_back(vert);
 		}
 
 		for(int i = 0 ; i < numSegment ; i++) {
 			int a = i;
 			int b = (i + 1) % numSegment;
-			baseIndexList.push_back(a);
-			baseIndexList.push_back(b);
+			baseIndexList[i*2] = a;
+			baseIndexList[i*2 + 1] = b;
 		}
 	}
 
-	std::vector<S3DVertex> vertexList(baseVertexList.size());
+	std::array<S3DVertex, numSegment> vertexList;
 	for(size_t i = 0 ; i < cmd.size() ; ++i) {
 		const auto &pos = cmd.PosList[i];
 		const auto &color = cmd.ColorList[i];
@@ -689,27 +688,4 @@ void DebugDrawSceneNode::clear()
 	IndexList.clear();
 	Vertex2DList.clear();
 	Index2DList.clear();
-}
-
-void DebugDrawSceneNode::addIndexedVertices(const std::vector<vertex_type> &vertexList, const std::vector<unsigned short> &indexList)
-{
-	addIndexedVertices(vertexList, indexList, &VertexList, &IndexList);
-}
-
-void DebugDrawSceneNode::addIndexedVertices2D(const std::vector<vertex_type> &vertexList, const std::vector<unsigned short> &indexList)
-{
-	addIndexedVertices(vertexList, indexList, &Vertex2DList, &Index2DList);
-}
-
-void DebugDrawSceneNode::addIndexedVertices(const std::vector<vertex_type> &vertexList, 
-		const std::vector<unsigned short> &indexList,
-		std::vector<vertex_type> *targetVertexList,
-		std::vector<unsigned short> *targetIndexList)
-{
-	int currVertexSize = targetVertexList->size();
-	std::copy(vertexList.begin(), vertexList.end(), std::back_inserter(*targetVertexList));
-	for(auto idx : indexList) {
-		auto nextIdx = idx + currVertexSize;
-		targetIndexList->push_back(nextIdx);
-	}
 }
