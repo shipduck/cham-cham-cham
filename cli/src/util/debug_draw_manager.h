@@ -4,7 +4,7 @@
 #include "Typelist.h"
 #include "base/template_lib.h"
 
-class DebugDrawSceneNode;
+class LineBatchSceneNode;
 
 struct DebugDrawListMixin_Color {
 	std::vector<irr::video::SColor> ColorList;	
@@ -356,79 +356,7 @@ public:
 
 private:
 	irr::IrrlichtDevice *Device;
-	DebugDrawSceneNode *batchSceneNode;
-};
-
-/*
-디버깅용으로 쓰이는 씬노드
-DebugDraw에서 필요한 기능의 핵심은
-* 선 그리기에 특화
-* 색+선을 기본으로 사용
-단, 선굵기=1일떄만 해당 기능을 써서 배치 구성이 가능하다
-대부분의 디버깅 렌더링은 선굵기=1을 쓰니까 문제없을거같다
-*/
-class DebugDrawSceneNode : public irr::scene::ISceneNode {
-public:
-	typedef irr::core::vector3df vector_type;
-	typedef irr::video::SColor color_type;
-	typedef irr::video::S3DVertex vertex_type;
-	typedef irr::core::vector2di vector_2d_type;
-public:
-	DebugDrawSceneNode(irr::scene::ISceneNode *parent, irr::scene::ISceneManager *smgr, irr::s32 id);
-
-	virtual void OnRegisterSceneNode();
-	virtual void render();
-	virtual const irr::core::aabbox3d<irr::f32> &getBoundingBox() const { return Box; }
-	virtual irr::u32 getMaterialCount() const { return 1; }
-	virtual irr::video::SMaterial &getMaterial(irr::u32 i) { return Material; }
-
-	void addLine(const vector_type &p1, const vector_type &p2, const color_type &color);
-	void addLine(const vector_2d_type &p1, const vector_2d_type &p2, const color_type &color);
-
-	template<typename VertexListType, typename IndexListType>
-	void addIndexedVertices(const VertexListType &vertexList, const IndexListType &indexList)
-	{
-		static_assert(std::is_same<vertex_type, VertexListType::value_type>::value == 1, "");
-		static_assert(std::is_same<unsigned short, IndexListType::value_type>::value == 1, "");
-		addIndexedVertices(vertexList, indexList, &VertexList, &IndexList);
-	}
-	template<typename VertexListType, typename IndexListType>
-	void addIndexedVertices2D(const VertexListType &vertexList, const IndexListType &indexList)
-	{
-		static_assert(std::is_same<vertex_type, VertexListType::value_type>::value == 1, "");
-		static_assert(std::is_same<unsigned short, IndexListType::value_type>::value == 1, "");
-		addIndexedVertices(vertexList, indexList, &Vertex2DList, &Index2DList);
-	}
-	
-	void clear();
-
-private:
-	irr::core::aabbox3d<irr::f32> Box;
-	irr::video::SMaterial Material;
-
-	std::vector<vertex_type> VertexList;
-	std::vector<unsigned short> IndexList;
-
-	std::vector<vertex_type> Vertex2DList;
-	std::vector<unsigned short> Index2DList;
-
-private:
-	template<typename InputVertexListType, typename InputIndexListType>
-	void addIndexedVertices(const InputVertexListType &vertexList, 
-		const InputIndexListType &indexList,
-		std::vector<vertex_type> *targetVertexList,
-		std::vector<unsigned short> *targetIndexList)
-	{
-		static_assert(std::is_same<vertex_type, InputVertexListType::value_type>::value == 1, "");
-		static_assert(std::is_same<unsigned short, InputIndexListType::value_type>::value == 1, "");
-
-		int currVertexSize = targetVertexList->size();
-		std::copy(vertexList.begin(), vertexList.end(), std::back_inserter(*targetVertexList));
-		for(auto idx : indexList) {
-			auto nextIdx = idx + currVertexSize;
-			targetIndexList->push_back(nextIdx);
-		}
-	}
+	LineBatchSceneNode *batchSceneNode;
 };
 
 // 주력으로 사용할것을 전역변수로 걸어놔야 속편하다
