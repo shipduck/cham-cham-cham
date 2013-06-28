@@ -63,8 +63,29 @@ void DebugDrawManager::shutDown()
 		batchSceneNode->drop();
 		batchSceneNode = nullptr;
 	}
+	auto it = batchSceneNodeMap.begin();
+	auto endit = batchSceneNodeMap.end();
+	for( ; it != endit ; ++it) {
+		it->second->remove();
+		it->second->drop();
+	}
 }
 
+LineBatchSceneNode *DebugDrawManager::getBatchSceneNode(float thickness)
+{
+	if(thickness == 1.0f || abs(thickness - 1.0f) < FLT_EPSILON) {
+		return batchSceneNode;
+	}
+	auto found = batchSceneNodeMap.find(thickness);
+	if(found != batchSceneNodeMap.end()) {
+		return found->second;
+	}
+	ISceneManager* smgr = Device->getSceneManager();
+	auto sceneNode = new LineBatchSceneNode(smgr->getRootSceneNode(), smgr, 0);
+	sceneNode->setThickness(thickness);
+	batchSceneNodeMap[thickness] = sceneNode;
+	return sceneNode;
+}
 
 template<typename TList> struct DebugDrawListFunctor;
 template<>
@@ -143,9 +164,20 @@ void DebugDrawManager::drawAll()
 	if(batchSceneNode) {
 		batchSceneNode->clear();
 	}
+	auto it = batchSceneNodeMap.begin();
+	const auto endit = batchSceneNodeMap.end();
+	for( ; it != endit ; ++it) {
+		it->second->clear();
+	}
+	
 	DebugDrawListFunctor<DebugDrawCmdTypeList>::draw(*this);
+	
 	if(batchSceneNode) {
 		batchSceneNode->render();
+	}
+	it = batchSceneNodeMap.begin();
+	for( ; it != endit ; ++it) {
+		it->second->render();
 	}
 }
 
@@ -328,23 +360,8 @@ void DebugDrawManager::drawList(const DebugDrawList_Line2D &cmd)
 	int loopCount = cmd.size();
 	for(int i = 0 ; i < loopCount ; ++i) {
 		float scale = cmd.ScaleList[i];
-		if(scale != 1.0f) {
-			continue;
-		}
-		batchSceneNode->addLine(cmd.P1List[i], cmd.P2List[i], cmd.ColorList[i]);
-	}
-
-	auto driver = Device->getVideoDriver();
-	for(int i = 0 ; i < loopCount ; ++i) {
-		float scale = cmd.ScaleList[i];
-		if(scale == 1.0f) {
-			continue;
-		}
-		video::SMaterial m; 
-		m.Lighting = false;
-		m.Thickness = scale;
-		driver->setMaterial(m);
-		driver->draw2DLine(cmd.P1List[i], cmd.P2List[i], cmd.ColorList[i]);
+		auto sceneNode = getBatchSceneNode(scale);
+		sceneNode->addLine(cmd.P1List[i], cmd.P2List[i], cmd.ColorList[i]);
 	}
 }
 
@@ -361,8 +378,9 @@ void DebugDrawManager::drawList(const DebugDrawList_Cross2D &cmd)
 		vector2di right = pos + vector2di(size, 0);
 		vector2di left = pos - vector2di(size, 0);
 
-		batchSceneNode->addLine(top, bottom, color);
-		batchSceneNode->addLine(left, right, color);
+		auto sceneNode = getBatchSceneNode(1.0f);
+		sceneNode->addLine(top, bottom, color);
+		sceneNode->addLine(left, right, color);
 	}
 }
 void DebugDrawManager::drawList(const DebugDrawList_String2D &cmd)
@@ -428,7 +446,8 @@ void DebugDrawManager::drawList(const DebugDrawList_Circle2D &cmd)
 			vert.Pos += vector3df(pos.X, pos.Y, 0);
 		}
 
-		batchSceneNode->addIndexedVertices2D(vertexList, baseIndexList);
+		auto sceneNode = getBatchSceneNode(1.0f);
+		sceneNode->addIndexedVertices2D(vertexList, baseIndexList);
 	}
 }
 
@@ -437,25 +456,8 @@ void DebugDrawManager::drawList(const DebugDrawList_Line3D &cmd)
 	int loopCount = cmd.size();
 	for(int i = 0 ; i < loopCount ; ++i) {
 		float scale = cmd.ScaleList[i];
-		if(scale != 1.0f) {
-			continue;
-		}
-		batchSceneNode->addLine(cmd.P1List[i], cmd.P2List[i], cmd.ColorList[i]);
-	}
-
-	IVideoDriver* driver = Device->getVideoDriver();
-	driver->setTransform(video::ETS_WORLD, core::matrix4());
-	for(int i = 0 ; i < loopCount ; ++i) {
-		float scale = cmd.ScaleList[i];
-		if(scale == 1.0f) {
-			continue;
-		}
-
-		video::SMaterial m; 
-		m.Lighting = false;
-		m.Thickness = cmd.ScaleList[i];
-		driver->setMaterial(m);
-		driver->draw3DLine(cmd.P1List[i], cmd.P2List[i], cmd.ColorList[i]);
+		auto sceneNode = getBatchSceneNode(scale);
+		sceneNode->addLine(cmd.P1List[i], cmd.P2List[i], cmd.ColorList[i]);
 	}
 }
 
@@ -488,7 +490,8 @@ void DebugDrawManager::drawList(const DebugDrawList_Sphere3D &cmd)
 			vert.Pos += pos;
 		}
 
-		batchSceneNode->addIndexedVertices(vertexList, baseIndexList);
+		auto sceneNode = getBatchSceneNode(1.0f);
+		sceneNode->addIndexedVertices(vertexList, baseIndexList);
 	}
 }
 void DebugDrawManager::drawList(const DebugDrawList_String3D &cmd)
@@ -517,8 +520,9 @@ void DebugDrawManager::drawList(const DebugDrawList_Axis3D &cmd)
 		xf.transformVect(y);
 		xf.transformVect(z);
 
-		batchSceneNode->addLine(zero, x, red);
-		batchSceneNode->addLine(zero, y, green);
-		batchSceneNode->addLine(zero, z, blue);
+		auto sceneNode = getBatchSceneNode(1.0f);
+		sceneNode->addLine(zero, x, red);
+		sceneNode->addLine(zero, y, green);
+		sceneNode->addLine(zero, z, blue);
 	}
 }

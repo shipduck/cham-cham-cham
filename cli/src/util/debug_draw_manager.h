@@ -356,7 +356,13 @@ public:
 
 private:
 	irr::IrrlichtDevice *Device;
+
+private:
 	LineBatchSceneNode *batchSceneNode;
+	// thickness != 1 인 경우도 렌더링 로직은 동일하게 처리하기 위해서 도입
+	std::map<float, LineBatchSceneNode *> batchSceneNodeMap;
+
+	LineBatchSceneNode *getBatchSceneNode(float thickness);
 };
 
 // 주력으로 사용할것을 전역변수로 걸어놔야 속편하다
