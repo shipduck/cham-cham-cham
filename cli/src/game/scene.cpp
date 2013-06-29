@@ -44,7 +44,7 @@ void Scene::setUp()
 
 void Scene::shutDown()
 {
-	//Renderer.reset(nullptr);
+	Renderer.reset(nullptr);
 
 	auto guienv = Device->getGUIEnvironment();
 	auto smgr = Device->getSceneManager();

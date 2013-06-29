@@ -32,6 +32,28 @@ struct HMDDescriptor
   float distortionK[4];
 };
 
+class OculusDistorsionCallback: public irr::video::IShaderConstantSetCallBack 
+{ 
+  public:
+  irr::f32 scale[2];
+  irr::f32 scaleIn[2];
+  irr::f32 lensCenter[2];
+  irr::f32 hmdWarpParam[4];
+  virtual void OnSetConstants(irr::video::IMaterialRendererServices* services, irr::s32 userData) 
+  { 
+    irr::video::IVideoDriver* driver = services->getVideoDriver();
+    services->setPixelShaderConstant("scale", scale, 2);
+    services->setPixelShaderConstant("scaleIn", scaleIn ,2);
+    services->setPixelShaderConstant("lensCenter", lensCenter ,2);
+    services->setPixelShaderConstant("hmdWarpParam", hmdWarpParam ,4);
+  }
+};
+/*
+irrlicht doesn't support remove material renderer.
+NEED only ONE OculusDistorsionCallback!
+*/
+extern OculusDistorsionCallback g_distortionCB;
+
 class HMDStereoRender
 {
 public:
@@ -67,23 +89,5 @@ private:
   irr::video::S3DVertex _planeVertices[4];
   irr::u16 _planeIndices[6];
   irr::ITimer* _timer;
-
-  class OculusDistorsionCallback: public irr::video::IShaderConstantSetCallBack 
-  { 
-  public:
-    irr::f32 scale[2];
-    irr::f32 scaleIn[2];
-    irr::f32 lensCenter[2];
-    irr::f32 hmdWarpParam[4];
-    virtual void OnSetConstants(irr::video::IMaterialRendererServices* services, irr::s32 userData) 
-    { 
-      irr::video::IVideoDriver* driver = services->getVideoDriver();
-      services->setPixelShaderConstant("scale", scale, 2);
-      services->setPixelShaderConstant("scaleIn", scaleIn ,2);
-      services->setPixelShaderConstant("lensCenter", lensCenter ,2);
-      services->setPixelShaderConstant("hmdWarpParam", hmdWarpParam ,4);
-    }
-  };
-  OculusDistorsionCallback _distortionCB;
 };
 #endif

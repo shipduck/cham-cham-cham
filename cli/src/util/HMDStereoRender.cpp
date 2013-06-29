@@ -15,7 +15,6 @@ BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CON
 OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #include "stdafx.h"
-
 #include "HMDStereoRender.h"
 
 #include <iostream>
@@ -30,7 +29,7 @@ using namespace std;
 static const char* vertexShader =
 "void main() {"
 "  gl_Position = vec4(gl_Vertex.xy, 0.0, 1.0);"
-"  gl_TexCoord[0].st = gl_MultiTexCoord0;"
+"  gl_TexCoord[0].st = gl_MultiTexCoord0.st;"
 "}";
 
 static const char *fragShader =
@@ -53,6 +52,19 @@ static const char *fragShader =
 "    gl_FragColor = texture2D(texid, tc);"
 "}";
 
+//OculusDistorsionCallback as singleton
+OculusDistorsionCallback g_distortionCB;
+E_MATERIAL_TYPE getOculusDistorsionCallbackMaterial(irr::video::IVideoDriver *driver)
+{
+  static int material = -1;
+  if(material == -1) {
+    IGPUProgrammingServices* gpu = driver->getGPUProgrammingServices(); 
+    material = (E_MATERIAL_TYPE)gpu->addHighLevelShaderMaterial(vertexShader, "main", EVST_VS_3_0, fragShader, "main", EPST_PS_3_0, &g_distortionCB);
+    //printf("HMDStereoRender Material Type : %d\n", material);
+  }
+  return (E_MATERIAL_TYPE)material;
+}
+
 HMDStereoRender::HMDStereoRender(irr::IrrlichtDevice *device, HMDDescriptor HMD, f32 worldScale)
   : _worldScale(worldScale),
     _renderTexture(NULL)
@@ -65,10 +77,10 @@ HMDStereoRender::HMDStereoRender(irr::IrrlichtDevice *device, HMDDescriptor HMD,
   _pCamera = _smgr->addCameraSceneNode();
 
   // Init shader parameters
-  _distortionCB.scale[0] = 1.0f; _distortionCB.scale[1] = 1.0f;
-  _distortionCB.scaleIn[0] = 1.0f; _distortionCB.scaleIn[1] = 1.0f;
-  _distortionCB.lensCenter[0] = 0.0f;_distortionCB.lensCenter[1] = 0.0f;
-  _distortionCB.hmdWarpParam[0] = 1.0f;_distortionCB.hmdWarpParam[1] = 0.0f;_distortionCB.hmdWarpParam[2] = 0.0f;_distortionCB.hmdWarpParam[3] = 0.0f;
+  g_distortionCB.scale[0] = 1.0f; g_distortionCB.scale[1] = 1.0f;
+  g_distortionCB.scaleIn[0] = 1.0f; g_distortionCB.scaleIn[1] = 1.0f;
+  g_distortionCB.lensCenter[0] = 0.0f;g_distortionCB.lensCenter[1] = 0.0f;
+  g_distortionCB.hmdWarpParam[0] = 1.0f;g_distortionCB.hmdWarpParam[1] = 0.0f;g_distortionCB.hmdWarpParam[2] = 0.0f;g_distortionCB.hmdWarpParam[3] = 0.0f;
   
   // Plane
   _planeVertices[0] = video::S3DVertex(-1.0f, -1.0f, 1.0f,1,1,0, video::SColor(255,0,255,255), 0.0f, 0.0f);
@@ -83,9 +95,8 @@ HMDStereoRender::HMDStereoRender(irr::IrrlichtDevice *device, HMDDescriptor HMD,
   _renderMaterial.TextureLayer[0].TextureWrapU = ETC_CLAMP;
   _renderMaterial.TextureLayer[0].TextureWrapV = ETC_CLAMP;
 
-  IGPUProgrammingServices* gpu = _driver->getGPUProgrammingServices(); 
-  _renderMaterial.MaterialType=(E_MATERIAL_TYPE)gpu->addHighLevelShaderMaterial(vertexShader, "main", EVST_VS_3_0, fragShader, "main", EPST_PS_3_0, &_distortionCB);
-
+  IGPUProgrammingServices* gpu = _driver->getGPUProgrammingServices();
+  _renderMaterial.MaterialType = getOculusDistorsionCallbackMaterial(_driver);
   setHMD(HMD);
 }
 
@@ -121,16 +132,16 @@ void HMDStereoRender::setHMD(HMDDescriptor HMD) {
   // Distortion shader parameters
   _lensShift = 4.0f * (HMD.hScreenSize/4.0f - HMD.lensSeparationDistance/2.0f) / HMD.hScreenSize;
 
-  _distortionCB.scale[0] = 1.0f/distScale;
-  _distortionCB.scale[1] = 1.0f*aspect/distScale;
+  g_distortionCB.scale[0] = 1.0f/distScale;
+  g_distortionCB.scale[1] = 1.0f*aspect/distScale;
   
-  _distortionCB.scaleIn[0] = 1.0f;
-  _distortionCB.scaleIn[1] = 1.0f/aspect;
+  g_distortionCB.scaleIn[0] = 1.0f;
+  g_distortionCB.scaleIn[1] = 1.0f/aspect;
   
-  _distortionCB.hmdWarpParam[0] = HMD.distortionK[0];
-  _distortionCB.hmdWarpParam[1] = HMD.distortionK[1];
-  _distortionCB.hmdWarpParam[2] = HMD.distortionK[2];
-  _distortionCB.hmdWarpParam[3] = HMD.distortionK[3];
+  g_distortionCB.hmdWarpParam[0] = HMD.distortionK[0];
+  g_distortionCB.hmdWarpParam[1] = HMD.distortionK[1];
+  g_distortionCB.hmdWarpParam[2] = HMD.distortionK[2];
+  g_distortionCB.hmdWarpParam[3] = HMD.distortionK[3];
 
   // Create render target
   if (_driver->queryFeature(video::EVDF_RENDER_TO_TARGET))
@@ -171,7 +182,7 @@ void HMDStereoRender::drawAll(ISceneManager* smgr) {
   _driver->setRenderTarget(0, false, false, video::SColor(0,100,100,100));
   _driver->setViewPort(_viewportLeft);
 
-  _distortionCB.lensCenter[0] = _lensShift;
+  g_distortionCB.lensCenter[0] = _lensShift;
 
   _driver->setMaterial(_renderMaterial); 
   _driver->drawIndexedTriangleList(_planeVertices, 4, _planeIndices, 2);
@@ -194,7 +205,7 @@ void HMDStereoRender::drawAll(ISceneManager* smgr) {
   _driver->setRenderTarget(0, false, false, video::SColor(0,100,100,100));  
   _driver->setViewPort(_viewportRight);
 
-  _distortionCB.lensCenter[0] = -_lensShift;
+  g_distortionCB.lensCenter[0] = -_lensShift;
 
   _driver->setMaterial(_renderMaterial); 
   _driver->drawIndexedTriangleList(_planeVertices, 4, _planeIndices, 2);
