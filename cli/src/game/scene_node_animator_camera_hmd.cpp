@@ -11,6 +11,7 @@
 #include "ICameraSceneNode.h"
 #include "ISceneNodeAnimatorCollisionResponse.h"
 
+#include "joystick_input_event.h"
 
 using namespace irr;
 using namespace core;
@@ -21,22 +22,21 @@ SceneNodeAnimatorCameraHMD::SceneNodeAnimatorCameraHMD(IrrlichtDevice *dev, gui:
 		f32 rotateSpeed, f32 moveSpeed, f32 jumpSpeed)
 : Device(dev), CursorControl(cursorControl), MaxVerticalAngle(88.0f),
 	MoveSpeed(moveSpeed), RotateSpeed(rotateSpeed), JumpSpeed(jumpSpeed),
-	Yaw(0), Pitch(0), Roll(0),
-	XMovement(0.0f),
-	YMovement(0.0f),
-	XView(0.0f),
-	YView(0.0f),
-	Moved(false)
+	Yaw(0), Pitch(0), Roll(0)
 {
 	#ifdef _DEBUG
 	setDebugName("CameraSceneNodeAnimatorHMD");
 	#endif
 
+	joystick = new JoystickInputEvent;
+
 	if (CursorControl) {
 		CursorControl->grab();
 	}
 
-	Device->activateJoysticks(JoystickInfo);
+	Device->setEventReceiver(joystick);
+	joystick->setDevice(Device);
+	joystick->activateJoystickEvent();
 }
 
 
@@ -46,6 +46,8 @@ SceneNodeAnimatorCameraHMD::~SceneNodeAnimatorCameraHMD()
 	if (CursorControl) {
 		CursorControl->drop();
 	}
+
+	delete joystick;
 }
 
 
@@ -60,10 +62,6 @@ bool SceneNodeAnimatorCameraHMD::OnEvent(const SEvent& evt)
 	// once every run() of the Irrlicht device.  Store the
 	// state of the first joystick, ignoring other joysticks.
 	// This is currently only supported on Windows and Linux.
-	if (evt.EventType == EET_JOYSTICK_INPUT_EVENT && evt.JoystickEvent.Joystick == 0) {
-		JoystickState = evt.JoystickEvent;
-	}
-
 	if (evt.EventType == EET_KEY_INPUT_EVENT && evt.KeyInput.PressedDown) {
 		if (evt.KeyInput.Key == KEY_ESCAPE)
 		{
@@ -89,60 +87,19 @@ void SceneNodeAnimatorCameraHMD::animateNode(ISceneNode* node, u32 timeMs)
 		return;
 	}
 
+	joystick->update();
+	const auto& JoystickInfo = joystick->getJoystickInfo();
+
 	if(JoystickInfo.size() == 0) {
 		return;
 	}
 	
-	// 기본 변수 초기화
-	XMovement = (f32)JoystickState.Axis[SEvent::SJoystickEvent::AXIS_X] / 32767.f;
-	YMovement = (f32)JoystickState.Axis[SEvent::SJoystickEvent::AXIS_Y] / -32767.f;
-
-	XView = (f32)JoystickState.Axis[SEvent::SJoystickEvent::AXIS_R] / 32767.f;
-	YView = (f32)JoystickState.Axis[SEvent::SJoystickEvent::AXIS_U] / 32767.f;
-
-	YView = 0.0f; //temp
-
-	const f32 DEAD_ZONE = 0.20f;
-
-	if(fabs(XMovement) < DEAD_ZONE) {
-		XMovement = 0.0f;
-	}
-	if(fabs(YMovement) < DEAD_ZONE) {
-		YMovement = 0.0f;
-	}
-
-	if(fabs(XView) < DEAD_ZONE) {
-		XView = 0.0f;
-	}
-	if(fabs(YView) < DEAD_ZONE) {
-		YView = 0.0f;
-	}
-
-	const u16 povDegrees = JoystickState.POV / 100;
-
-	if(povDegrees < 360) {
-		if(povDegrees > 0 && povDegrees < 180) {
-			XMovement = 1.f;
-		} else if(povDegrees > 180) {
-			XMovement = -1.f;
-		}
-		if(povDegrees > 90 && povDegrees < 270) {
-			YMovement = -1.f;
-		} else if(povDegrees > 270 || povDegrees < 90) {
-			YMovement = +1.f;
-		}
-	}
-
-	if(!core::equals(XMovement, 0.f) || !core::equals(YMovement, 0.f)) {
-		Moved = true;
-	} else {
-		Moved = false;
-	}
-
 	////////////////////////////////////////
 
-	f32 moveHorizontal = getXMovement(); // Range is -1.f for full left to +1.f for full right
-	f32 moveVertical = getYMovement(); // -1.f for full down to +1.f for full up.
+	f32 moveHorizontal = joystick->getHorizontalMovement(); // Range is -1.f for full left to +1.f for full right
+	f32 moveVertical = joystick->getVerticalMovement(); // -1.f for full down to +1.f for full up.
+	f32 rotateHoriziontal = joystick->getLeftRightRotation();
+	f32 rotateVertical = joystick->getUpDownRotation();
 
 	float verticalMoveDelta = moveVertical * MoveSpeed * timeMs / 1000.0f;
 	float horizontalMoveDelta = moveHorizontal * MoveSpeed * timeMs / 1000.0f;
@@ -177,7 +134,7 @@ void SceneNodeAnimatorCameraHMD::animateNode(ISceneNode* node, u32 timeMs)
 	core::vector3df target = (camera->getTarget() - camera->getAbsolutePosition());
 
 	core::matrix4 mat;
-	mat.setRotationDegrees(core::vector3df(YView * RotateSpeed, XView * RotateSpeed, 0));
+	mat.setRotationDegrees(core::vector3df(rotateVertical * RotateSpeed, rotateHoriziontal * RotateSpeed, 0));
 	mat.transformVect(target);
 
 	// write right target

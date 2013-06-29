@@ -11,6 +11,8 @@
 #include "SKeyMap.h"
 #include "irrArray.h"
 
+class JoystickInputEvent;
+
 //! Special scene node animator for FPS cameras
 class SceneNodeAnimatorCameraHMD : public irr::scene::ISceneNodeAnimator
 {
@@ -62,14 +64,6 @@ public:
 	virtual ISceneNodeAnimator* createClone(irr::scene::ISceneNode* node, irr::scene::ISceneManager* newManager=0);
 
 	void rotateCamera(irr::scene::ISceneNode* node, irr::u32 ms);;
-
-	void setCursor(irr::gui::ICursorControl* cursor) { CursorControl = cursor; }
-	irr::f32 getXMovement() const { return XMovement; }
-	irr::f32 getYMovement() const { return YMovement; }
-	irr::f32 getXView() const { return XView; }
-	irr::f32 getYView() const { return YView; }	
-	const irr::SEvent::SJoystickEvent& getJoystickState() const { return JoystickState; }
-
 private:
 	irr::gui::ICursorControl *CursorControl;
 
@@ -84,19 +78,8 @@ private:
 	irr::f32 Pitch;
 	irr::f32 Roll;
 
-	// for joystick
 	irr::IrrlichtDevice* Device;
-	irr::SEvent::SJoystickEvent JoystickState;
-
-	irr::f32 XMovement;
-	irr::f32 YMovement;
-
-	irr::f32 XView;
-	irr::f32 YView;
-
-	bool Moved;
-
-	irr::core::array<irr::SJoystickInfo> JoystickInfo;
+	JoystickInputEvent* joystick;
 };
 
 #endif // __C_SCENE_NODE_ANIMATOR_CAMERA_HMD_H_INCLUDED__
