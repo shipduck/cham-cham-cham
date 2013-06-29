@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "entrypoint.h"
 #include "util/debug_draw_manager.h"
+#include "util/audio_manager.h"
 #include "util/head_tracking.h"
 #include "util/hmd_display.h"
 
@@ -22,7 +23,6 @@ int SCREEN_WIDTH = 1280;
 int SCREEN_HEIGHT = 800;
 bool fullscreen = false;
 bool vsync = true;
-ALboolean useSound = AL_FALSE;
 
 int entrypoint(int argc, char* argv[])
 {
@@ -64,23 +64,16 @@ int entrypoint(int argc, char* argv[])
 	bool isFirstRun = true;
 	u32 then = device->getTimer()->getTime();
     
-    ALuint bgmBuf = 0, bgmSrc = 0;
-    
-    if (!(useSound = alutInit(NULL, nullptr))) {
-        puts(alutGetErrorString(alutGetError()));
-        puts("Failed to init sound");
-    }
-    
-    if (useSound) {
-        if((bgmBuf = alutCreateBufferFromFile("res/sound/bg.wav")) == AL_NONE) {
-            puts(alutGetErrorString(alutGetError()));
-        } else {
-            alGenSources(1, &bgmSrc);
-            alSourcei(bgmSrc, AL_BUFFER, bgmBuf);
-            alSourcePlay(bgmSrc);
-        }
-    }
-    
+	gAudioMgr->setUp();
+	if(gAudioMgr->isSupport()) {
+		const std::string bg("res/sound/bg.wav");
+		BGM bgm;
+		bgm.setUp(bg);
+		bgm.open();
+		bgm.play();
+		gAudioMgr->addBGM("bg", bgm);
+	}
+
 	// Render loop
 	while(device->run()) {
 		int frameDeltaTime = 0;
@@ -141,12 +134,7 @@ int entrypoint(int argc, char* argv[])
 	//clean debug tool
 	gDebugDrawMgr->shutDown();
     
-    if (useSound) {
-        if (bgmSrc != 0) {
-            alSourcePause(bgmSrc);
-        }
-        alutExit();
-    }
+	gAudioMgr->shutDown();
 
 	device->drop();	
 	
