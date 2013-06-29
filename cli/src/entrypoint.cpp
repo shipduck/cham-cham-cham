@@ -6,7 +6,6 @@
 #include "util/hmd_display.h"
 
 // scene
-#include "game/sample_scene.h"
 #include "game/debug_draw_scene.h"
 #include "game/game_scene.h"
 
@@ -23,7 +22,7 @@ int SCREEN_WIDTH = 1280;
 int SCREEN_HEIGHT = 800;
 bool fullscreen = false;
 bool vsync = true;
-bool useSound;
+ALboolean useSound = AL_FALSE;
 
 int entrypoint(int argc, char* argv[])
 {
@@ -40,23 +39,23 @@ int entrypoint(int argc, char* argv[])
 	IGUIEnvironment* guienv = device->getGUIEnvironment();
 	ISceneManager* smgr = device->getSceneManager();
 
-	HMDDisplay display;
-	display.setUp(device);
-
-	//Oculus Rift Head Tracking
-	HeadTracking headTracking;
-	headTracking.startUp();
-
 	//set debug tool
 	gDebugDrawMgr->setUp(device);
 	//gNormalFont12 = guienv->getFont("res/font_12.xml");
 	gNormalFont14 = guienv->getFont("res/font_14.xml");
 
 	//simple scene framework
-	//std::unique_ptr<Scene> scene(new SampleScene(device));
-	std::unique_ptr<Scene> scene(new DebugDrawScene(device));
-	//std::unique_ptr<Scene> scene(new GameScene(device));
+	//std::unique_ptr<Scene> scene(new DebugDrawScene(device));
+	std::unique_ptr<Scene> scene(new GameScene(device));
 	scene->setUp();
+
+
+	HMDDisplay display;
+	display.setUp(device);
+
+	//Oculus Rift Head Tracking
+	HeadTracking headTracking;
+	headTracking.startUp();
 
 	int lastFPS = -1;
 
@@ -111,8 +110,8 @@ int entrypoint(int argc, char* argv[])
 		driver->beginScene(true, true, video::SColor(255,113,113,133));
 
 		// draw the 3d scene
-		display.NormalDrawAll(smgr);
-		//display.StereoDrawAll(smgr);
+		//display.NormalDrawAll(smgr);
+		display.StereoDrawAll(smgr);
 		
 		scene->draw();
 
