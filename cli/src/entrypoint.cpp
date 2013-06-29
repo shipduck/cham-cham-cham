@@ -4,7 +4,6 @@
 #include "util/debug_draw_manager.h"
 #include "util/audio_manager.h"
 #include "util/head_tracking.h"
-#include "util/hmd_display.h"
 
 // scene
 #include "game/debug_draw_scene.h"
@@ -49,20 +48,10 @@ int entrypoint(int argc, char* argv[])
 	std::unique_ptr<Scene> scene(new GameScene(device));
 	scene->setUp();
 
-
-	//HMDDisplay display;
-	//display.setUp(device);
-
 	//Oculus Rift Head Tracking
 	HeadTracking headTracking;
 	headTracking.startUp();
 
-	int lastFPS = -1;
-
-	// 첫번째 프레임 가동에서 시간이 오래 걸릴수 있으니까
-	// 씬 변환이후 첫번쨰 프레임은 dt=0으로 생각하고 돌린다
-	bool isFirstRun = true;
-	u32 then = device->getTimer()->getTime();
     
 	gAudioMgr->setUp();
 	if(gAudioMgr->isSupport()) {
@@ -74,6 +63,11 @@ int entrypoint(int argc, char* argv[])
 		gAudioMgr->addBGM("bg", bgm);
 	}
 
+	int lastFPS = -1;
+	// 첫번째 프레임 가동에서 시간이 오래 걸릴수 있으니까
+	// 씬 변환이후 첫번쨰 프레임은 dt=0으로 생각하고 돌린다
+	bool isFirstRun = true;
+	u32 then = device->getTimer()->getTime();
 	// Render loop
 	while(device->run()) {
 		int frameDeltaTime = 0;

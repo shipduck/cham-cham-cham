@@ -15,6 +15,5 @@ public:
 	virtual void shutDown();
 
 	virtual void update(int ms);
-	virtual void draw();
 };
 

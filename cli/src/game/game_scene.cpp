@@ -89,6 +89,7 @@ void GameScene::initCam()
 	camNode->setTarget(core::vector3df(0, 0, 1));
 	camNode->setFarValue(1000.0f);
 	hmdCam->drop();
+	
 }
 
 void GameScene::initTargetableObject()
@@ -293,23 +294,6 @@ void GameScene::initSky()
 void GameScene::shutDown()
 {
 	Scene::shutDown();
-}
-void GameScene::draw()
-{
-	IVideoDriver* driver = Device->getVideoDriver();
-	IGUIEnvironment* guienv = Device->getGUIEnvironment();
-	ISceneManager* smgr = Device->getSceneManager();
-
-	driver->beginScene(true, true, video::SColor(255, 255, 255, 255));
-	// draw the 3d scene
-	//display.NormalDrawAll(smgr);
-	//display.StereoDrawAll(smgr);
-	smgr->drawAll();
-
-	// debug render
-	gDebugDrawMgr->drawAll();
-	guienv->drawAll();
-	driver->endScene();	//render end
 }
 
 void GameScene::update(int ms)

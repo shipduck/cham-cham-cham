@@ -13,7 +13,6 @@ public:
 	virtual void shutDown();
 
 	virtual void update(int ms);
-	virtual void draw();
 
 	void initCam();
 	void initSky();
