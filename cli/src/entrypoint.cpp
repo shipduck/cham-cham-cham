@@ -50,8 +50,8 @@ int entrypoint(int argc, char* argv[])
 	scene->setUp();
 
 
-	HMDDisplay display;
-	display.setUp(device);
+	//HMDDisplay display;
+	//display.setUp(device);
 
 	//Oculus Rift Head Tracking
 	HeadTracking headTracking;
@@ -98,20 +98,7 @@ int entrypoint(int argc, char* argv[])
 		//hmdCam->setHeadTrackingValue(yaw, pitch, roll);
 
 		scene->update(frameDeltaTime);
-
-		// draw block
-		driver->beginScene(true, true, video::SColor(255,113,113,133));
-
-		// draw the 3d scene
-		//display.NormalDrawAll(smgr);
-		display.StereoDrawAll(smgr);
-		
 		scene->draw();
-
-		// debug render
-		gDebugDrawMgr->drawAll();
-		guienv->drawAll();
-		driver->endScene();	//render end
 
 		//debug draw mgr의 업데이트를 나중에 처리해야 1프레임만 렌더링되는 객체도
 		//제대로 렌더링된다
