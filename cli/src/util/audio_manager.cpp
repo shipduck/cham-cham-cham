@@ -34,6 +34,7 @@ void AudioManager::shutDown()
 		it->second.close();
 	}
     alutExit();
+	SupportAL = false;
 }
 
 void AudioManager::addBGM(const std::string &name, const BGM &bgm)
