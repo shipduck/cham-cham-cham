@@ -67,15 +67,9 @@ void Scene::draw()
 	IVideoDriver* driver = Device->getVideoDriver();
 	IGUIEnvironment* guienv = Device->getGUIEnvironment();
 	ISceneManager* smgr = Device->getSceneManager();
-
-	driver->beginScene(true, true, video::SColor(255, 255, 255, 255));
+	
 	// draw the 3d scene
 	drawAllNormal(smgr);
 	//drawAllStereo(smgr);
 	//smgr->drawAll();
-
-	// debug render
-	gDebugDrawMgr->drawAll();
-	guienv->drawAll();
-	driver->endScene();	//render end
 }
