@@ -9,8 +9,7 @@
 #include "game/debug_draw_scene.h"
 #include "game/game_scene.h"
 
-// console
-#include "irrConsole/console.h"
+#include "game/game_console.h"
 
 using namespace irr;
 using namespace core;
@@ -23,66 +22,25 @@ using namespace gui;
 // Configuration
 int SCREEN_WIDTH = 1280;
 int SCREEN_HEIGHT = 800;
-irr::gui::IGUIFont* captionFont = nullptr;
-array<irr::core::stringw> captionText;
-IC_Console console;
-u32 captionHeight = 0;
-
-void drawCaptions(irr::IrrlichtDevice *device)
-{
-	static const irr::video::SColor fontColor(200,200,200,200);
-	dimension2d<u32> screenDim = device->getVideoDriver()->getScreenSize();
-	rect<s32> lineRect(10,10,screenDim.Width, screenDim.Height);
-	for(u32 i = 0; i < captionText.size(); i++)
-	{
-		captionFont->draw(captionText[i].c_str(),lineRect,fontColor);
-		lineRect.UpperLeftCorner.Y += captionHeight;
-		lineRect.LowerRightCorner.Y += captionHeight;
-	}
-}
 
 class MyEventReceiver : public irr::IEventReceiver {
 public:
-	bool OnEvent(const SEvent& event)
-	{
-		if(event.EventType == irr::EET_KEY_INPUT_EVENT ) {
-			if(event.KeyInput.PressedDown) {
-				if(event.KeyInput.Key == irr::KEY_ESCAPE) {
-					if(console.isVisible()) {
-						console.setVisible(false);
-						return true;
-					} else {
-						//프로그램 끄기
-						//setRunning(false);
-						return true;
-					}
-				} else if(event.KeyInput.Key == IC_Console::IC_KEY_TILDE) {
-					if(!console.isVisible()) {
-						console.setVisible(true);
-						return true;
-					} else if(!event.KeyInput.Control) {
-						console.setVisible(false);
-						return true;
-					}
-				} if(console.isVisible()) {
-					console.handleKeyPress(event.KeyInput.Char, event.KeyInput.Key,event.KeyInput.Shift, event.KeyInput.Control);
-					return true;
-				}
-			}
-		} else if(event.EventType == irr::EET_LOG_TEXT_EVENT) {
-			console.logMessage_ANSI(event.LogEvent.Level,event.LogEvent.Text);
-			return true;
-		} else if(event.EventType == irr::EET_MOUSE_INPUT_EVENT) {
-			return console.isVisible();
-		}
-		return false;
+	bool OnEvent(const SEvent& event) {
+		return onConsoleEvent(event);
 	}
-
 };
 
+void initConsole(irr::IrrlichtDevice *device, IC_Console *console)
+{
+	//this is how you alter some of the config params
+	console->getConfig().dimensionRatios.Y = 0.8f;
+	console->getConfig().fontName = "res/font_14.xml";
+	//now initialize
+	console->initializeConsole(device->getGUIEnvironment(), dimension2d<s32>(SCREEN_WIDTH, SCREEN_HEIGHT));
 
-
-
+	//register common commands
+	console->loadDefaultCommands(device);
+}
 
 int entrypoint(int argc, char* argv[])
 {
@@ -96,7 +54,7 @@ int entrypoint(int argc, char* argv[])
 	
 	MyEventReceiver receiver;
 	IrrlichtDevice *device = createDevice(EDT_OPENGL, dimension2d<u32>(SCREEN_WIDTH, SCREEN_HEIGHT), 32, fullscreen, stencil, vsync, &receiver);
-	if (!device){ 
+	if (!device){
 		return 1;
 	}
 	
@@ -109,37 +67,8 @@ int entrypoint(int argc, char* argv[])
 	//gNormalFont12 = guienv->getFont("res/font_12.xml");
 	gNormalFont14 = guienv->getFont("res/font_14.xml");
 
-	//load the caption font
-	captionFont = gNormalFont14;
-
-	//initialize the caption array
-	captionText.push_back(L"IrrConsole : Quake Style Drop Down Console Demo For Irrlicht");
-	captionText.push_back(L"Author : Saurav Mohapatra (mohaps@gmail.com)");
-	captionText.push_back(L"");
-	captionText.push_back(L"HELP TEXT:");
-	captionText.push_back(L"============================================================");
-	captionText.push_back(L"     Press the tilde (~) key to toggle console");
-	captionText.push_back(L"     Use the UP/DN arrow keys to access command history");
-	captionText.push_back(L"     Type commands at the prompt");
-	captionText.push_back(L"     To execute a command put \\ in front");
-	captionText.push_back(L"     e.g. \\list");
-	captionText.push_back(L"     use the \"list\" or \"help\" commands to find out more");
-	captionText.push_back(L"     to start try the command \"\\help show_node\");");
-	captionText.push_back(L"============================================================");
-	captionText.push_back(L" ");
-	captionText.push_back(L"TO QUIT THIS DEMO PRESS ESCAPE KEY");
-
-	//initialize the caption line height
-	captionHeight = gNormalFont14->getDimension(L"X").Height + 2;
 	//initialize the console
-	//this is how you alter some of the config params
-	console.getConfig().dimensionRatios.Y = 0.8f;
-	console.getConfig().fontName = "res/font_14.xml";
-	//now initialize
-	console.initializeConsole(device->getGUIEnvironment(), dimension2d<s32>(SCREEN_WIDTH, SCREEN_HEIGHT));
-
-	//register common commands
-	console.loadDefaultCommands(device);
+	initConsole(device, &gConsole);
 
 	//simple scene framework
 	std::unique_ptr<Scene> scene(new DebugDrawScene(device));
@@ -199,10 +128,10 @@ int entrypoint(int argc, char* argv[])
 			gDebugDrawMgr->drawAll();
 			guienv->drawAll();	
 
-			console.renderConsole(guienv, driver, frameDeltaTime);
-			if(!console.isVisible()) {
-				drawCaptions(device);
-			}
+			gConsole.renderConsole(guienv, driver, frameDeltaTime);
+			//if(!gConsole.isVisible()) {
+			//	drawConsoleCaptions(device);
+			//}
 
 			driver->endScene();	//render end
 		}
