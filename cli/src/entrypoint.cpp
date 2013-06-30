@@ -23,12 +23,6 @@ using namespace gui;
 int SCREEN_WIDTH = 1280;
 int SCREEN_HEIGHT = 800;
 
-class MyEventReceiver : public irr::IEventReceiver {
-public:
-	bool OnEvent(const SEvent& event) {
-		return onConsoleEvent(event);
-	}
-};
 
 int entrypoint(int argc, char* argv[])
 {
@@ -40,7 +34,7 @@ int entrypoint(int argc, char* argv[])
 	for (int i=1;i<argc;i++) fullscreen |= !strcmp("-f", argv[i]);
 	//fullscreen = true;
 	
-	MyEventReceiver receiver;
+	ConsoleEventReceiver receiver;
 	IrrlichtDevice *device = createDevice(EDT_OPENGL, dimension2d<u32>(SCREEN_WIDTH, SCREEN_HEIGHT), 32, fullscreen, stencil, vsync, &receiver);
 	if (!device){
 		return 1;
@@ -59,15 +53,14 @@ int entrypoint(int argc, char* argv[])
 	setUpConsole(device);
 
 	//simple scene framework
-	std::unique_ptr<Scene> scene(new DebugDrawScene(device));
-	//std::unique_ptr<Scene> scene(new GameScene(device));
+	//std::unique_ptr<Scene> scene(new DebugDrawScene(device));
+	std::unique_ptr<Scene> scene(new GameScene(device));
 	scene->setUp();
 
 	//Oculus Rift Head Tracking
 	HeadTracking headTracking;
 	headTracking.startUp();
 
-    
 	gAudioMgr->setUp();
 	if(gAudioMgr->isSupport()) {
 		const std::string bg("res/sound/bg.wav");

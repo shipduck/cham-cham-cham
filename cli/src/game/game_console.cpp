@@ -5,6 +5,11 @@
 
 IC_Console gConsole;
 
+bool ConsoleEventReceiver::OnEvent(const irr::SEvent& event) 
+{
+	return onConsoleEvent(event);
+}
+
 void drawConsoleCaptions(irr::IrrlichtDevice *device)
 {
 	auto font = gNormalFont14;

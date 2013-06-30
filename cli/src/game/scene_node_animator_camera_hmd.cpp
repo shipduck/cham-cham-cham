@@ -1,3 +1,4 @@
+﻿// Ŭnicode please 
 // Copyright (C) 2002-2012 Nikolausf Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
@@ -34,7 +35,9 @@ SceneNodeAnimatorCameraHMD::SceneNodeAnimatorCameraHMD(IrrlichtDevice *dev, gui:
 		CursorControl->grab();
 	}
 
-	Device->setEventReceiver(joystick);
+	//device의 이벤트 핸들러는 콘솔이 선점해야한다!
+	//다른 방식으로 이벤트 납치 구현하기
+	//Device->setEventReceiver(joystick);
 	joystick->setDevice(Device);
 	joystick->activateJoystickEvent();
 }
