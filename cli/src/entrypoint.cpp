@@ -30,18 +30,6 @@ public:
 	}
 };
 
-void initConsole(irr::IrrlichtDevice *device, IC_Console *console)
-{
-	//this is how you alter some of the config params
-	console->getConfig().dimensionRatios.Y = 0.8f;
-	console->getConfig().fontName = "res/font_14.xml";
-	//now initialize
-	console->initializeConsole(device->getGUIEnvironment(), dimension2d<s32>(SCREEN_WIDTH, SCREEN_HEIGHT));
-
-	//register common commands
-	console->loadDefaultCommands(device);
-}
-
 int entrypoint(int argc, char* argv[])
 {
 	bool fullscreen = false;
@@ -68,7 +56,7 @@ int entrypoint(int argc, char* argv[])
 	gNormalFont14 = guienv->getFont("res/font_14.xml");
 
 	//initialize the console
-	initConsole(device, &gConsole);
+	setUpConsole(device);
 
 	//simple scene framework
 	std::unique_ptr<Scene> scene(new DebugDrawScene(device));

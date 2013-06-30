@@ -79,3 +79,20 @@ bool onConsoleEvent(const irr::SEvent &event)
 	}
 	return false;
 }
+
+void setUpConsole(irr::IrrlichtDevice *device)
+{
+	//this is how you alter some of the config params
+	gConsole.getConfig().dimensionRatios.Y = 0.8f;
+	gConsole.getConfig().fontName = "res/font_14.xml";
+
+	auto screenSize = device->getVideoDriver()->getScreenSize();
+	int w = screenSize.Width;
+	int h = screenSize.Height;
+
+	//now initialize
+	gConsole.initializeConsole(device->getGUIEnvironment(), dimension2d<s32>(w, h));
+
+	//register common commands
+	gConsole.loadDefaultCommands(device);
+}
