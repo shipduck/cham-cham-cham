@@ -9,6 +9,8 @@
 #include "game/debug_draw_scene.h"
 #include "game/game_scene.h"
 
+#include "util/event_receiver_manager.h"
+
 #include "game/game_console.h"
 
 using namespace irr;
@@ -34,11 +36,18 @@ int entrypoint(int argc, char* argv[])
 	for (int i=1;i<argc;i++) fullscreen |= !strcmp("-f", argv[i]);
 	//fullscreen = true;
 	
-	ConsoleEventReceiver receiver;
-	IrrlichtDevice *device = createDevice(EDT_OPENGL, dimension2d<u32>(SCREEN_WIDTH, SCREEN_HEIGHT), 32, fullscreen, stencil, vsync, &receiver);
+	gEventReceiverMgr->addReceiver(new ConsoleEventReceiver(), 0);
+	IrrlichtDevice *device = createDevice(EDT_OPENGL, dimension2d<u32>(SCREEN_WIDTH, SCREEN_HEIGHT), 32, fullscreen, stencil, vsync, gEventReceiverMgr);
 	if (!device){
 		return 1;
 	}
+	gEventReceiverMgr->setUp(device);
+
+	auto joystickDev = gEventReceiverMgr->getJoystickDev();
+	joystickDev.showInfo();
+	
+	int val = joystickDev.getAxisIntValue<SEvent::SJoystickEvent::AXIS_X>();
+	float val2 = joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_X>();
 	
 	IVideoDriver* driver = device->getVideoDriver();
 	IGUIEnvironment* guienv = device->getGUIEnvironment();
@@ -135,11 +144,9 @@ int entrypoint(int argc, char* argv[])
 	//shut down scene before device drop!
 	scene->shutDown();
 
-	//clean debug tool
 	gDebugDrawMgr->shutDown();
-    
 	gAudioMgr->shutDown();
-
+	gEventReceiverMgr->shutDown();
 	device->drop();	
 	
 	//Deinitialize Oculus LibOVR
