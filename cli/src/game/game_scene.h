@@ -2,7 +2,6 @@
 #pragma once
 
 #include "scene.h"
-#include "game/scene_node_animator_camera_hmd.h"
 
 class GameScene : public Scene {
 public:
@@ -26,5 +25,4 @@ public:
 private:
 	irr::scene::IBillboardSceneNode *bill;
 	irr::scene::ICameraSceneNode* camNode;
-	SceneNodeAnimatorCameraHMD *hmdCam;
 };

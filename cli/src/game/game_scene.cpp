@@ -3,6 +3,7 @@
 #include "game_scene.h"
 #include "scene_helper.h"
 #include "util/debug_draw_manager.h"
+#include "util/event_receiver_manager.h"
 
 using namespace irr;
 using namespace video;
@@ -16,10 +17,45 @@ enum {
 	IDFlag_IsPickable = 1 << 1,
 };
 
+class GameEventReceiver : public ICustomEventReceiver {
+public:
+	virtual ~GameEventReceiver() {}
+	virtual bool OnEvent(const HeadTrackingEvent &evt) {
+		//TODO
+		return false;
+	}
+	virtual bool OnEvent(const irr::SEvent &evt) {
+		switch(evt.EventType) {
+		case EET_JOYSTICK_INPUT_EVENT:
+			onEvent(evt.JoystickEvent);
+			break;
+		case EET_KEY_INPUT_EVENT:
+			onEvent(evt.KeyInput);
+			break;
+		case EET_MOUSE_INPUT_EVENT:
+			onEvent(evt.MouseInput);
+			break;
+		}
+		return false;
+	}
+	void onEvent(const irr::SEvent::SJoystickEvent &evt) {
+		const JoystickDevice &joystickDev = gEventReceiverMgr->getJoystickDev();
+		const SJoystickInfo &joystickInfo = joystickDev.getJoystickInfo();
+		//TODO. joystick 이벤트는 매 프레임 polling으로 들어봐서 printf를 넣으면 도배가 되니까 생략
+	}
+	void onEvent(const irr::SEvent::SKeyInput &evt) {
+		printf("key\n");
+		//TODO
+	}
+	void onEvent(const irr::SEvent::SMouseInput &evt) {
+		printf("mouse\n");
+		//TODO
+	}
+};
+
 
 GameScene::GameScene(irr::IrrlichtDevice *dev)
 	: Scene(dev), 
-	hmdCam(nullptr), 
 	camNode(nullptr), 
 	bill(nullptr)
 {
@@ -73,23 +109,21 @@ void GameScene::setUp()
 		bill->setSize(core::dimension2d<f32>(20.0f, 20.0f));
 		bill->setID(ID_IsNotPickable); // This ensures that we don't accidentally ray-pick it
 	}
+	
+	// event receiver 등록
+	// TODO 이벤트 리시버 제거기능이 없으면 씬 교체시에 문제 발생함
+	gEventReceiverMgr->addReceiver(new GameEventReceiver(), 0);
 }
 
 void GameScene::initCam()
 {
 	ISceneManager* smgr = Device->getSceneManager();
-
-	// Create Camera
-	camNode = smgr->addCameraSceneNode();
-	auto cursorControl = Device->getCursorControl();
-	hmdCam = new SceneNodeAnimatorCameraHMD(Device, cursorControl, 0.3f, 0.10f, 0.0f);
-
-	camNode->addAnimator(hmdCam);
-	camNode->setPosition(core::vector3df(0, 100, 0));
-	camNode->setTarget(core::vector3df(0, 0, 1));
-	camNode->setFarValue(1000.0f);
-	hmdCam->drop();
 	
+	camNode = smgr->addCameraSceneNode();
+	float height = 100;
+	camNode->setPosition(core::vector3df(0, height, 0));
+	camNode->setTarget(core::vector3df(0, height, 1));
+	camNode->setFarValue(1000.0f);
 }
 
 void GameScene::initTargetableObject()

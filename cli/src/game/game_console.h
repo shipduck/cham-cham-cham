@@ -2,10 +2,12 @@
 #pragma once
 
 #include "irrConsole/console.h"
+#include "util/event_receiver_manager.h"
 
-class ConsoleEventReceiver : public irr::IEventReceiver {
+class ConsoleEventReceiver : public ICustomEventReceiver {
 public:
-	bool OnEvent(const irr::SEvent& event);
+	virtual bool OnEvent(const irr::SEvent& event);
+	virtual bool OnEvent(const HeadTrackingEvent &evt) { return false; }
 };
 
 void drawConsoleCaptions(irr::IrrlichtDevice *device);

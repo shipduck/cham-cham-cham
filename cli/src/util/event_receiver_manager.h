@@ -8,7 +8,27 @@ class EventReceiverManager;
 
 extern EventReceiverManager *gEventReceiverMgr;
 
-class EventReceiverManager : public irr::IEventReceiver {
+struct HeadTrackingEvent {
+	HeadTrackingEvent() : Yaw(0), Pitch(0), Roll(0) {}
+	HeadTrackingEvent(float yaw, float pitch, float roll)
+		: Yaw(yaw), Pitch(pitch), Roll(roll) {}
+	float Yaw;
+	float Pitch;
+	float Roll;
+};
+
+// 게임 내부에서 사용하는 Event receiver이다
+// HMD로 얻은 값까지 동일한 구조로 처리하기 위해서 도입함
+class ICustomEventReceiver : public irr::IEventReceiver {
+public:
+	virtual ~ICustomEventReceiver() {}
+	virtual bool OnEvent(const irr::SEvent &evt) = 0;
+	virtual bool OnEvent(const HeadTrackingEvent &evt) = 0;
+};
+
+
+
+class EventReceiverManager : public ICustomEventReceiver {
 public:
 	struct PriorityEventReceiver {
 		PriorityEventReceiver() : Priority(0) {}
@@ -19,7 +39,12 @@ public:
 			this->Receiver = std::move(o.Receiver);
 			return *this;
 		}
-		std::unique_ptr<irr::IEventReceiver> Receiver;
+		std::unique_ptr<ICustomEventReceiver> Receiver;
+		int Priority;
+	};
+
+	struct PriorityCustomEventReceiver {
+		ICustomEventReceiver *Receiver;
 		int Priority;
 	};
 	
@@ -33,21 +58,18 @@ public:
 	void shutDown();
 
 	virtual bool OnEvent(const irr::SEvent &evt);
+	bool OnEvent(const HeadTrackingEvent &evt);
 	/*
 	priority < 0은 high priority로 분리되서 디바이스 보다 먼저 처리됨
 	priority >= 0은 low priority로 분리해서 디바이스 이후에 처리됨
 	priority가 낮을수록 우선순위 높다
 	*/
-	void addReceiver(irr::IEventReceiver *receiver, int priority=0);
+	void addReceiver(ICustomEventReceiver *receiver, int priority=0);
 public:
 	const JoystickDevice &getJoystickDev() const { return *JoystickDev; }
-	const KeyboardDevice &getKeyboardDev() const { return *KeyboardDev; }
-	const MouseDevice &getMouseDev() const { return *MouseDev; }
 
 private:
 	std::unique_ptr<JoystickDevice> JoystickDev;
-	std::unique_ptr<KeyboardDevice> KeyboardDev;
-	std::unique_ptr<MouseDevice> MouseDev;
 
 	PriorityReceiverListType HighPriorityReceiverList;
 	PriorityReceiverListType LowPriorityReceiverList;
@@ -79,27 +101,4 @@ private:
 	irr::core::array<irr::SJoystickInfo> JoystickInfo;
 	irr::SEvent::SJoystickEvent JoystickState;
 	bool SupportJoystick;
-};
-
-class KeyboardDevice : public irr::IEventReceiver {
-public:
-	KeyboardDevice(irr::IrrlichtDevice *dev);
-	virtual bool OnEvent(const irr::SEvent &evt);
-	bool OnEvent(const irr::SEvent::SKeyInput &evt);
-};
-
-class MouseDevice : public irr::IEventReceiver {
-public:
-	MouseDevice(irr::IrrlichtDevice *dev);
-	virtual bool OnEvent(const irr::SEvent &evt);
-	bool OnEvent(const irr::SEvent::SMouseInput &evt);
-
-	const bool isLeftDown() const { return LeftDown; }
-	const bool isRightDown() const { return RightDown; }
-	const irr::core::position2di &getPosition() const { return Position; }
-
-public:
-	bool LeftDown;
-	bool RightDown;
-	irr::core::position2di Position;
 };

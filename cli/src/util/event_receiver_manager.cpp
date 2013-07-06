@@ -17,20 +17,16 @@ EventReceiverManager::~EventReceiverManager()
 void EventReceiverManager::setUp(irr::IrrlichtDevice *dev)
 {
 	JoystickDev.reset(new JoystickDevice(dev));
-	KeyboardDev.reset(new KeyboardDevice(dev));
-	MouseDev.reset(new MouseDevice(dev));
 }
 void EventReceiverManager::shutDown()
 {
 	JoystickDev.reset(nullptr);
-	KeyboardDev.reset(nullptr);
-	MouseDev.reset(nullptr);
 
 	LowPriorityReceiverList.clear();
 	HighPriorityReceiverList.clear();
 }
 
-void EventReceiverManager::addReceiver(irr::IEventReceiver *receiver, int priority)
+void EventReceiverManager::addReceiver(ICustomEventReceiver *receiver, int priority)
 {
 	SR_ASSERT(receiver != nullptr)
 
@@ -51,6 +47,17 @@ void EventReceiverManager::addReceiver(irr::IEventReceiver *receiver, int priori
 	});
 }
 
+bool EventReceiverManager::OnEvent(const HeadTrackingEvent &evt)
+{
+	for(auto &receiver : HighPriorityReceiverList) {
+		receiver.Receiver->OnEvent(evt);
+	}
+	for(auto &receiver : LowPriorityReceiverList) {
+		receiver.Receiver->OnEvent(evt);
+	}
+	return false;
+}
+
 bool EventReceiverManager::OnEvent(const irr::SEvent &evt)
 {
 	for(auto &receiver : HighPriorityReceiverList) {
@@ -60,12 +67,6 @@ bool EventReceiverManager::OnEvent(const irr::SEvent &evt)
 	switch(evt.EventType) {
 	case irr::EET_JOYSTICK_INPUT_EVENT:
 		JoystickDev->OnEvent(evt.JoystickEvent);
-		break;
-	case irr::EET_KEY_INPUT_EVENT:
-		KeyboardDev->OnEvent(evt.KeyInput);
-		break;
-	case irr::EET_MOUSE_INPUT_EVENT:
-		MouseDev->OnEvent(evt.MouseInput);
 		break;
 	default:
 		break;
@@ -127,58 +128,4 @@ void JoystickDevice::showInfo() const
 	} else {
 		std::cout << "Joystick support is not enabled" << std::endl;
 	}
-}
-
-KeyboardDevice::KeyboardDevice(irr::IrrlichtDevice *dev)
-{
-}
-
-bool KeyboardDevice::OnEvent(const irr::SEvent &evt)
-{
-	if(evt.EventType != irr::EET_KEY_INPUT_EVENT) {
-		return false;
-	}
-	return OnEvent(evt.KeyInput);
-}
-bool KeyboardDevice::OnEvent(const irr::SEvent::SKeyInput &evt)
-{
-	return true;
-}
-
-MouseDevice::MouseDevice(irr::IrrlichtDevice *dev)
-{
-}
-
-bool MouseDevice::OnEvent(const irr::SEvent &evt)
-{
-	if(evt.EventType != irr::EET_MOUSE_INPUT_EVENT) {
-		return false;
-	}
-	return OnEvent(evt.MouseInput);
-}
-
-bool MouseDevice::OnEvent(const irr::SEvent::SMouseInput &evt)
-{
-	switch(evt.Event) {
-	case EMIE_LMOUSE_PRESSED_DOWN:
-		LeftDown = true;
-		break;
-	case EMIE_LMOUSE_LEFT_UP:
-		LeftDown = false;
-		break;
-	case EMIE_RMOUSE_PRESSED_DOWN:
-		RightDown = true;
-		break;
-	case EMIE_RMOUSE_LEFT_UP:
-		RightDown = false;
-		break;
-	case EMIE_MOUSE_MOVED:
-		Position.Y = evt.Y;
-		Position.Y = evt.Y;
-		break;
-
-	default:
-		break;
-	}
-	return true;
 }

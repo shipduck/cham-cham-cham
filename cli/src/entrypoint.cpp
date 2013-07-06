@@ -100,16 +100,13 @@ int entrypoint(int argc, char* argv[])
 		}
 
 		// Read-Write Head Tracking Sensor Value to Camera
-		float yaw = 0;
-		float pitch = 0;
-		float roll = 0;
 		if(headTracking.isConnected()) {
-			headTracking.getValue(&yaw, &pitch, &roll);			
+			HeadTrackingEvent evt;
+			headTracking.getValue(&evt.Yaw, &evt.Pitch, &evt.Roll);
+			gEventReceiverMgr->OnEvent(evt);
 		}
-		//hmdCam->setHeadTrackingValue(yaw, pitch, roll);
 
 		scene->update(frameDeltaTime);
-
 		{
 			driver->beginScene(true, true, video::SColor(255, 10, 10, 10));
 			scene->draw();
