@@ -6,6 +6,7 @@ using namespace core;
 
 JoystickInputEvent::JoystickInputEvent()
 	: Device(nullptr),
+	SupportJoystick(false),
 	XMovement(0.0f),
 	YMovement(0.0f),
 	XView(0.0f),
@@ -20,15 +21,24 @@ void JoystickInputEvent::setDevice(irr::IrrlichtDevice* device)
 }
 void JoystickInputEvent::activateJoystickEvent()
 {
-	Device->activateJoysticks(JoystickInfo);
+	SupportJoystick = Device->activateJoysticks(JoystickInfo);
 }
 
 bool JoystickInputEvent::OnEvent(const irr::SEvent& event)
 {
-	if (event.EventType == EET_JOYSTICK_INPUT_EVENT && event.JoystickEvent.Joystick == 0) {
-		JoystickState = event.JoystickEvent;
+	if(event.EventType != irr::EET_JOYSTICK_INPUT_EVENT) {
+		return false;
 	}
 
+	if(event.JoystickEvent.Joystick == 0) {
+		return false;
+	}
+
+	return OnEvent(event.JoystickEvent);
+}
+bool JoystickInputEvent::OnEvent(const irr::SEvent::SJoystickEvent &event)
+{
+	JoystickState = event;
 	return true;
 }
 
@@ -99,6 +109,36 @@ float JoystickInputEvent::getLeftRightRotation() const
 float JoystickInputEvent::getUpDownRotation() const
 {
 	return YView;
+}
+
+void JoystickInputEvent::showInfo() const
+{
+	if(SupportJoystick) {
+		std::cout << "Joystick support is enabled and " << JoystickInfo.size();
+		std::cout<< "joystick(s) are present." << std::endl;
+
+		for(size_t joystick = 0 ; joystick < JoystickInfo.size() ; ++joystick) {
+			std::cout << "Joystick " << joystick << ":" << std::endl;
+			std::cout << "\tName: " << JoystickInfo[joystick].Name.c_str() << std::endl;
+			std::cout << "\tAxes: " << JoystickInfo[joystick].Axes << std::endl;
+			std::cout << "\tButtons: " << JoystickInfo[joystick].Buttons << std::endl;
+			std::cout << "\tHat is: ";
+
+			switch(JoystickInfo[joystick].PovHat) {
+			case SJoystickInfo::POV_HAT_PRESENT:
+				std::cout << "present" << std::endl;
+				break;
+			case SJoystickInfo::POV_HAT_ABSENT:
+				std::cout << "absent" << std::endl;
+				break;
+			case SJoystickInfo::POV_HAT_UNKNOWN:
+				std::cout << "unknown" << std::endl;
+				break;
+			}
+		}
+	} else {
+		std::cout << "Joystick support is not enabled" << std::endl;
+	}
 }
 
 const irr::SEvent::SJoystickEvent& JoystickInputEvent::getJoystickState() const

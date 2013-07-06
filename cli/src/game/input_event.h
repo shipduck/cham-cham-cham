@@ -1,11 +1,14 @@
 #pragma once
 
-class InputEvent : public irr::IEventReceiver
+#include "util/event_receiver_manager.h"
+
+class InputEvent : public ICustomEventReceiver
 {
 public:
 	virtual ~InputEvent() {};
 
 	virtual bool OnEvent(const irr::SEvent& event) override = 0;
+	virtual bool OnEvent(const HeadTrackingEvent &evt) override = 0;
 
 	virtual void update() = 0;
 

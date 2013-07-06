@@ -11,6 +11,8 @@ public:
 	void activateJoystickEvent();
 
 	bool OnEvent(const irr::SEvent& event) override;
+	bool OnEvent(const irr::SEvent::SJoystickEvent &evt);
+	bool OnEvent(const HeadTrackingEvent &evt) override { return false;}
 
 	void update() override;
 
@@ -20,12 +22,15 @@ public:
 	float getLeftRightRotation() const override;
 	float getUpDownRotation() const override;
 
+	void showInfo() const;
+
 	const irr::SEvent::SJoystickEvent& getJoystickState() const;
 	const irr::core::array<irr::SJoystickInfo>& getJoystickInfo() const;
 private:
 	irr::IrrlichtDevice* Device;
 	irr::SEvent::SJoystickEvent JoystickState;
 	irr::core::array<irr::SJoystickInfo> JoystickInfo;
+	bool SupportJoystick;
 
 	irr::f32 XMovement;
 	irr::f32 YMovement;

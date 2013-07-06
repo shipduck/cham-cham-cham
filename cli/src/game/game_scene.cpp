@@ -4,6 +4,7 @@
 #include "scene_helper.h"
 #include "util/debug_draw_manager.h"
 #include "util/event_receiver_manager.h"
+#include "game/joystick_input_event.h"
 
 using namespace irr;
 using namespace video;
@@ -39,8 +40,8 @@ public:
 		return false;
 	}
 	void onEvent(const irr::SEvent::SJoystickEvent &evt) {
-		const JoystickDevice &joystickDev = gEventReceiverMgr->getJoystickDev();
-		const SJoystickInfo &joystickInfo = joystickDev.getJoystickInfo();
+		const JoystickInputEvent &joystickDev = gEventReceiverMgr->getJoystickDev();
+		const SJoystickInfo &joystickInfo = joystickDev.getJoystickInfo()[0];
 		//TODO. joystick 이벤트는 매 프레임 polling으로 들어봐서 printf를 넣으면 도배가 되니까 생략
 	}
 	void onEvent(const irr::SEvent::SKeyInput &evt) {
@@ -57,7 +58,10 @@ public:
 GameScene::GameScene(irr::IrrlichtDevice *dev)
 	: Scene(dev), 
 	camNode(nullptr), 
-	bill(nullptr)
+	bill(nullptr),
+	MoveSpeed(300),
+	RotateSpeed(300),
+	JumpSpeed(300)
 {
 }
 
@@ -336,6 +340,51 @@ void GameScene::update(int ms)
 	ISceneManager* smgr = Device->getSceneManager();
 	IGUIEnvironment* guienv = Device->getGUIEnvironment();
 	scene::ISceneCollisionManager* collMan = smgr->getSceneCollisionManager();
+
+	gEventReceiverMgr->update(ms);
+
+	const auto& joystick = gEventReceiverMgr->getJoystickDev();
+	const auto& JoystickInfo = joystick.getJoystickInfo();
+
+	if(JoystickInfo.size() == 0) {
+		return;
+	}
+
+	////////////////////////////////////////
+	f32 moveHorizontal = joystick.getHorizontalMovement(); // Range is -1.f for full left to +1.f for full right
+	f32 moveVertical = joystick.getVerticalMovement(); // -1.f for full down to +1.f for full up.
+	f32 rotateHoriziontal = joystick.getLeftRightRotation();
+	f32 rotateVertical = joystick.getUpDownRotation();
+
+	float verticalMoveDelta = moveVertical * MoveSpeed * ms / 1000.0f;
+	float horizontalMoveDelta = moveHorizontal * MoveSpeed * ms / 1000.0f;
+
+	vector3df forward = camNode->getTarget() - camNode->getPosition();
+	f32 distance = sqrt(pow(forward.Z,2) + pow(forward.X,2));
+
+	float sine = forward.Z / distance;
+	float cosine = forward.X / distance;
+
+	// Rotate -90
+	float sineTemp = sine;
+	sine = -cosine;
+	cosine = sineTemp;
+
+	// update position
+	vector3df pos = camNode->getPosition();
+	if(!core::equals(moveHorizontal, 0.f) || !core::equals(moveVertical, 0.f)) {
+		vector3df moveVector;
+
+		moveVector.X  = horizontalMoveDelta * cosine - verticalMoveDelta * sine;
+		moveVector.Z = horizontalMoveDelta * sine + verticalMoveDelta * cosine;
+
+		pos.X += moveVector.X;
+		pos.Z += moveVector.Z;
+
+		//printf("sine : %f, cosine : %f\n", sine, cosine);
+	}
+	// write translation
+	camNode->setPosition(pos);
 
 
 	// All intersections in this example are done with a ray cast out from the camera to

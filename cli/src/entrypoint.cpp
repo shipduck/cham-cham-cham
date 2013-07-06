@@ -11,6 +11,7 @@
 
 #include "util/event_receiver_manager.h"
 
+#include "game/joystick_input_event.h"
 #include "game/game_console.h"
 
 using namespace irr;
@@ -45,9 +46,6 @@ int entrypoint(int argc, char* argv[])
 
 	auto joystickDev = gEventReceiverMgr->getJoystickDev();
 	joystickDev.showInfo();
-	
-	int val = joystickDev.getAxisIntValue<SEvent::SJoystickEvent::AXIS_X>();
-	float val2 = joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_X>();
 	
 	IVideoDriver* driver = device->getVideoDriver();
 	IGUIEnvironment* guienv = device->getGUIEnvironment();

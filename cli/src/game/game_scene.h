@@ -25,4 +25,8 @@ public:
 private:
 	irr::scene::IBillboardSceneNode *bill;
 	irr::scene::ICameraSceneNode* camNode;
+
+	irr::f32 MoveSpeed;
+	irr::f32 RotateSpeed;
+	irr::f32 JumpSpeed;
 };

@@ -1,6 +1,7 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
 #include "event_receiver_manager.h"
+#include "game/joystick_input_event.h"
 
 using namespace irr;
 using namespace scene;
@@ -16,7 +17,10 @@ EventReceiverManager::~EventReceiverManager()
 }
 void EventReceiverManager::setUp(irr::IrrlichtDevice *dev)
 {
-	JoystickDev.reset(new JoystickDevice(dev));
+	auto* joystick = new JoystickInputEvent;
+	joystick->setDevice(dev);
+	joystick->activateJoystickEvent();
+	JoystickDev.reset(joystick);
 }
 void EventReceiverManager::shutDown()
 {
@@ -24,6 +28,10 @@ void EventReceiverManager::shutDown()
 
 	LowPriorityReceiverList.clear();
 	HighPriorityReceiverList.clear();
+}
+void EventReceiverManager::update(int ms)
+{
+	JoystickDev->update();
 }
 
 void EventReceiverManager::addReceiver(ICustomEventReceiver *receiver, int priority)
@@ -77,55 +85,4 @@ bool EventReceiverManager::OnEvent(const irr::SEvent &evt)
 	}
 
 	return false;
-}
-
-JoystickDevice::JoystickDevice(irr::IrrlichtDevice *dev)
-	: Device(dev), SupportJoystick(false)
-{
-	if(dev != nullptr) {
-		SupportJoystick = Device->activateJoysticks(JoystickInfo);
-	}
-}
-bool JoystickDevice::OnEvent(const irr::SEvent &evt)
-{
-	if(evt.EventType != irr::EET_JOYSTICK_INPUT_EVENT) {
-		return false;
-	}
-	return OnEvent(evt.JoystickEvent);
-}
-
-bool JoystickDevice::OnEvent(const irr::SEvent::SJoystickEvent &evt)
-{
-	JoystickState = evt;
-	return true;
-}
-
-void JoystickDevice::showInfo() const
-{
-	if(SupportJoystick) {
-		std::cout << "Joystick support is enabled and " << JoystickInfo.size();
-		std::cout<< "joystick(s) are present." << std::endl;
-
-		for(size_t joystick = 0 ; joystick < JoystickInfo.size() ; ++joystick) {
-			std::cout << "Joystick " << joystick << ":" << std::endl;
-			std::cout << "\tName: " << JoystickInfo[joystick].Name.c_str() << std::endl;
-			std::cout << "\tAxes: " << JoystickInfo[joystick].Axes << std::endl;
-			std::cout << "\tButtons: " << JoystickInfo[joystick].Buttons << std::endl;
-			std::cout << "\tHat is: ";
-
-			switch(JoystickInfo[joystick].PovHat) {
-			case SJoystickInfo::POV_HAT_PRESENT:
-				std::cout << "present" << std::endl;
-				break;
-			case SJoystickInfo::POV_HAT_ABSENT:
-				std::cout << "absent" << std::endl;
-				break;
-			case SJoystickInfo::POV_HAT_UNKNOWN:
-				std::cout << "unknown" << std::endl;
-				break;
-			}
-		}
-	} else {
-		std::cout << "Joystick support is not enabled" << std::endl;
-	}
 }

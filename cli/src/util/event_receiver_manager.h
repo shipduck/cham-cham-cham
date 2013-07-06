@@ -1,7 +1,7 @@
 ﻿// Ŭnicode please 
 #pragma once
 
-class JoystickDevice;
+class JoystickInputEvent;
 class KeyboardDevice;
 class MouseDevice;
 class EventReceiverManager;
@@ -56,6 +56,7 @@ public:
 
 	void setUp(irr::IrrlichtDevice *dev);
 	void shutDown();
+	void update(int ms);
 
 	virtual bool OnEvent(const irr::SEvent &evt);
 	bool OnEvent(const HeadTrackingEvent &evt);
@@ -66,39 +67,11 @@ public:
 	*/
 	void addReceiver(ICustomEventReceiver *receiver, int priority=0);
 public:
-	const JoystickDevice &getJoystickDev() const { return *JoystickDev; }
+	const JoystickInputEvent &getJoystickDev() const { return *JoystickDev; }
 
 private:
-	std::unique_ptr<JoystickDevice> JoystickDev;
+	std::unique_ptr<JoystickInputEvent> JoystickDev;
 
 	PriorityReceiverListType HighPriorityReceiverList;
 	PriorityReceiverListType LowPriorityReceiverList;
-};
-
-class JoystickDevice : public irr::IEventReceiver {
-public:
-	JoystickDevice(irr::IrrlichtDevice *dev);
-	virtual bool OnEvent(const irr::SEvent &evt);
-	bool OnEvent(const irr::SEvent::SJoystickEvent &evt);
-
-	void showInfo() const;
-
-	const irr::SJoystickInfo &getJoystickInfo() const { return JoystickInfo[0]; }
-
-	template<int Axis>
-	float getAxisFloatValue() const {
-		int raw = getAxisIntValue<Axis>();
-		return static_cast<float>(raw / 32767.0f);
-	}
-
-	template<int Axis>
-	int getAxisIntValue() const {
-		const auto &joystickData = JoystickState;
-		return joystickData.Axis[Axis];
-	}
-private:
-	irr::IrrlichtDevice *Device;
-	irr::core::array<irr::SJoystickInfo> JoystickInfo;
-	irr::SEvent::SJoystickEvent JoystickState;
-	bool SupportJoystick;
 };
