@@ -15,9 +15,6 @@ public:
 	bool OnEvent(const irr::SEvent::SJoystickEvent &evt);
 	bool OnEvent(const HeadTrackingEvent &evt) override { return false;}
 
-	float getHorizontalMovement() const override;
-	float getVerticalMovement() const override;
-
 	float getLeftRightRotation() const override;
 	float getUpDownRotation() const override;
 
@@ -28,9 +25,6 @@ private:
 	irr::SEvent::SJoystickEvent JoystickState;
 	irr::core::array<irr::SJoystickInfo> JoystickInfo;
 	bool SupportJoystick;
-
-	irr::f32 XMovement;
-	irr::f32 YMovement;
 
 	irr::f32 XView;
 	irr::f32 YView;

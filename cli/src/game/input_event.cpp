@@ -4,6 +4,10 @@
 using namespace irr;
 
 GameEventReceiver::GameEventReceiver() 
+	: leftKeyDown_(false),
+	rightKeyDown_(false),
+	upKeyDown_(false),
+	downKeyDown_(false)
 {
 	forwardKeyList_[0] = irr::KEY_UP;
 	forwardKeyList_[1] = irr::KEY_KEY_W;
@@ -16,6 +20,24 @@ GameEventReceiver::GameEventReceiver()
 
 	rightKeyList_[0] = irr::KEY_RIGHT;
 	rightKeyList_[1] = irr::KEY_KEY_D;
+}
+
+MoveEvent GameEventReceiver::getMoveEvent() const
+{
+	MoveEvent evt = keyboardMoveEvent_;
+	if(joystickMoveEvent_.forwardBackward != 0) {
+		evt.forwardBackward = joystickMoveEvent_.forwardBackward;
+	}
+	if(joystickMoveEvent_.leftRight != 0) {
+		evt.leftRight = joystickMoveEvent_.leftRight;
+	}
+	return evt;
+}
+LookEvent GameEventReceiver::getLookEvent() const
+{
+	LookEvent evt = mouseLookEvent_;
+	//TODO
+	return evt;
 }
 
 bool GameEventReceiver::OnEvent(const HeadTrackingEvent &evt)
@@ -42,42 +64,82 @@ bool GameEventReceiver::OnEvent(const irr::SEvent &evt)
 
 void GameEventReceiver::onEvent(const irr::SEvent::SJoystickEvent &evt) 
 {
+	MoveEvent &moveEvent = joystickMoveEvent_;
+	LookEvent &lookEvent = joystickLookEvent_;
+
 	const JoystickDevice &joystickDev = gEventReceiverMgr->getJoystickDev();
 	const SJoystickInfo &joystickInfo = joystickDev.getJoystickInfo()[0];
-	//TODO. joystick 이벤트는 매 프레임 polling으로 들어봐서 printf를 넣으면 도배가 되니까 생략
+
+	float XMovement = joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_X>();
+	float YMovement = -joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_Y>();
+	const float DEAD_ZONE = 0.20f;
+
+	if(fabs(XMovement) < DEAD_ZONE) {
+		XMovement = 0.0f;
+	}
+	if(fabs(YMovement) < DEAD_ZONE) {
+		YMovement = 0.0f;
+	}
+
+	const u16 povDegrees = evt.POV / 100;
+	if(povDegrees < 360) {
+		if(povDegrees > 0 && povDegrees < 180) {
+			XMovement = 1.f;
+		} else if(povDegrees > 180) {
+			XMovement = -1.f;
+		}
+		if(povDegrees > 90 && povDegrees < 270) {
+			YMovement = -1.f;
+		} else if(povDegrees > 270 || povDegrees < 90) {
+			YMovement = +1.f;
+		}
+	}
+
+	moveEvent.forwardBackward = YMovement;
+	moveEvent.leftRight = XMovement;
+
+	//TODO move가 실제로 발생했을떄만 이동처리하는거 구현할때 살려서 쓴다
+	/*
+	if(!core::equals(XMovement, 0.f) || !core::equals(YMovement, 0.f)) {
+		Moved = true;
+	} else {
+		Moved = false;
+	}
+	*/
 }
 
 void GameEventReceiver::onEvent(const irr::SEvent::SKeyInput &evt) 
 {
+	MoveEvent &moveEvent = keyboardMoveEvent_;
+
 	//processing move event
 	if(std::find(getForwardKeyList().begin(), getForwardKeyList().end(), evt.Key) != getForwardKeyList().end()) {
-		if(evt.PressedDown) {
-			moveEvent_.forwardBackward = 1.0f;
-		} else {
-			moveEvent_.forwardBackward = 0;
-		}
+		upKeyDown_ = evt.PressedDown;
 	}
 	if(std::find(getBackwardKeyList().begin(), getBackwardKeyList().end(), evt.Key) != getBackwardKeyList().end()) {
-		if(evt.PressedDown) {
-			moveEvent_.forwardBackward = -1.0f;
-		} else {
-			moveEvent_.forwardBackward = 0;
-		}
+		downKeyDown_ = evt.PressedDown;
 	}
 	if(std::find(getLeftKeyList().begin(), getLeftKeyList().end(), evt.Key) != getLeftKeyList().end()) {
-		if(evt.PressedDown) {
-			moveEvent_.leftRight = -1.0f;
-		} else {
-			moveEvent_.leftRight = 0;
-		}
+		leftKeyDown_ = evt.PressedDown;
 	}
 	if(std::find(getRightKeyList().begin(), getRightKeyList().end(), evt.Key) != getRightKeyList().end()) {
-		if(evt.PressedDown) {
-			moveEvent_.leftRight = 1.0f;
-		} else {
-			moveEvent_.leftRight = 0;
-		}
+		rightKeyDown_ = evt.PressedDown;
 	}
+
+	MoveEvent moveEvt;
+	if(leftKeyDown_) {
+		moveEvt.leftRight -= 1.0f;
+	}
+	if(rightKeyDown_) {
+		moveEvt.leftRight += 1.0f;
+	}
+	if(upKeyDown_) {
+		moveEvt.forwardBackward += 1.0f;
+	}
+	if(downKeyDown_) {
+		moveEvt.forwardBackward -= 1.0f;
+	}
+	keyboardMoveEvent_ = moveEvt;
 }
 
 void GameEventReceiver::onEvent(const irr::SEvent::SMouseInput &evt)

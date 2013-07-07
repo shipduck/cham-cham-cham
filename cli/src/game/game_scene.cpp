@@ -359,11 +359,11 @@ void GameScene::update(int ms)
 	scene::ISceneCollisionManager* collMan = smgr->getSceneCollisionManager();
 
 	//방향처리의 우선순위가 이동처리보다 높다
-	const LookEvent &lookEvent = eventReceiver_->getLookEvent();
+	LookEvent lookEvent = eventReceiver_->getLookEvent();
 	updateLookEvent(ms, lookEvent);
 
 	//앞으로 이동하는거 처리
-	const MoveEvent &moveEvent = eventReceiver_->getMoveEvent();
+	MoveEvent moveEvent = eventReceiver_->getMoveEvent();
 	updateMoveEvent(ms, moveEvent);
 
 	/*
