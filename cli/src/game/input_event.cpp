@@ -1,8 +1,10 @@
 ﻿// Ŭnicode please
 #include "stdafx.h"
 #include "input_event.h"
+#include "key_mapping.h"
 
 using namespace irr;
+
 
 MoveEvent MoveEvent::merge(const MoveEvent &o) const
 {
@@ -32,19 +34,14 @@ GameEventReceiver::GameEventReceiver()
 	: leftKeyDown_(false),
 	rightKeyDown_(false),
 	upKeyDown_(false),
-	downKeyDown_(false)
+	downKeyDown_(false),
+	keyMapping_(new KeyMapping())
 {
-	forwardKeyList_[0] = irr::KEY_UP;
-	forwardKeyList_[1] = irr::KEY_KEY_W;
+	
+}
 
-	backwardKeyList_[0] = irr::KEY_DOWN;
-	backwardKeyList_[1] = irr::KEY_KEY_S;
-
-	leftKeyList_[0] = irr::KEY_LEFT;
-	leftKeyList_[1] = irr::KEY_KEY_A;
-
-	rightKeyList_[0] = irr::KEY_RIGHT;
-	rightKeyList_[1] = irr::KEY_KEY_D;
+GameEventReceiver::~GameEventReceiver()
+{
 }
 
 MoveEvent GameEventReceiver::getMoveEvent() const
@@ -144,17 +141,41 @@ void GameEventReceiver::onEvent(const irr::SEvent::SKeyInput &evt)
 {
 	MoveEvent &moveEvent = keyboardMoveEvent_;
 
+	struct KeyCompFunctor {
+		KeyCompFunctor(irr::EKEY_CODE key) : key(key) {}
+		irr::EKEY_CODE key;
+
+		bool operator()(const KeyMapData &a) {
+			return (a.keyCode == key);
+		}
+	};
+
 	//processing move event
-	if(std::find(getForwardKeyList().begin(), getForwardKeyList().end(), evt.Key) != getForwardKeyList().end()) {
+	auto forwardIt = keyMapping_->getForwardKeyList().begin();
+	auto forwardEndit = keyMapping_->getForwardKeyList().end();
+	auto forwardFound = std::find_if(forwardIt, forwardEndit, KeyCompFunctor(evt.Key));
+	if(forwardFound != forwardEndit) {
 		upKeyDown_ = evt.PressedDown;
 	}
-	if(std::find(getBackwardKeyList().begin(), getBackwardKeyList().end(), evt.Key) != getBackwardKeyList().end()) {
+
+	auto backwardIt = keyMapping_->getBackwardKeyList().begin();
+	auto backwardEndit = keyMapping_->getBackwardKeyList().end();
+	auto backwardFound = std::find_if(backwardIt, backwardEndit, KeyCompFunctor(evt.Key));
+	if(backwardFound != backwardEndit) {
 		downKeyDown_ = evt.PressedDown;
 	}
-	if(std::find(getLeftKeyList().begin(), getLeftKeyList().end(), evt.Key) != getLeftKeyList().end()) {
+
+	auto leftIt = keyMapping_->getLeftKeyList().begin();
+	auto leftEndit = keyMapping_->getLeftKeyList().end();
+	auto leftFound = std::find_if(leftIt, leftEndit, KeyCompFunctor(evt.Key));
+	if(leftFound != leftEndit) {
 		leftKeyDown_ = evt.PressedDown;
 	}
-	if(std::find(getRightKeyList().begin(), getRightKeyList().end(), evt.Key) != getRightKeyList().end()) {
+
+	auto rightIt = keyMapping_->getRightKeyList().begin();
+	auto rightEndit = keyMapping_->getRightKeyList().end();
+	auto rightFound = std::find_if(rightIt, rightEndit, KeyCompFunctor(evt.Key));
+	if(rightFound != rightEndit) {
 		rightKeyDown_ = evt.PressedDown;
 	}
 
