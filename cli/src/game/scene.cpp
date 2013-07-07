@@ -4,6 +4,7 @@
 #include "util/debug_draw_manager.h"
 
 #include "hmd/HMDStereoRender.h"
+#include "hmd/hmd_event_receiver.h"
 
 using namespace irr;
 using namespace video;
@@ -55,6 +56,10 @@ void Scene::shutDown()
 
 void Scene::drawAllNormal(irr::scene::ISceneManager *smgr)
 {
+	IVideoDriver* driver = Device->getVideoDriver();
+	int w = driver->getScreenSize().Width;
+	int h = driver->getScreenSize().Height;
+	driver->setViewPort(core::recti(0, 0, w, h));
 	smgr->drawAll();
 }
 
@@ -70,7 +75,10 @@ void Scene::draw()
 	ISceneManager* smgr = Device->getSceneManager();
 	
 	// draw the 3d scene
-	drawAllNormal(smgr);
-	//drawAllStereo(smgr);
+	if(gHMDEventReceiver->isSupportHMD()) {
+		drawAllStereo(smgr);
+	} else {
+		drawAllNormal(smgr);
+	}
 	//smgr->drawAll();
 }

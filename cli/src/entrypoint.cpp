@@ -5,6 +5,7 @@
 #include "util/audio_manager.h"
 
 #include "hmd/head_tracking.h"
+#include "hmd/hmd_event_receiver.h"
 
 // scene
 #include "game/debug_draw_scene.h"
@@ -37,6 +38,7 @@ int entrypoint(int argc, char* argv[])
 	//fullscreen = true;
 	
 	gEventReceiverMgr->addReceiver(new ConsoleEventReceiver(), 0);
+	gHMDEventReceiver = static_cast<HMDEventReceiver*>(gEventReceiverMgr->addReceiver(new HMDEventReceiver(), 0));
 	IrrlichtDevice *device = createDevice(EDT_OPENGL, dimension2d<u32>(SCREEN_WIDTH, SCREEN_HEIGHT), 32, fullscreen, stencil, vsync, gEventReceiverMgr);
 	if (!device){
 		return 1;
