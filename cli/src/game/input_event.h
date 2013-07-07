@@ -2,19 +2,20 @@
 
 #include "util/event_receiver_manager.h"
 
-struct InputEvent {
-};
-
-struct MoveEvent : public InputEvent {
+struct MoveEvent {
 	MoveEvent() : forwardBackward(0.0f), leftRight(0.0f) {}
 	float forwardBackward;
 	float leftRight;
+
+	MoveEvent merge(const MoveEvent &o) const;
 };
 
-struct LookEvent : public InputEvent {
+struct LookEvent {
 	LookEvent() : horizontalRotation(0), verticalRotation(0) {}
 	float horizontalRotation;
 	float verticalRotation;
+
+	LookEvent merge(const LookEvent &o) const;
 };
 
 

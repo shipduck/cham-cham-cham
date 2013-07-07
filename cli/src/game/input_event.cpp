@@ -1,7 +1,32 @@
+ï»¿// Å¬nicode please
 #include "stdafx.h"
 #include "input_event.h"
 
 using namespace irr;
+
+MoveEvent MoveEvent::merge(const MoveEvent &o) const
+{
+	MoveEvent tmp = *this;
+	if(tmp.forwardBackward == 0.0f && o.forwardBackward != 0.0f) {
+		tmp.forwardBackward = o.forwardBackward;
+	}
+	if(tmp.leftRight == 0.0f && o.leftRight != 0.0f) {
+		tmp.leftRight = o.leftRight;
+	}
+	return tmp;
+}
+
+LookEvent LookEvent::merge(const LookEvent &o) const
+{
+	LookEvent tmp = *this;
+	if(tmp.horizontalRotation == 0.0f && o.horizontalRotation != 0.0f) {
+		tmp.horizontalRotation = o.horizontalRotation;
+	}
+	if(tmp.verticalRotation == 0.0f && o.verticalRotation != 0.0f) {
+		tmp.verticalRotation = o.verticalRotation;
+	}
+	return tmp;
+}
 
 GameEventReceiver::GameEventReceiver() 
 	: leftKeyDown_(false),
@@ -24,24 +49,12 @@ GameEventReceiver::GameEventReceiver()
 
 MoveEvent GameEventReceiver::getMoveEvent() const
 {
-	MoveEvent evt = keyboardMoveEvent_;
-	if(joystickMoveEvent_.forwardBackward != 0) {
-		evt.forwardBackward = joystickMoveEvent_.forwardBackward;
-	}
-	if(joystickMoveEvent_.leftRight != 0) {
-		evt.leftRight = joystickMoveEvent_.leftRight;
-	}
+	MoveEvent evt = keyboardMoveEvent_.merge(joystickMoveEvent_);
 	return evt;
 }
 LookEvent GameEventReceiver::getLookEvent() const
 {
-	LookEvent evt = mouseLookEvent_;
-	if(joystickLookEvent_.horizontalRotation != 0) {
-		evt.horizontalRotation = joystickLookEvent_.horizontalRotation;
-	}
-	if(joystickLookEvent_.verticalRotation != 0) {
-		evt.verticalRotation = joystickLookEvent_.verticalRotation;
-	}
+	LookEvent evt = mouseLookEvent_.merge(joystickLookEvent_);
 	return evt;
 }
 
@@ -107,7 +120,7 @@ void GameEventReceiver::onEvent(const irr::SEvent::SJoystickEvent &evt)
 	float XView = joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_R>();
 	float YView = joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_U>();
 
-	YView = 0.0f;	//À§¾Æ·¡ º¸´Â°Å ±¸ÇöÇÏ±âÀü±îÁö´Â ¸·¾Æ³õ±â
+	YView = 0.0f;	//ìœ„ì•„ëž˜ ë³´ëŠ”ê±° êµ¬í˜„í•˜ê¸°ì „ê¹Œì§€ëŠ” ë§‰ì•„ë†“ê¸°
 	if(fabs(XView) < DEAD_ZONE) {
 		XView = 0.0f;
 	}
@@ -117,7 +130,7 @@ void GameEventReceiver::onEvent(const irr::SEvent::SJoystickEvent &evt)
 	lookEvent.horizontalRotation = XView;
 	lookEvent.verticalRotation = YView;
 
-	//TODO move°¡ ½ÇÁ¦·Î ¹ß»ýÇßÀ»‹š¸¸ ÀÌµ¿Ã³¸®ÇÏ´Â°Å ±¸ÇöÇÒ¶§ »ì·Á¼­ ¾´´Ù
+	//TODO moveê°€ ì‹¤ì œë¡œ ë°œìƒí–ˆì„ë–„ë§Œ ì´ë™ì²˜ë¦¬í•˜ëŠ”ê±° êµ¬í˜„í• ë•Œ ì‚´ë ¤ì„œ ì“´ë‹¤
 	/*
 	if(!core::equals(XMovement, 0.f) || !core::equals(YMovement, 0.f)) {
 		Moved = true;

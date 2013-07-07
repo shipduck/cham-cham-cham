@@ -1,7 +1,6 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
 #include "event_receiver_manager.h"
-#include "game/joystick_input_event.h"
 
 using namespace irr;
 using namespace scene;
