@@ -3,7 +3,8 @@
 #include "entrypoint.h"
 #include "util/debug_draw_manager.h"
 #include "util/audio_manager.h"
-#include "util/head_tracking.h"
+
+#include "hmd/head_tracking.h"
 
 // scene
 #include "game/debug_draw_scene.h"

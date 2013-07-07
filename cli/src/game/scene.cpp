@@ -2,7 +2,8 @@
 #include "stdafx.h"
 #include "scene.h"
 #include "util/debug_draw_manager.h"
-#include "util/HMDStereoRender.h"
+
+#include "hmd/HMDStereoRender.h"
 
 using namespace irr;
 using namespace video;
