@@ -1,9 +1,7 @@
 ﻿// Ŭnicode please 
 #pragma once
 
-class JoystickInputEvent;
-class KeyboardDevice;
-class MouseDevice;
+class JoystickDevice;
 class EventReceiverManager;
 
 extern EventReceiverManager *gEventReceiverMgr;
@@ -26,28 +24,21 @@ public:
 	virtual bool OnEvent(const HeadTrackingEvent &evt) = 0;
 };
 
-
-
 class EventReceiverManager : public ICustomEventReceiver {
 public:
 	struct PriorityEventReceiver {
-		PriorityEventReceiver() : Priority(0) {}
+		PriorityEventReceiver() : priority(0) {}
 		PriorityEventReceiver(PriorityEventReceiver&& o) 
-			: Priority(o.Priority), Receiver(std::move(o.Receiver)) { }
+			: priority(o.priority), receiver(std::move(o.receiver)) { }
 		PriorityEventReceiver &operator=(PriorityEventReceiver&& o) {
-			this->Priority = o.Priority;
-			this->Receiver = std::move(o.Receiver);
+			this->priority = o.priority;
+			this->receiver = std::move(o.receiver);
 			return *this;
 		}
-		std::unique_ptr<ICustomEventReceiver> Receiver;
-		int Priority;
+		std::unique_ptr<ICustomEventReceiver> receiver;
+		int priority;
 	};
 
-	struct PriorityCustomEventReceiver {
-		ICustomEventReceiver *Receiver;
-		int Priority;
-	};
-	
 	typedef std::vector<PriorityEventReceiver> PriorityReceiverListType;
 
 public:
@@ -56,7 +47,6 @@ public:
 
 	void setUp(irr::IrrlichtDevice *dev);
 	void shutDown();
-	void update(int ms);
 
 	virtual bool OnEvent(const irr::SEvent &evt);
 	bool OnEvent(const HeadTrackingEvent &evt);
@@ -65,13 +55,44 @@ public:
 	priority >= 0은 low priority로 분리해서 디바이스 이후에 처리됨
 	priority가 낮을수록 우선순위 높다
 	*/
-	void addReceiver(ICustomEventReceiver *receiver, int priority=0);
+	ICustomEventReceiver *addReceiver(ICustomEventReceiver *receiver, int priority=0);
+
 public:
-	const JoystickInputEvent &getJoystickDev() const { return *JoystickDev; }
+	const JoystickDevice &getJoystickDev() const { return *joystickDev_; }
 
 private:
-	std::unique_ptr<JoystickInputEvent> JoystickDev;
+	std::unique_ptr<JoystickDevice> joystickDev_;
 
-	PriorityReceiverListType HighPriorityReceiverList;
-	PriorityReceiverListType LowPriorityReceiverList;
+	PriorityReceiverListType highPriorityReceiverList_;
+	PriorityReceiverListType lowPriorityReceiverList_;
+};
+
+class JoystickDevice : public irr::IEventReceiver {
+public:
+	JoystickDevice();
+	void setDevice(irr::IrrlichtDevice* device);
+
+	virtual bool OnEvent(const irr::SEvent &evt);
+	bool OnEvent(const irr::SEvent::SJoystickEvent &evt);
+
+	void showInfo() const;
+
+	const irr::core::array<irr::SJoystickInfo> &getJoystickInfo() const { return joystickInfo_; }
+
+	template<int Axis>
+	float getAxisFloatValue() const {
+		int raw = getAxisIntValue<Axis>();
+		return static_cast<float>(raw / 32767.0f);
+	}
+
+	template<int Axis>
+	int getAxisIntValue() const {
+		const auto &joystickData = joystickState_;
+		return joystickData.Axis[Axis];
+	}
+private:
+	irr::IrrlichtDevice *device_;
+	irr::core::array<irr::SJoystickInfo> joystickInfo_;
+	irr::SEvent::SJoystickEvent joystickState_;
+	bool supportJoystick_;
 };

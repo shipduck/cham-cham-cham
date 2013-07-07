@@ -4,7 +4,7 @@
 #include "scene_helper.h"
 #include "util/debug_draw_manager.h"
 #include "util/event_receiver_manager.h"
-#include "game/joystick_input_event.h"
+#include "input_event.h"
 
 using namespace irr;
 using namespace video;
@@ -16,42 +16,6 @@ enum {
     ID_IsNotPickable = 0,
     IDFlag_Wall = 1 << 0,
 	IDFlag_IsPickable = 1 << 1,
-};
-
-class GameEventReceiver : public ICustomEventReceiver {
-public:
-	virtual ~GameEventReceiver() {}
-	virtual bool OnEvent(const HeadTrackingEvent &evt) {
-		//TODO
-		return false;
-	}
-	virtual bool OnEvent(const irr::SEvent &evt) {
-		switch(evt.EventType) {
-		case EET_JOYSTICK_INPUT_EVENT:
-			onEvent(evt.JoystickEvent);
-			break;
-		case EET_KEY_INPUT_EVENT:
-			onEvent(evt.KeyInput);
-			break;
-		case EET_MOUSE_INPUT_EVENT:
-			onEvent(evt.MouseInput);
-			break;
-		}
-		return false;
-	}
-	void onEvent(const irr::SEvent::SJoystickEvent &evt) {
-		const JoystickInputEvent &joystickDev = gEventReceiverMgr->getJoystickDev();
-		const SJoystickInfo &joystickInfo = joystickDev.getJoystickInfo()[0];
-		//TODO. joystick 이벤트는 매 프레임 polling으로 들어봐서 printf를 넣으면 도배가 되니까 생략
-	}
-	void onEvent(const irr::SEvent::SKeyInput &evt) {
-		printf("key\n");
-		//TODO
-	}
-	void onEvent(const irr::SEvent::SMouseInput &evt) {
-		printf("mouse\n");
-		//TODO
-	}
 };
 
 
@@ -116,7 +80,7 @@ void GameScene::setUp()
 	
 	// event receiver 등록
 	// TODO 이벤트 리시버 제거기능이 없으면 씬 교체시에 문제 발생함
-	gEventReceiverMgr->addReceiver(new GameEventReceiver(), 0);
+	eventReceiver_ = static_cast<GameEventReceiver*>(gEventReceiverMgr->addReceiver(new GameEventReceiver(), 0));
 }
 
 void GameScene::initCam()
@@ -334,6 +298,59 @@ void GameScene::shutDown()
 	Scene::shutDown();
 }
 
+void GameScene::updateMoveEvent(int ms, const MoveEvent &evt)
+{
+	core::vector3df pos = camNode->getPosition();
+	core::vector3df target = camNode->getTarget();
+	core::vector3df posDelta;
+
+	{
+		//forward backward
+		float forwardBackwordDelta = evt.forwardBackward * MoveSpeed * ms / 1000.0f;
+
+		vector3df forward = target - pos;
+		forward.Y = 0;
+		f32 distance = sqrt(pow(forward.Z,2) + pow(forward.X,2));
+		forward /= distance;
+
+		// update position
+		if(!core::equals(forwardBackwordDelta, 0.f)) {
+			vector3df forwardVec = forward * forwardBackwordDelta;
+			posDelta += forwardVec;
+		}
+	}
+
+	{
+		//strafing
+		core::vector3df strafevect = target - pos;
+		strafevect = camNode->getUpVector().crossProduct(strafevect);
+		strafevect.Y = 0;
+		f32 distance = sqrt(pow(strafevect.Z,2) + pow(strafevect.X,2));
+		strafevect /= distance;
+
+		float leftRightDelta = evt.leftRight * MoveSpeed * ms / 1000.0f;
+
+		// update position
+		if(!core::equals(leftRightDelta, 0.f)) {
+			posDelta += strafevect * leftRightDelta;
+		}
+	}
+	
+	// write translation
+	pos += posDelta;
+	camNode->setPosition(pos);
+
+	// write right target
+	target += posDelta;
+	camNode->setTarget(target);
+}
+void GameScene::updateLookEvent(int ms, const LookEvent &evt)
+{
+	core::vector3df pos = camNode->getPosition();
+	core::vector3df target = (camNode->getTarget() - camNode->getAbsolutePosition());
+	core::vector3df relativeRotation = target.getHorizontalAngle();
+}
+
 void GameScene::update(int ms)
 {
 	IVideoDriver* driver = Device->getVideoDriver();
@@ -341,8 +358,15 @@ void GameScene::update(int ms)
 	IGUIEnvironment* guienv = Device->getGUIEnvironment();
 	scene::ISceneCollisionManager* collMan = smgr->getSceneCollisionManager();
 
-	gEventReceiverMgr->update(ms);
+	//방향처리의 우선순위가 이동처리보다 높다
+	const LookEvent &lookEvent = eventReceiver_->getLookEvent();
+	updateLookEvent(ms, lookEvent);
 
+	//앞으로 이동하는거 처리
+	const MoveEvent &moveEvent = eventReceiver_->getMoveEvent();
+	updateMoveEvent(ms, moveEvent);
+
+	/*
 	const auto& joystick = gEventReceiverMgr->getJoystickDev();
 	const auto& JoystickInfo = joystick.getJoystickInfo();
 
@@ -351,41 +375,17 @@ void GameScene::update(int ms)
 	}
 
 	////////////////////////////////////////
-	f32 moveHorizontal = joystick.getHorizontalMovement(); // Range is -1.f for full left to +1.f for full right
-	f32 moveVertical = joystick.getVerticalMovement(); // -1.f for full down to +1.f for full up.
-	f32 rotateHoriziontal = joystick.getLeftRightRotation();
-	f32 rotateVertical = joystick.getUpDownRotation();
-
-	float verticalMoveDelta = moveVertical * MoveSpeed * ms / 1000.0f;
-	float horizontalMoveDelta = moveHorizontal * MoveSpeed * ms / 1000.0f;
-
-	vector3df forward = camNode->getTarget() - camNode->getPosition();
-	f32 distance = sqrt(pow(forward.Z,2) + pow(forward.X,2));
-
-	float sine = forward.Z / distance;
-	float cosine = forward.X / distance;
+	
+	f32 rotateHoriziontal = 0.0f;	//joystick.getLeftRightRotation();
+	f32 rotateVertical = 0.0f;	//joystick.getUpDownRotation();	
 
 	// Rotate -90
 	float sineTemp = sine;
 	sine = -cosine;
 	cosine = sineTemp;
 
-	// update position
-	vector3df pos = camNode->getPosition();
-	if(!core::equals(moveHorizontal, 0.f) || !core::equals(moveVertical, 0.f)) {
-		vector3df moveVector;
-
-		moveVector.X  = horizontalMoveDelta * cosine - verticalMoveDelta * sine;
-		moveVector.Z = horizontalMoveDelta * sine + verticalMoveDelta * cosine;
-
-		pos.X += moveVector.X;
-		pos.Z += moveVector.Z;
-
-		//printf("sine : %f, cosine : %f\n", sine, cosine);
-	}
-	// write translation
-	camNode->setPosition(pos);
-
+	
+	*/
 
 	// All intersections in this example are done with a ray cast out from the camera to
     // a distance of 1000.  You can easily modify this to check (e.g.) a bullet

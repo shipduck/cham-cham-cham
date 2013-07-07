@@ -29,7 +29,7 @@ SceneNodeAnimatorCameraHMD::SceneNodeAnimatorCameraHMD(IrrlichtDevice *dev, gui:
 	setDebugName("CameraSceneNodeAnimatorHMD");
 	#endif
 
-	joystick = new JoystickInputEvent;
+	//joystick = new JoystickInputEvent;
 
 	if (CursorControl) {
 		CursorControl->grab();
@@ -38,8 +38,8 @@ SceneNodeAnimatorCameraHMD::SceneNodeAnimatorCameraHMD(IrrlichtDevice *dev, gui:
 	//device의 이벤트 핸들러는 콘솔이 선점해야한다!
 	//다른 방식으로 이벤트 납치 구현하기
 	//Device->setEventReceiver(joystick);
-	joystick->setDevice(Device);
-	joystick->activateJoystickEvent();
+	//joystick->setDevice(Device);
+	//joystick->activateJoystickEvent();
 }
 
 
@@ -50,7 +50,7 @@ SceneNodeAnimatorCameraHMD::~SceneNodeAnimatorCameraHMD()
 		CursorControl->drop();
 	}
 
-	delete joystick;
+	//delete joystick;
 }
 
 
@@ -80,6 +80,7 @@ bool SceneNodeAnimatorCameraHMD::OnEvent(const SEvent& evt)
 
 void SceneNodeAnimatorCameraHMD::animateNode(ISceneNode* node, u32 timeMs)
 {
+	/*
 	if (!node || node->getType() != ESNT_CAMERA) {
 		return;
 	}
@@ -143,6 +144,7 @@ void SceneNodeAnimatorCameraHMD::animateNode(ISceneNode* node, u32 timeMs)
 	// write right target
 	target += pos;
 	camera->setTarget(target);
+	*/
 }
 
 void SceneNodeAnimatorCameraHMD::setHeadTrackingValue(f32 yaw, f32 pitch, f32 roll)

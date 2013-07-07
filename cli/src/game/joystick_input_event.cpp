@@ -4,6 +4,7 @@
 using namespace irr;
 using namespace core;
 
+/*
 JoystickInputEvent::JoystickInputEvent()
 	: Device(nullptr),
 	SupportJoystick(false),
@@ -14,16 +15,6 @@ JoystickInputEvent::JoystickInputEvent()
 	Moved(false)
 {
 }
-
-void JoystickInputEvent::setDevice(irr::IrrlichtDevice* device)
-{
-	Device = device;
-}
-void JoystickInputEvent::activateJoystickEvent()
-{
-	SupportJoystick = Device->activateJoysticks(JoystickInfo);
-}
-
 bool JoystickInputEvent::OnEvent(const irr::SEvent& event)
 {
 	if(event.EventType != irr::EET_JOYSTICK_INPUT_EVENT) {
@@ -111,35 +102,7 @@ float JoystickInputEvent::getUpDownRotation() const
 	return YView;
 }
 
-void JoystickInputEvent::showInfo() const
-{
-	if(SupportJoystick) {
-		std::cout << "Joystick support is enabled and " << JoystickInfo.size();
-		std::cout<< "joystick(s) are present." << std::endl;
 
-		for(size_t joystick = 0 ; joystick < JoystickInfo.size() ; ++joystick) {
-			std::cout << "Joystick " << joystick << ":" << std::endl;
-			std::cout << "\tName: " << JoystickInfo[joystick].Name.c_str() << std::endl;
-			std::cout << "\tAxes: " << JoystickInfo[joystick].Axes << std::endl;
-			std::cout << "\tButtons: " << JoystickInfo[joystick].Buttons << std::endl;
-			std::cout << "\tHat is: ";
-
-			switch(JoystickInfo[joystick].PovHat) {
-			case SJoystickInfo::POV_HAT_PRESENT:
-				std::cout << "present" << std::endl;
-				break;
-			case SJoystickInfo::POV_HAT_ABSENT:
-				std::cout << "absent" << std::endl;
-				break;
-			case SJoystickInfo::POV_HAT_UNKNOWN:
-				std::cout << "unknown" << std::endl;
-				break;
-			}
-		}
-	} else {
-		std::cout << "Joystick support is not enabled" << std::endl;
-	}
-}
 
 const irr::SEvent::SJoystickEvent& JoystickInputEvent::getJoystickState() const
 {
@@ -149,3 +112,4 @@ const irr::core::array<irr::SJoystickInfo>& JoystickInputEvent::getJoystickInfo(
 {
 	return JoystickInfo;
 }
+*/
