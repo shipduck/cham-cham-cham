@@ -36,7 +36,12 @@ MoveEvent GameEventReceiver::getMoveEvent() const
 LookEvent GameEventReceiver::getLookEvent() const
 {
 	LookEvent evt = mouseLookEvent_;
-	//TODO
+	if(joystickLookEvent_.horizontalRotation != 0) {
+		evt.horizontalRotation = joystickLookEvent_.horizontalRotation;
+	}
+	if(joystickLookEvent_.verticalRotation != 0) {
+		evt.verticalRotation = joystickLookEvent_.verticalRotation;
+	}
 	return evt;
 }
 
@@ -64,6 +69,8 @@ bool GameEventReceiver::OnEvent(const irr::SEvent &evt)
 
 void GameEventReceiver::onEvent(const irr::SEvent::SJoystickEvent &evt) 
 {
+	const float DEAD_ZONE = 0.20f;
+
 	MoveEvent &moveEvent = joystickMoveEvent_;
 	LookEvent &lookEvent = joystickLookEvent_;
 
@@ -72,7 +79,6 @@ void GameEventReceiver::onEvent(const irr::SEvent::SJoystickEvent &evt)
 
 	float XMovement = joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_X>();
 	float YMovement = -joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_Y>();
-	const float DEAD_ZONE = 0.20f;
 
 	if(fabs(XMovement) < DEAD_ZONE) {
 		XMovement = 0.0f;
@@ -97,6 +103,19 @@ void GameEventReceiver::onEvent(const irr::SEvent::SJoystickEvent &evt)
 
 	moveEvent.forwardBackward = YMovement;
 	moveEvent.leftRight = XMovement;
+
+	float XView = joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_R>();
+	float YView = joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_U>();
+
+	YView = 0.0f;	//위아래 보는거 구현하기전까지는 막아놓기
+	if(fabs(XView) < DEAD_ZONE) {
+		XView = 0.0f;
+	}
+	if(fabs(YView) < DEAD_ZONE) {
+		YView = 0.0f;
+	}
+	lookEvent.horizontalRotation = XView;
+	lookEvent.verticalRotation = YView;
 
 	//TODO move가 실제로 발생했을떄만 이동처리하는거 구현할때 살려서 쓴다
 	/*

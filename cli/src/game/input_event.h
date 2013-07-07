@@ -12,9 +12,9 @@ struct MoveEvent : public InputEvent {
 };
 
 struct LookEvent : public InputEvent {
-	LookEvent() : leftRightRotation(0), upDownRotation(0) {}
-	float leftRightRotation;
-	float upDownRotation;
+	LookEvent() : horizontalRotation(0), verticalRotation(0) {}
+	float horizontalRotation;
+	float verticalRotation;
 };
 
 

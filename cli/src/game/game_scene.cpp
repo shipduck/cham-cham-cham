@@ -24,7 +24,7 @@ GameScene::GameScene(irr::IrrlichtDevice *dev)
 	camNode(nullptr), 
 	bill(nullptr),
 	MoveSpeed(300),
-	RotateSpeed(300),
+	RotateSpeed(100),
 	JumpSpeed(300)
 {
 }
@@ -346,9 +346,22 @@ void GameScene::updateMoveEvent(int ms, const MoveEvent &evt)
 }
 void GameScene::updateLookEvent(int ms, const LookEvent &evt)
 {
+	f32 rotateHoriziontal = evt.horizontalRotation;
+	f32 rotateVertical = evt.verticalRotation;
+
 	core::vector3df pos = camNode->getPosition();
-	core::vector3df target = (camNode->getTarget() - camNode->getAbsolutePosition());
-	core::vector3df relativeRotation = target.getHorizontalAngle();
+	core::vector3df target = camNode->getTarget() - pos;
+	target = target.normalize();
+	core::matrix4 mat;
+
+	mat.setRotationDegrees(core::vector3df(
+		rotateVertical * RotateSpeed * ms * 0.001f, 
+		rotateHoriziontal * RotateSpeed * ms * 0.001f,
+		0));
+	mat.transformVect(target);
+
+	target += pos;
+	camNode->setTarget(target);
 }
 
 void GameScene::update(int ms)
@@ -365,27 +378,6 @@ void GameScene::update(int ms)
 	//앞으로 이동하는거 처리
 	MoveEvent moveEvent = eventReceiver_->getMoveEvent();
 	updateMoveEvent(ms, moveEvent);
-
-	/*
-	const auto& joystick = gEventReceiverMgr->getJoystickDev();
-	const auto& JoystickInfo = joystick.getJoystickInfo();
-
-	if(JoystickInfo.size() == 0) {
-		return;
-	}
-
-	////////////////////////////////////////
-	
-	f32 rotateHoriziontal = 0.0f;	//joystick.getLeftRightRotation();
-	f32 rotateVertical = 0.0f;	//joystick.getUpDownRotation();	
-
-	// Rotate -90
-	float sineTemp = sine;
-	sine = -cosine;
-	cosine = sineTemp;
-
-	
-	*/
 
 	// All intersections in this example are done with a ray cast out from the camera to
     // a distance of 1000.  You can easily modify this to check (e.g.) a bullet

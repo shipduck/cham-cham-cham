@@ -10,8 +10,6 @@
 #include "game/game_scene.h"
 
 #include "util/event_receiver_manager.h"
-
-#include "game/joystick_input_event.h"
 #include "game/game_console.h"
 
 using namespace irr;
