@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "IrrConsole/defaultCmds.h"
+#include "console/defaultCmds.h"
 IC_Command_ECHO::IC_Command_ECHO() : IC_Command(L"echo")
 {
 	setUsage(L"echo <string>");

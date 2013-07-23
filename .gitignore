@@ -44,3 +44,6 @@ admin/
 
 # boost
 cli/boost
+
+# CVars
+cli/ext/CVars/CVarVersion.h

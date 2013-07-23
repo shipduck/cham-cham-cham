@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "IrrConsole/utils.h"
+#include "console/utils.h"
 
 //=====================================================================================
 IC_Error::IC_Error(const WideString str, const s32 code) : errorMessage(str), errorCode(code)

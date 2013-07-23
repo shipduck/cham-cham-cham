@@ -3,8 +3,8 @@
 #include "scene.h"
 #include "util/debug_draw_manager.h"
 
-#include "hmd/HMDStereoRender.h"
-#include "hmd/hmd_event_receiver.h"
+#include "irr/HMDStereoRender.h"
+#include "irr/hmd_event_receiver.h"
 
 using namespace irr;
 using namespace video;

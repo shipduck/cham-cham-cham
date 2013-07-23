@@ -4,8 +4,8 @@
 #include "util/debug_draw_manager.h"
 #include "util/audio_manager.h"
 
-#include "hmd/head_tracking.h"
-#include "hmd/hmd_event_receiver.h"
+#include "irr/head_tracking.h"
+#include "irr/hmd_event_receiver.h"
 
 // scene
 #include "game/debug_draw_scene.h"

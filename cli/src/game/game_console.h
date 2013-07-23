@@ -1,7 +1,7 @@
 ﻿// Ŭnicode please 
 #pragma once
 
-#include "irrConsole/console.h"
+#include "console/console.h"
 #include "util/event_receiver_manager.h"
 
 class ConsoleEventReceiver : public ICustomEventReceiver {

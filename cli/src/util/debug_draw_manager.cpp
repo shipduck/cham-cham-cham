@@ -1,8 +1,8 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
 #include "debug_draw_manager.h"
-#include "line_batch_scene_node.h"
 #include "wire_sphere_factory.h"
+#include "irr/line_batch_scene_node.h"
 
 using namespace Loki;
 using namespace irr;

@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include "IrrConsole/console.h"
-#include "IrrConsole/defaultCmds.h"
+#include "console/console.h"
+#include "console/defaultCmds.h"
 
 //=========================================================================================
 //! constructor
