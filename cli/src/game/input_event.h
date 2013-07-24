@@ -25,7 +25,7 @@ class GameEventReceiver : public ICustomEventReceiver {
 public:
 	GameEventReceiver();
 	virtual ~GameEventReceiver();
-	virtual bool OnEvent(const HeadTrackingEvent &evt);
+	virtual bool OnEvent(const SHeadTrackingEvent &evt);
 	virtual bool OnEvent(const irr::SEvent &evt);
 	void onEvent(const irr::SEvent::SJoystickEvent &evt);
 	void onEvent(const irr::SEvent::SKeyInput &evt);

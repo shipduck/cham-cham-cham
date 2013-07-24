@@ -7,7 +7,7 @@
 class ConsoleEventReceiver : public ICustomEventReceiver {
 public:
 	virtual bool OnEvent(const irr::SEvent& event);
-	virtual bool OnEvent(const HeadTrackingEvent &evt) { return false; }
+	virtual bool OnEvent(const SHeadTrackingEvent &evt) { return false; }
 };
 
 void drawConsoleCaptions(irr::IrrlichtDevice *device);

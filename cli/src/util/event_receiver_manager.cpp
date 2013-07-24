@@ -51,7 +51,7 @@ ICustomEventReceiver *EventReceiverManager::addReceiver(ICustomEventReceiver *re
 	return receiver;
 }
 
-bool EventReceiverManager::OnEvent(const HeadTrackingEvent &evt)
+bool EventReceiverManager::OnEvent(const SHeadTrackingEvent &evt)
 {
 	for(auto &receiver : highPriorityReceiverList_) {
 		receiver.receiver->OnEvent(evt);

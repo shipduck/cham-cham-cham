@@ -4,6 +4,9 @@
 
 using namespace OVR;
 
+HeadTracker headTrackerLocal;
+HeadTracker *g_headTracker = &headTrackerLocal;
+
 HeadTracker::HeadTracker() 
 {
 }
@@ -30,6 +33,7 @@ bool HeadTracker::startUp()
     if (Sensor) {
         FusionResult.AttachToSensor(Sensor);
 	}
+	return true;
 }
 
 bool HeadTracker::shutDown()

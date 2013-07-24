@@ -31,7 +31,10 @@
 
 #include <type_traits>
 
+// irrlicht
 #include "irrlicht.h"
+
+// libovr
 #include <OVR.h>
 
 #include "AL/alut.h"

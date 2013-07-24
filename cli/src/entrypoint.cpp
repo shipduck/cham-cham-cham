@@ -26,6 +26,41 @@ using namespace gui;
 int SCREEN_WIDTH = 1280;
 int SCREEN_HEIGHT = 800;
 
+int mainStartUp(irr::IrrlichtDevice *device)
+{
+	IVideoDriver* driver = device->getVideoDriver();
+	IGUIEnvironment* guienv = device->getGUIEnvironment();
+	ISceneManager* smgr = device->getSceneManager();
+
+	g_eventReceiverMgr->startUp(device);
+
+	auto joystickDev = g_eventReceiverMgr->getJoystickDev();
+	joystickDev.showInfo();
+
+	//set debug tool
+	g_debugDrawMgr->startUp(device);
+	
+	//initialize the console
+	//g_normalFont12 = guienv->getFont("res/font_12.xml");
+	g_normalFont14 = guienv->getFont("res/font_14.xml");
+	setUpConsole(device);
+
+	g_audioMgr->startUp();
+
+	//Oculus Rift Head Tracking
+	g_headTracker->startUp();
+
+	return 0;
+}
+
+int mainShutDown()
+{
+	g_debugDrawMgr->shutDown();
+	g_eventReceiverMgr->shutDown();
+	g_audioMgr->shutDown();
+	g_headTracker->shutDown();
+	return 0;
+}
 
 int entrypoint(int argc, char* argv[])
 {
@@ -43,33 +78,19 @@ int entrypoint(int argc, char* argv[])
 	if (!device){
 		return 1;
 	}
-	g_eventReceiverMgr->startUp(device);
-
-	auto joystickDev = g_eventReceiverMgr->getJoystickDev();
-	joystickDev.showInfo();
+	mainStartUp(device);
 	
 	IVideoDriver* driver = device->getVideoDriver();
 	IGUIEnvironment* guienv = device->getGUIEnvironment();
 	ISceneManager* smgr = device->getSceneManager();
-
-	//set debug tool
-	g_debugDrawMgr->startUp(device);
-	//g_normalFont12 = guienv->getFont("res/font_12.xml");
-	g_normalFont14 = guienv->getFont("res/font_14.xml");
-
-	//initialize the console
-	setUpConsole(device);
 
 	//simple scene framework
 	//std::unique_ptr<Scene> scene(new DebugDrawScene(device));
 	std::unique_ptr<Scene> scene(new GameScene(device));
 	scene->startUp();
 
-	//Oculus Rift Head Tracking
-	HeadTracker headTracker;
-	headTracker.startUp();
+	
 
-	g_audioMgr->startUp();
 	if(g_audioMgr->isSupport()) {
 		const std::string bg("res/sound/bg.wav");
 		BGM bgm;
@@ -99,9 +120,9 @@ int entrypoint(int argc, char* argv[])
 		}
 
 		// Read-Write Head Tracking Sensor Value to Camera
-		if(headTracker.isConnected()) {
-			HeadTrackingEvent evt;
-			headTracker.getValue(&evt.Yaw, &evt.Pitch, &evt.Roll);
+		if(g_headTracker->isConnected()) {
+			SHeadTrackingEvent evt;
+			g_headTracker->getValue(&evt.yaw, &evt.pitch, &evt.roll);
 			g_eventReceiverMgr->OnEvent(evt);
 		}
 
@@ -140,13 +161,9 @@ int entrypoint(int argc, char* argv[])
 	//shut down scene before device drop!
 	scene->shutDown();
 
-	g_debugDrawMgr->shutDown();
-	g_audioMgr->shutDown();
-	g_eventReceiverMgr->shutDown();
+	mainShutDown();
+	
 	device->drop();	
-	
-	//Deinitialize Oculus LibOVR
-	headTracker.shutDown();
-	
+
 	return 0;
 }

@@ -55,7 +55,7 @@ LookEvent GameEventReceiver::getLookEvent() const
 	return evt;
 }
 
-bool GameEventReceiver::OnEvent(const HeadTrackingEvent &evt)
+bool GameEventReceiver::OnEvent(const SHeadTrackingEvent &evt)
 {
 	//TODO
 	return false;
