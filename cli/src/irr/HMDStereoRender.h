@@ -22,31 +22,31 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 
 struct HMDDescriptor 
 {
-  int hResolution;
-  int vResolution;
-  float hScreenSize;
-  float vScreenSize;
-  float interpupillaryDistance;
-  float lensSeparationDistance;
-  float eyeToScreenDistance;
-  float distortionK[4];
+	int hResolution;
+	int vResolution;
+	float hScreenSize;
+	float vScreenSize;
+	float interpupillaryDistance;
+	float lensSeparationDistance;
+	float eyeToScreenDistance;
+	float distortionK[4];
 };
 
 class OculusDistorsionCallback: public irr::video::IShaderConstantSetCallBack 
 { 
-  public:
-  irr::f32 scale[2];
-  irr::f32 scaleIn[2];
-  irr::f32 lensCenter[2];
-  irr::f32 hmdWarpParam[4];
-  virtual void OnSetConstants(irr::video::IMaterialRendererServices* services, irr::s32 userData) 
-  { 
-    irr::video::IVideoDriver* driver = services->getVideoDriver();
-    services->setPixelShaderConstant("scale", scale, 2);
-    services->setPixelShaderConstant("scaleIn", scaleIn ,2);
-    services->setPixelShaderConstant("lensCenter", lensCenter ,2);
-    services->setPixelShaderConstant("hmdWarpParam", hmdWarpParam ,4);
-  }
+public:
+	irr::f32 scale[2];
+	irr::f32 scaleIn[2];
+	irr::f32 lensCenter[2];
+	irr::f32 hmdWarpParam[4];
+	virtual void OnSetConstants(irr::video::IMaterialRendererServices* services, irr::s32 userData) 
+	{ 
+		irr::video::IVideoDriver* driver = services->getVideoDriver();
+		services->setPixelShaderConstant("scale", scale, 2);
+		services->setPixelShaderConstant("scaleIn", scaleIn ,2);
+		services->setPixelShaderConstant("lensCenter", lensCenter ,2);
+		services->setPixelShaderConstant("hmdWarpParam", hmdWarpParam ,4);
+	}
 };
 /*
 irrlicht doesn't support remove material renderer.
@@ -57,37 +57,37 @@ extern OculusDistorsionCallback g_distortionCB;
 class HMDStereoRender
 {
 public:
-  HMDStereoRender(irr::IrrlichtDevice *device, HMDDescriptor HMD, irr::f32 worldScale = 1.0);
-  ~HMDStereoRender();
+	HMDStereoRender(irr::IrrlichtDevice *device, HMDDescriptor HMD, irr::f32 worldScale = 1.0);
+	~HMDStereoRender();
 
-  HMDDescriptor getHMD(); 
-  void setHMD(HMDDescriptor HMD);
+	HMDDescriptor getHMD(); 
+	void setHMD(HMDDescriptor HMD);
 
-  irr::f32 getWorldScale(); 
-  void setWorldScale(irr::f32 worldScale);
+	irr::f32 getWorldScale(); 
+	void setWorldScale(irr::f32 worldScale);
 
-  void drawAll(irr::scene::ISceneManager* smgr);
+	void drawAll(irr::scene::ISceneManager* smgr);
 
 private:  
-  irr::video::IVideoDriver* _driver;
-  irr::video::ITexture* _renderTexture;
-  irr::scene::ISceneManager* _smgr;
+	irr::video::IVideoDriver* _driver;
+	irr::video::ITexture* _renderTexture;
+	irr::scene::ISceneManager* _smgr;
 
-  HMDDescriptor _HMD;
-  irr::f32 _worldScale;
-  irr::core::matrix4 _projectionLeft;
-  irr::core::matrix4 _projectionRight;
-  irr::f32 _eyeSeparation;
-  irr::f32 _lensShift;
+	HMDDescriptor _HMD;
+	irr::f32 _worldScale;
+	irr::core::matrix4 _projectionLeft;
+	irr::core::matrix4 _projectionRight;
+	irr::f32 _eyeSeparation;
+	irr::f32 _lensShift;
 
-  irr::core::rect<irr::s32> _viewportLeft;
-  irr::core::rect<irr::s32> _viewportRight;
+	irr::core::rect<irr::s32> _viewportLeft;
+	irr::core::rect<irr::s32> _viewportRight;
 
-  irr::scene::ICameraSceneNode* _pCamera;
+	irr::scene::ICameraSceneNode* _pCamera;
 
-  irr::video::SMaterial _renderMaterial;
-  irr::video::S3DVertex _planeVertices[4];
-  irr::u16 _planeIndices[6];
-  irr::ITimer* _timer;
+	irr::video::SMaterial _renderMaterial;
+	irr::video::S3DVertex _planeVertices[4];
+	irr::u16 _planeIndices[6];
+	irr::ITimer* _timer;
 };
 #endif

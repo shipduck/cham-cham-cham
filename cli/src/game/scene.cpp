@@ -31,15 +31,15 @@ void Scene::setUp()
 	// Parameters from the Oculus Rift DK1
 	HMD.hResolution = 1280;
 	HMD.vResolution = 800;
-	HMD.hScreenSize = 0.14976;
-	HMD.vScreenSize = 0.0936;
-	HMD.interpupillaryDistance = 0.064;
-	HMD.lensSeparationDistance = 0.064;
-	HMD.eyeToScreenDistance = 0.041;
-	HMD.distortionK[0] = 1.0;
-	HMD.distortionK[1] = 0.22;
-	HMD.distortionK[2] = 0.24;
-	HMD.distortionK[3] = 0.0;
+	HMD.hScreenSize = 0.14976f;
+	HMD.vScreenSize = 0.0936f;
+	HMD.interpupillaryDistance = 0.064f;
+	HMD.lensSeparationDistance = 0.064f;
+	HMD.eyeToScreenDistance = 0.041f;
+	HMD.distortionK[0] = 1.0f;
+	HMD.distortionK[1] = 0.22f;
+	HMD.distortionK[2] = 0.24f;
+	HMD.distortionK[3] = 0.0f;
 
 	Renderer.reset(new HMDStereoRender(Device, HMD, 10));
 }

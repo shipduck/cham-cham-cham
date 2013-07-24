@@ -3,10 +3,11 @@
 
 class LineBatchSceneNode : public irr::scene::ISceneNode {
 public:
-	typedef irr::core::vector3df vector_type;
 	typedef irr::video::SColor color_type;
 	typedef irr::video::S3DVertex vertex_type;
+	typedef irr::core::vector3df vector_3d_type;
 	typedef irr::core::vector2di vector_2d_type;
+
 public:
 	LineBatchSceneNode(irr::scene::ISceneNode *parent, irr::scene::ISceneManager *smgr, irr::s32 id);
 
@@ -16,7 +17,7 @@ public:
 	virtual irr::u32 getMaterialCount() const { return 1; }
 	virtual irr::video::SMaterial &getMaterial(irr::u32 i) { return Material; }
 
-	void addLine(const vector_type &p1, const vector_type &p2, const color_type &color);
+	void addLine(const vector_3d_type &p1, const vector_3d_type &p2, const color_type &color);
 	void addLine(const vector_2d_type &p1, const vector_2d_type &p2, const color_type &color);
 
 	void setThickness(float val) { Material.Thickness = val; }
@@ -27,7 +28,7 @@ public:
 	{
 		static_assert(std::is_same<vertex_type, VertexListType::value_type>::value == 1, "");
 		static_assert(std::is_same<unsigned short, IndexListType::value_type>::value == 1, "");
-		addIndexedVertices(vertexList, indexList, &VertexList, &IndexList);
+		addIndexedVertices(vertexList, indexList, &Vertex3DList, &Index3DList);
 	}
 	template<typename VertexListType, typename IndexListType>
 	void addIndexedVertices2D(const VertexListType &vertexList, const IndexListType &indexList)
@@ -43,8 +44,8 @@ private:
 	irr::core::aabbox3d<irr::f32> Box;
 	irr::video::SMaterial Material;
 
-	std::vector<vertex_type> VertexList;
-	std::vector<unsigned short> IndexList;
+	std::vector<vertex_type> Vertex3DList;
+	std::vector<unsigned short> Index3DList;
 
 	std::vector<vertex_type> Vertex2DList;
 	std::vector<unsigned short> Index2DList;

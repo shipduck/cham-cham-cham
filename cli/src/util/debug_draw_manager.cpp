@@ -107,8 +107,8 @@ struct DebugDrawListFunctor< Typelist<T, U> > {
 	}
 	static void draw(DebugDrawManager &mgr)
 	{
-		const const auto &immediateList = Field<T>(mgr).ImmediateDrawList;
-		const const auto &durationList = Field<T>(mgr).DurationDrawList;
+		const auto &immediateList = Field<T>(mgr).ImmediateDrawList;
+		const auto &durationList = Field<T>(mgr).DurationDrawList;
 		if(immediateList.size() > 0) {
 			mgr.drawList(immediateList);
 		}
@@ -443,7 +443,7 @@ void DebugDrawManager::drawList(const DebugDrawList_Circle2D &cmd)
 		for(auto &vert : vertexList) {
 			vert.Color = color;
 			vert.Pos *= radius;
-			vert.Pos += vector3df(pos.X, pos.Y, 0);
+			vert.Pos += vector3df(pos.X, pos.Y, 0.0f);
 		}
 
 		auto sceneNode = getBatchSceneNode(1.0f);

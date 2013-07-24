@@ -9,15 +9,16 @@ using namespace core;
 LineBatchSceneNode::LineBatchSceneNode(irr::scene::ISceneNode *parent, irr::scene::ISceneManager *smgr, s32 id)
 	: scene::ISceneNode(parent, smgr, id)
 {
+	this->setIsDebugObject(true);
 	Material.Wireframe = false;
 	Material.Lighting = false;
 
 	Box.reset(vector3df(0, 0, 0));
 
-	VertexList.reserve(1 << 16);
-	IndexList.reserve(1 << 16);
-	Vertex2DList.reserve(1 << 16);
-	Index2DList.reserve(1 << 16);
+	Vertex3DList.reserve(1 << 8);
+	Index3DList.reserve(1 << 8);
+	Vertex2DList.reserve(1 << 8);
+	Index2DList.reserve(1 << 8);
 }
 
 void LineBatchSceneNode::OnRegisterSceneNode()
@@ -33,30 +34,30 @@ void LineBatchSceneNode::render()
 	IVideoDriver *driver = SceneManager->getVideoDriver();
 	driver->setMaterial(Material);
 	driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
-	driver->drawVertexPrimitiveList(VertexList.data(), VertexList.size(), IndexList.data(), IndexList.size(), video::EVT_STANDARD, scene::EPT_LINES, video::EIT_16BIT);
+	driver->drawVertexPrimitiveList(Vertex3DList.data(), Vertex3DList.size(), Index3DList.data(), Index3DList.size(), video::EVT_STANDARD, scene::EPT_LINES, video::EIT_16BIT);
 	driver->draw2DVertexPrimitiveList(Vertex2DList.data(), Vertex2DList.size(), Index2DList.data(), Index2DList.size(), video::EVT_STANDARD, scene::EPT_LINES, video::EIT_16BIT);
 }
 
-void LineBatchSceneNode::addLine(const vector_type &p1, const vector_type &p2, const color_type &color)
+void LineBatchSceneNode::addLine(const vector_3d_type &p1, const vector_3d_type &p2, const color_type &color)
 {
 	vector3df normal(1, 0, 0);
 	vector2df texcoord(0, 0);
-	auto v1 = vertex_type(p1, normal, color, texcoord);
-	auto v2 = vertex_type(p2, normal, color, texcoord);
+	vertex_type v1(p1, normal, color, texcoord);
+	vertex_type v2(p2, normal, color, texcoord);
 
-	unsigned short currVertexSize = VertexList.size();
-	VertexList.push_back(v1);
-	VertexList.push_back(v2);
-	IndexList.push_back(currVertexSize);
-	IndexList.push_back(currVertexSize + 1);
+	unsigned short currVertexSize = Vertex3DList.size();
+	Vertex3DList.push_back(v1);
+	Vertex3DList.push_back(v2);
+	Index3DList.push_back(currVertexSize);
+	Index3DList.push_back(currVertexSize + 1);
 }
 
 void LineBatchSceneNode::addLine(const vector_2d_type &p1, const vector_2d_type &p2, const color_type &color)
 {
 	vector3df normal(1, 0, 0);
 	vector2df texcoord(0, 0);
-	auto v1 = vertex_type(vector_type(p1.X, p1.Y, 0), normal, color, texcoord);
-	auto v2 = vertex_type(vector_type(p2.X, p2.Y, 0), normal, color, texcoord);
+	vertex_type v1(vector_3d_type((float)p1.X, (float)p1.Y, 0.0f), normal, color, texcoord);
+	vertex_type v2(vector_3d_type((float)p2.X, (float)p2.Y, 0.0f), normal, color, texcoord);
 
 	unsigned short currVertexSize = Vertex2DList.size();
 	Vertex2DList.push_back(v1);
@@ -67,8 +68,8 @@ void LineBatchSceneNode::addLine(const vector_2d_type &p1, const vector_2d_type 
 
 void LineBatchSceneNode::clear()
 {
-	VertexList.clear();
-	IndexList.clear();
+	Vertex3DList.clear();
+	Index3DList.clear();
 	Vertex2DList.clear();
 	Index2DList.clear();
 }
