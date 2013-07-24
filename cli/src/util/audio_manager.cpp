@@ -6,7 +6,7 @@ AudioManager audioManagerLocal;
 AudioManager *g_audioMgr = &audioManagerLocal;
 
 AudioManager::AudioManager()
-	: SupportAL(false)
+	: supportAL_(false)
 {
 }
 AudioManager::~AudioManager()
@@ -19,7 +19,7 @@ void AudioManager::startUp()
         puts(alutGetErrorString(alutGetError()));
         puts("Failed to init sound");
     } else {
-		SupportAL = true;
+		supportAL_ = true;
 	}
 }
 void AudioManager::shutDown()
@@ -27,60 +27,60 @@ void AudioManager::shutDown()
 	if(isSupport() == false) {
 		return;
 	}
-	auto it = BgmDict.begin();
-	auto endit = BgmDict.end();
+	auto it = bgmDict_.begin();
+	auto endit = bgmDict_.end();
 	for( ; it != endit ; ++it) {
 		it->second.pause();
 		it->second.close();
 	}
     alutExit();
-	SupportAL = false;
+	supportAL_ = false;
 }
 
 void AudioManager::addBGM(const std::string &name, const BGM &bgm)
 {
-	auto found = BgmDict.find(name);
-	SR_ASSERT(found == BgmDict.end() && "name conflict");
-	BgmDict[name] = bgm;
+	auto found = bgmDict_.find(name);
+	SR_ASSERT(found == bgmDict_.end() && "name conflict");
+	bgmDict_[name] = bgm;
 }
 
 void BGM::startUp(const std::string &file)
 {
-	this->File = file;
+	this->file_ = file;
 }
 
 bool BGM::open()
 {
-	if((BgmBuf = alutCreateBufferFromFile(this->File.c_str())) == AL_NONE) {
+	if((bgmBuf_ = alutCreateBufferFromFile(this->file_.c_str())) == AL_NONE) {
         puts(alutGetErrorString(alutGetError()));
 		return false;
     }
-    alGenSources(1, &BgmSrc);
-    alSourcei(BgmSrc, AL_BUFFER, BgmBuf);
+    alGenSources(1, &bgmSrc_);
+    alSourcei(bgmSrc_, AL_BUFFER, bgmBuf_);
 	return true;
 }
 
 bool BGM::close()
 {
-	if(BgmBuf == 0) {
+	if(bgmBuf_ == 0) {
 		return false;
 	}
 
-	alDeleteSources(1, &BgmSrc);
-	alDeleteBuffers(1, &BgmBuf);
-	BgmSrc = 0;
-	BgmBuf = 0;
+	alDeleteSources(1, &bgmSrc_);
+	alDeleteBuffers(1, &bgmBuf_);
+	bgmSrc_ = 0;
+	bgmBuf_ = 0;
 	return true;
 }
 void BGM::play()
 {
-	if(BgmSrc != 0) {
-		alSourcePlay(BgmSrc);
+	if(bgmSrc_ != 0) {
+		alSourcePlay(bgmSrc_);
 	}
 }
 void BGM::pause()
 {
-	if (BgmSrc != 0) {
-        alSourcePause(BgmSrc);
+	if (bgmSrc_ != 0) {
+        alSourcePause(bgmSrc_);
     }
 }

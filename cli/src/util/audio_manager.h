@@ -14,19 +14,19 @@ public:
 	void startUp();
 	void shutDown();
 
-	bool isSupport() { return SupportAL; }
+	bool isSupport() { return supportAL_; }
 
 	void addBGM(const std::string &name, const BGM &bgm);
 
 private:
-	bool SupportAL;
-	BgmDictType BgmDict;
+	bool supportAL_;
+	BgmDictType bgmDict_;
 };
 
 //stl 안에 들어가는 클래스이므로 생성자/소멸자에 로직이 있으면 망한다
 class BGM {
 public:
-	BGM() : BgmBuf(0), BgmSrc(0) {}
+	BGM() : bgmBuf_(0), bgmSrc_(0) {}
 	~BGM() {}
 	
 	void startUp(const std::string &file);
@@ -38,9 +38,9 @@ public:
 
 
 private:
-	std::string File;
-	ALuint BgmBuf;
-	ALuint BgmSrc;
+	std::string file_;
+	ALuint bgmBuf_;
+	ALuint bgmSrc_;
 };
 
 extern AudioManager *g_audioMgr;
