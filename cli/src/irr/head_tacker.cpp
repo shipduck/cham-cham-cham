@@ -31,55 +31,55 @@ bool HeadTracker::startUp()
 	OVR::System::Init();
 
 	// *** Initialization - Create the first available HMD Device
-    Manager = *DeviceManager::Create();
-    HMD     = *Manager->EnumerateDevices<HMDDevice>().CreateDevice();
-    if (!HMD) {
+    manager_ = *DeviceManager::Create();
+    hmd_ = *manager_->EnumerateDevices<HMDDevice>().CreateDevice();
+    if (!hmd_) {
         return false;
 	}
-    Sensor  = *HMD->GetSensor();
+    sensor_ = *hmd_->GetSensor();
 
     // Get DisplayDeviceName, ScreenWidth/Height, etc..
-    HMD->GetDeviceInfo(&HmdInfo);
+    hmd_->GetDeviceInfo(&hmdInfo_);
     
-    if (Sensor) {
-        FusionResult.AttachToSensor(Sensor);
+    if (sensor_) {
+        fusionResult_.AttachToSensor(sensor_);
+	} else {
+		lastEvt_ = SHeadTrackingEvent::FailEvent();
 	}
 	return true;
 }
 
 bool HeadTracker::shutDown()
 {
-	Sensor.Clear();
-    HMD.Clear();
-    Manager.Clear();
+	sensor_.Clear();
+    hmd_.Clear();
+    manager_.Clear();
 
     OVR::System::Destroy();
 	return true;
 }
 
-SHeadTrackingEvent HeadTracker::getValue() const
+void HeadTracker::update()
 {
-	if(Sensor == nullptr) {
-		return SHeadTrackingEvent::FailEvent();
+	if(sensor_ == nullptr) {
+		return;
 	}
 
 	// *** Per Frame
     // Get orientation quaternion to control view
-    Quatf q = FusionResult.GetOrientation();
+    Quatf q = fusionResult_.GetOrientation();
 
     // Create a matrix from quaternion,
     // where elements [0][0] through [3][3] contain rotation.
     Matrix4f bodyFrameMatrix(q); 
 
     // Get Euler angles from quaternion, in specified axis rotation order.
-	SHeadTrackingEvent evt;
-    q.GetEulerAngles<Axis_Y, Axis_X, Axis_Z>(&evt.yaw, &evt.pitch, &evt.roll);
-	return evt;
+    q.GetEulerAngles<Axis_Y, Axis_X, Axis_Z>(&lastEvt_.yaw, &lastEvt_.pitch, &lastEvt_.roll);
 }
 
 bool HeadTracker::isConnected() const
 {
-	if(Sensor == nullptr) {
+	if(sensor_ == nullptr) {
 		return false;
 	}
 	return true;

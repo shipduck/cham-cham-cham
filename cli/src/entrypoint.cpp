@@ -120,6 +120,7 @@ int entrypoint(int argc, char* argv[])
 		}
 
 		// Read-Write Head Tracking Sensor Value to Camera
+		g_headTracker->update();
 		if(g_headTracker->isConnected()) {
 			SHeadTrackingEvent evt = g_headTracker->getValue();
 			g_eventReceiverMgr->OnEvent(evt);

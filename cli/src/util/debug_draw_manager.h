@@ -6,97 +6,107 @@
 
 class LineBatchSceneNode;
 
-struct DebugDrawListMixin_Color {
-	std::vector<irr::video::SColor> ColorList;	
-	void clear() { ColorList.clear(); }
-	void pop_back() { ColorList.pop_back(); }
-	int size() const { return ColorList.size(); }
+class DebugDrawListMixin_Color {
+public:
+	std::vector<irr::video::SColor> colorList;	
+	void clear() { colorList.clear(); }
+	void pop_back() { colorList.pop_back(); }
+	size_t size() const { return colorList.size(); }
 };
 
-struct DebugDrawListMixin_Node {
+class DebugDrawListMixin_Node {
+public:
 	~DebugDrawListMixin_Node();
-	std::vector<irr::scene::ISceneNode*> NodeList;
+	std::vector<irr::scene::ISceneNode*> nodeList;
 	void clear();
 	void pop_back();
-	int size() const { return NodeList.size(); }
+	size_t size() const { return nodeList.size(); }
 };
 
-struct DebugDrawListMixin_3D {
-	std::vector<bool> DepthEnableList;
-	void clear() { DepthEnableList.clear(); }
-	void pop_back() { DepthEnableList.pop_back(); }
-	int size() const { return DepthEnableList.size(); }
-};
-
-template<typename T>
-struct DebugDrawListMixin_Scale {
-	std::vector<T> ScaleList;
-	void clear() { ScaleList.clear(); }
-	void pop_back() { ScaleList.pop_back(); }
-	int size() const { return ScaleList.size(); }
-};
-
-struct DebugDrawListMixin_Transform {
-	std::vector<irr::core::matrix4> XfList;
-	void clear() { XfList.clear(); }
-	void pop_back() { XfList.pop_back(); }
-	int size() const { return XfList.size(); }
+class DebugDrawListMixin_3D {
+public:
+	std::vector<bool> depthEnableList;
+	void clear() { depthEnableList.clear(); }
+	void pop_back() { depthEnableList.pop_back(); }
+	size_t size() const { return depthEnableList.size(); }
 };
 
 template<typename T>
-struct DebugDrawListMixin_Line {
-	std::vector<T> P1List;
-	std::vector<T> P2List;
+class DebugDrawListMixin_Scale {
+public:
+	std::vector<T> scaleList;
+	void clear() { scaleList.clear(); }
+	void pop_back() { scaleList.pop_back(); }
+	size_t size() const { return scaleList.size(); }
+};
+
+class DebugDrawListMixin_Transform {
+public:
+	std::vector<irr::core::matrix4> xfList;
+	void clear() { xfList.clear(); }
+	void pop_back() { xfList.pop_back(); }
+	size_t size() const { return xfList.size(); }
+};
+
+template<typename T>
+class DebugDrawListMixin_Line {
+public:
+	std::vector<T> p1List;
+	std::vector<T> p2List;
 
 	void clear()
 	{
-		P1List.clear();
-		P2List.clear();
+		p1List.clear();
+		p2List.clear();
 	}
 	void pop_back()
 	{
-		P1List.pop_back();
-		P2List.pop_back();
+		p1List.pop_back();
+		p2List.pop_back();
 	}
-	int size() const
+	size_t size() const
 	{
-		SR_ASSERT(P1List.size() == P2List.size());
-		return P1List.size();
+		SR_ASSERT(p1List.size() == p2List.size());
+		return p1List.size();
 	}
 };
 
 template<typename T>
-struct DebugDrawListMixin_Pos {
-	std::vector<T> PosList;
-	void clear() { PosList.clear(); }
-	void pop_back() { PosList.pop_back(); }
-	int size() const { return PosList.size(); }
+class DebugDrawListMixin_Pos {
+public:
+	std::vector<T> posList;
+	void clear() { posList.clear(); }
+	void pop_back() { posList.pop_back(); }
+	size_t size() const { return posList.size(); }
 };
 
-struct DebugDrawListMixin_String {
+class DebugDrawListMixin_String {
+public:
 	typedef std::wstring string_type;
 	typedef std::wstring::value_type value_type;
 
-	std::vector<string_type> MsgList;
+	std::vector<string_type> msgList;
 
-	void clear() { MsgList.clear(); }
-	void pop_back() { MsgList.pop_back(); }
-	int size() const { return MsgList.size(); }
+	void clear() { msgList.clear(); }
+	void pop_back() { msgList.pop_back(); }
+	size_t size() const { return msgList.size(); }
 };
 
-template<typename TList> struct DebugDrawListPolicy;
+template<typename TList> class DebugDrawListPolicy;
 
 template<>
-struct DebugDrawListPolicy<Loki::NullType> {
+class DebugDrawListPolicy<Loki::NullType> {
+public:
 	enum { HasNext = 0 };
 	static void clear(GenSimpleHierarchy<Loki::NullType> &obj) {}
 	static void pop_back(GenSimpleHierarchy<Loki::NullType> &obj) {}
-	static int size(const GenSimpleHierarchy<Loki::NullType> &obj) { return 0; }
+	static size_t size(const GenSimpleHierarchy<Loki::NullType> &obj) { return 0; }
 	static bool validate(const GenSimpleHierarchy<Loki::NullType> &obj) { return true; }
 };
 
 template<typename T, typename U>
-struct DebugDrawListPolicy< Loki::Typelist<T, U> > {
+class DebugDrawListPolicy< Loki::Typelist<T, U> > {
+public:
 	enum { HasNext = 1 };
 	typedef DebugDrawListPolicy<U> Next;
 	static void clear(GenSimpleHierarchy< Loki::Typelist<T, U> > &obj)
@@ -109,7 +119,7 @@ struct DebugDrawListPolicy< Loki::Typelist<T, U> > {
 		static_cast<T&>(obj).pop_back();
 		Next::pop_back(obj);
 	};
-	static int size(const GenSimpleHierarchy< Loki::Typelist<T, U> > &obj)
+	static size_t size(const GenSimpleHierarchy< Loki::Typelist<T, U> > &obj)
 	{
 		return static_cast<const T&>(obj).size();
 	}
@@ -125,7 +135,8 @@ struct DebugDrawListPolicy< Loki::Typelist<T, U> > {
 };
 
 template<typename TList>
-struct DebugDrawListT : public GenSimpleHierarchy<TList> {
+class DebugDrawListT : public GenSimpleHierarchy<TList> {
+public:
 	typedef DebugDrawListPolicy<TList> Policy;
 	void clear() { Policy::clear(*this); }
 	void pop_back() { Policy::pop_back(*this); }
@@ -138,7 +149,7 @@ typedef TYPELIST_3(
 	DebugDrawListMixin_Scale<float>,
 	DebugDrawListMixin_Color
 	) DebugDrawListMixinList_Line2D;
-struct DebugDrawList_Line2D : public DebugDrawListT<DebugDrawListMixinList_Line2D> {};
+class DebugDrawList_Line2D : public DebugDrawListT<DebugDrawListMixinList_Line2D> {};
 
 typedef TYPELIST_4(
 	DebugDrawListMixin_Line<irr::core::vector3df>,
@@ -146,14 +157,14 @@ typedef TYPELIST_4(
 	DebugDrawListMixin_Color,
 	DebugDrawListMixin_3D
 	) DebugDrawListMixinList_Line3D;
-struct DebugDrawList_Line3D : public DebugDrawListT<DebugDrawListMixinList_Line3D> {};
+class DebugDrawList_Line3D : public DebugDrawListT<DebugDrawListMixinList_Line3D> {};
 
 typedef TYPELIST_3(
 	DebugDrawListMixin_Pos<irr::core::vector2di>,
 	DebugDrawListMixin_Scale<float>,
 	DebugDrawListMixin_Color
 	) DebugDrawListMixinList_Cross2D;
-struct DebugDrawList_Cross2D : public DebugDrawListT<DebugDrawListMixinList_Cross2D> {};
+class DebugDrawList_Cross2D : public DebugDrawListT<DebugDrawListMixinList_Cross2D> {};
 
 typedef TYPELIST_4(
 	DebugDrawListMixin_Pos<irr::core::vector3df>,
@@ -161,7 +172,7 @@ typedef TYPELIST_4(
 	DebugDrawListMixin_Color,
 	DebugDrawListMixin_3D
 	) DebugDrawListMixinList_Cross3D;
-struct DebugDrawList_Cross3D : public DebugDrawListT<DebugDrawListMixinList_Cross3D> {};
+class DebugDrawList_Cross3D : public DebugDrawListT<DebugDrawListMixinList_Cross3D> {};
 
 typedef TYPELIST_4(
 	DebugDrawListMixin_Pos<irr::core::vector2di>,
@@ -169,7 +180,7 @@ typedef TYPELIST_4(
 	DebugDrawListMixin_Color,
 	DebugDrawListMixin_String
 	) DebugDrawListMixinList_String2D;
-struct DebugDrawList_String2D : public DebugDrawListT<DebugDrawListMixinList_String2D> {};
+class DebugDrawList_String2D : public DebugDrawListT<DebugDrawListMixinList_String2D> {};
 
 typedef TYPELIST_6(
 	DebugDrawListMixin_Pos<irr::core::vector3df>,
@@ -179,14 +190,14 @@ typedef TYPELIST_6(
 	DebugDrawListMixin_3D,
 	DebugDrawListMixin_Node
 	) DebugDrawListMixinList_String3D;
-struct DebugDrawList_String3D : public DebugDrawListT<DebugDrawListMixinList_String3D> {};
+class DebugDrawList_String3D : public DebugDrawListT<DebugDrawListMixinList_String3D> {};
 
 typedef TYPELIST_3(
 	DebugDrawListMixin_Pos<irr::core::vector2di>,
 	DebugDrawListMixin_Scale<float>,
 	DebugDrawListMixin_Color
 	) DebugDrawListMixinList_Circle2D;
-struct DebugDrawList_Circle2D : public DebugDrawListT<DebugDrawListMixinList_Circle2D> {};
+class DebugDrawList_Circle2D : public DebugDrawListT<DebugDrawListMixinList_Circle2D> {};
 
 typedef TYPELIST_4(
 	DebugDrawListMixin_Pos<irr::core::vector3df>,
@@ -194,32 +205,32 @@ typedef TYPELIST_4(
 	DebugDrawListMixin_Color,
 	DebugDrawListMixin_3D
 	) DebugDrawListMixinList_Sphere3D;
-struct DebugDrawList_Sphere3D : public DebugDrawListT<DebugDrawListMixinList_Sphere3D> {};
+class DebugDrawList_Sphere3D : public DebugDrawListT<DebugDrawListMixinList_Sphere3D> {};
 
 typedef TYPELIST_3(
 	DebugDrawListMixin_Transform,
 	DebugDrawListMixin_Scale<float>,
 	DebugDrawListMixin_3D
 	) DebugDrawListMixinList_Axis3D;
-struct DebugDrawList_Axis3D : public DebugDrawListT<DebugDrawListMixinList_Axis3D> {};
+class DebugDrawList_Axis3D : public DebugDrawListT<DebugDrawListMixinList_Axis3D> {};
 
 template<class T>
 class DebugDrawListHolder {
 public:
 	typedef T value_type;
 
-	value_type ImmediateDrawList;
-	value_type DurationDrawList;
-	std::vector<int> DurationList;	//millisecond
+	value_type immediateDrawList;
+	value_type durationDrawList;
+	std::vector<int> durationList;	//millisecond
 
 	const value_type &getList(int duration) const
 	{
 		const value_type *drawList = nullptr;
 		SR_ASSERT(duration >= 0);
 		if(duration == 0) {
-			drawList = &ImmediateDrawList;
+			drawList = &immediateDrawList;
 		} else {
-			drawList = &DurationDrawList;
+			drawList = &durationDrawList;
 			
 		}
 		return *drawList;
@@ -229,7 +240,7 @@ public:
 	{
 		value_type &drawList = const_cast<value_type&>(getList(duration));
 		if(duration > 0) {
-			DurationList.push_back(duration);
+			durationList.push_back(duration);
 		}
 		return drawList;
 	}
@@ -245,7 +256,7 @@ public:
 			bool validateResult = drawList.validate();
 			SR_ASSERT(validateResult == true);
 			
-			if(drawList.size() == DurationDrawList.size()) {
+			if(drawList.size() == durationDrawList.size()) {
 				validateResult = false;
 			}
 			SR_ASSERT(validateResult == true);
@@ -278,7 +289,7 @@ typedef TYPELIST_9(
 
 class DebugDrawManager : public Loki::GenScatterHierarchy<DebugDrawCmdTypeList, DebugDrawListHolder> {
 public:
-	DebugDrawManager() : Device(nullptr), batchSceneNode(nullptr) {}
+	DebugDrawManager() : device_(nullptr), batchSceneNode_(nullptr) {}
 	~DebugDrawManager() {}
 
 	void startUp(irr::IrrlichtDevice *dev);
@@ -286,7 +297,7 @@ public:
 	void drawAll();
 	void updateAll(int ms);
 	void clear();
-	int size() const;
+	size_t size() const;
 
 	//add 3d
 public:
@@ -355,12 +366,12 @@ public:
 	void drawList(const DebugDrawList_String3D &cmd);
 
 private:
-	irr::IrrlichtDevice *Device;
+	irr::IrrlichtDevice *device_;
 
 private:
-	LineBatchSceneNode *batchSceneNode;
+	LineBatchSceneNode *batchSceneNode_;
 	// thickness != 1 인 경우도 렌더링 로직은 동일하게 처리하기 위해서 도입
-	std::map<float, LineBatchSceneNode *> batchSceneNodeMap;
+	std::map<float, LineBatchSceneNode *> batchSceneNodeMap_;
 
 	LineBatchSceneNode *getBatchSceneNode(float thickness);
 };

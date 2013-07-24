@@ -25,17 +25,17 @@ DebugDrawListMixin_Node::~DebugDrawListMixin_Node()
 }
 void DebugDrawListMixin_Node::pop_back() 
 {
-	auto node = NodeList.back();
+	auto node = nodeList.back();
 	if(node) {
 		node->remove();
 		node->drop();
 	}
-	NodeList.pop_back();
+	nodeList.pop_back();
 }
 void DebugDrawListMixin_Node::clear() 
 {
-	auto it = NodeList.begin();
-	auto endit = NodeList.end();
+	auto it = nodeList.begin();
+	auto endit = nodeList.end();
 	for( ; it != endit ; ++it) {
 		auto node = *it;
 		if(node) {
@@ -43,28 +43,28 @@ void DebugDrawListMixin_Node::clear()
 			node->drop();
 		}
 	}
-	NodeList.clear(); 
+	nodeList.clear(); 
 }
 
 void DebugDrawManager::startUp(irr::IrrlichtDevice *dev)
 {
-	this->Device = dev;
+	this->device_ = dev;
 
 	if(dev != nullptr) {
 		ISceneManager* smgr = dev->getSceneManager();
-		batchSceneNode = new LineBatchSceneNode(smgr->getRootSceneNode(), smgr, 0);
+		batchSceneNode_ = new LineBatchSceneNode(smgr->getRootSceneNode(), smgr, 0);
 	}
 }
 void DebugDrawManager::shutDown()
 {
 	clear();
-	if(batchSceneNode) {
-		batchSceneNode->remove();
-		batchSceneNode->drop();
-		batchSceneNode = nullptr;
+	if(batchSceneNode_) {
+		batchSceneNode_->remove();
+		batchSceneNode_->drop();
+		batchSceneNode_ = nullptr;
 	}
-	auto it = batchSceneNodeMap.begin();
-	auto endit = batchSceneNodeMap.end();
+	auto it = batchSceneNodeMap_.begin();
+	auto endit = batchSceneNodeMap_.end();
 	for( ; it != endit ; ++it) {
 		it->second->remove();
 		it->second->drop();
@@ -74,16 +74,16 @@ void DebugDrawManager::shutDown()
 LineBatchSceneNode *DebugDrawManager::getBatchSceneNode(float thickness)
 {
 	if(thickness == 1.0f || abs(thickness - 1.0f) < FLT_EPSILON) {
-		return batchSceneNode;
+		return batchSceneNode_;
 	}
-	auto found = batchSceneNodeMap.find(thickness);
-	if(found != batchSceneNodeMap.end()) {
+	auto found = batchSceneNodeMap_.find(thickness);
+	if(found != batchSceneNodeMap_.end()) {
 		return found->second;
 	}
-	ISceneManager* smgr = Device->getSceneManager();
+	ISceneManager* smgr = device_->getSceneManager();
 	auto sceneNode = new LineBatchSceneNode(smgr->getRootSceneNode(), smgr, 0);
 	sceneNode->setThickness(thickness);
-	batchSceneNodeMap[thickness] = sceneNode;
+	batchSceneNodeMap_[thickness] = sceneNode;
 	return sceneNode;
 }
 
@@ -100,15 +100,15 @@ struct DebugDrawListFunctor< Typelist<T, U> > {
 	static int size(const DebugDrawManager &mgr)
 	{
 		int sum = 0;
-		sum += Field<T>(mgr).ImmediateDrawList.size();
-		sum += Field<T>(mgr).DurationDrawList.size();
+		sum += Field<T>(mgr).immediateDrawList.size();
+		sum += Field<T>(mgr).durationDrawList.size();
 		sum += DebugDrawListFunctor<U>::size(mgr);
 		return sum;
 	}
 	static void draw(DebugDrawManager &mgr)
 	{
-		const auto &immediateList = Field<T>(mgr).ImmediateDrawList;
-		const auto &durationList = Field<T>(mgr).DurationDrawList;
+		const auto &immediateList = Field<T>(mgr).immediateDrawList;
+		const auto &durationList = Field<T>(mgr).durationDrawList;
 		if(immediateList.size() > 0) {
 			mgr.drawList(immediateList);
 		}
@@ -119,19 +119,19 @@ struct DebugDrawListFunctor< Typelist<T, U> > {
 	}
 	static void clear(DebugDrawManager &mgr)
 	{
-		Field<T>(mgr).DurationList.clear();
-		Field<T>(mgr).DurationDrawList.clear();
-		Field<T>(mgr).ImmediateDrawList.clear();
+		Field<T>(mgr).durationList.clear();
+		Field<T>(mgr).durationDrawList.clear();
+		Field<T>(mgr).immediateDrawList.clear();
 		DebugDrawListFunctor<U>::clear(mgr);
 	}
 	static void update(int ms, DebugDrawManager &mgr)
 	{
-		Field<T>(mgr).ImmediateDrawList.clear();
+		Field<T>(mgr).immediateDrawList.clear();
 		
-		auto &durationList = Field<T>(mgr).DurationList;
-		auto &durationDrawList = Field<T>(mgr).DurationDrawList;
+		auto &durationList = Field<T>(mgr).durationList;
+		auto &durationDrawList = Field<T>(mgr).durationDrawList;
 
-		//TODO DurationDrawList-DurationList 시간 내림차순으로 정렬
+		//TODO durationDrawList-durationList 시간 내림차순으로 정렬
 		SR_ASSERT(durationList.size() == 0 && "duration based is not implemented yet");
 
 		//시간지난거 삭제
@@ -152,7 +152,7 @@ struct DebugDrawListFunctor< Typelist<T, U> > {
 	}
 };
 
-int DebugDrawManager::size() const
+size_t DebugDrawManager::size() const
 {
 	int sum = DebugDrawListFunctor<DebugDrawCmdTypeList>::size(*this);	
 	return sum;
@@ -161,21 +161,21 @@ int DebugDrawManager::size() const
 
 void DebugDrawManager::drawAll()
 {
-	if(batchSceneNode) {
-		batchSceneNode->clear();
+	if(batchSceneNode_) {
+		batchSceneNode_->clear();
 	}
-	auto it = batchSceneNodeMap.begin();
-	const auto endit = batchSceneNodeMap.end();
+	auto it = batchSceneNodeMap_.begin();
+	const auto endit = batchSceneNodeMap_.end();
 	for( ; it != endit ; ++it) {
 		it->second->clear();
 	}
 	
 	DebugDrawListFunctor<DebugDrawCmdTypeList>::draw(*this);
 	
-	if(batchSceneNode) {
-		batchSceneNode->render();
+	if(batchSceneNode_) {
+		batchSceneNode_->render();
 	}
-	it = batchSceneNodeMap.begin();
+	it = batchSceneNodeMap_.begin();
 	for( ; it != endit ; ++it) {
 		it->second->render();
 	}
@@ -200,11 +200,11 @@ void DebugDrawManager::addLine(const irr::core::vector3df &p1, const irr::core::
 	typedef DebugDrawList_Line3D ListType;
 	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 
-	drawList.P1List.push_back(p1);
-	drawList.P2List.push_back(p2);
-	drawList.ColorList.push_back(color);
-	drawList.ScaleList.push_back(lineWidth);
-	drawList.DepthEnableList.push_back(depthEnable);
+	drawList.p1List.push_back(p1);
+	drawList.p2List.push_back(p2);
+	drawList.colorList.push_back(color);
+	drawList.scaleList.push_back(lineWidth);
+	drawList.depthEnableList.push_back(depthEnable);
 
 	Field<ListType>(*this).runValidateOnce(duration);
 }
@@ -218,10 +218,10 @@ void DebugDrawManager::addCross(const irr::core::vector3df &pos,
 	typedef DebugDrawList_Cross3D ListType;
 	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
-	drawList.PosList.push_back(pos);
-	drawList.ColorList.push_back(color);
-	drawList.ScaleList.push_back(size);
-	drawList.DepthEnableList.push_back(depthEnable);
+	drawList.posList.push_back(pos);
+	drawList.colorList.push_back(color);
+	drawList.scaleList.push_back(size);
+	drawList.depthEnableList.push_back(depthEnable);
 
 	Field<ListType>(*this).runValidateOnce(duration);
 }
@@ -235,10 +235,10 @@ void DebugDrawManager::addSphere(const irr::core::vector3df &pos,
 	typedef DebugDrawList_Sphere3D ListType;
 	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
-	drawList.PosList.push_back(pos);
-	drawList.ColorList.push_back(color);
-	drawList.ScaleList.push_back(radius);
-	drawList.DepthEnableList.push_back(depthEnable);
+	drawList.posList.push_back(pos);
+	drawList.colorList.push_back(color);
+	drawList.scaleList.push_back(radius);
+	drawList.depthEnableList.push_back(depthEnable);
 
 	Field<ListType>(*this).runValidateOnce(duration);
 }
@@ -251,9 +251,9 @@ void DebugDrawManager::addAxis(const irr::core::matrix4 &xf,
 	typedef DebugDrawList_Axis3D ListType;
 	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
-	drawList.XfList.push_back(xf);
-	drawList.ScaleList.push_back(size);
-	drawList.DepthEnableList.push_back(depthEnable);
+	drawList.xfList.push_back(xf);
+	drawList.scaleList.push_back(size);
+	drawList.depthEnableList.push_back(depthEnable);
 
 	Field<ListType>(*this).runValidateOnce(duration);
 }
@@ -268,14 +268,14 @@ void DebugDrawManager::addString(const irr::core::vector3df &pos,
 	typedef DebugDrawList_String3D ListType;
 	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
-	drawList.PosList.push_back(pos);
-	drawList.ColorList.push_back(color);
-	drawList.ScaleList.push_back(scale);
-	drawList.MsgList.push_back(msg);
-	drawList.DepthEnableList.push_back(depthEnable);
+	drawList.posList.push_back(pos);
+	drawList.colorList.push_back(color);
+	drawList.scaleList.push_back(scale);
+	drawList.msgList.push_back(msg);
+	drawList.depthEnableList.push_back(depthEnable);
 
 	//create scene node
-	ISceneManager* smgr = Device->getSceneManager();
+	ISceneManager* smgr = device_->getSceneManager();
 	ITextSceneNode *node = smgr->addTextSceneNode(g_normalFont14, msg.data(), color);
 	if(node) {
 		SMaterial material;
@@ -288,7 +288,7 @@ void DebugDrawManager::addString(const irr::core::vector3df &pos,
 	node->setScale(vector3df(scale, scale, scale));
 	node->setPosition(pos);
 	node->grab();
-	drawList.NodeList.push_back(node);
+	drawList.nodeList.push_back(node);
 
 	Field<ListType>(*this).runValidateOnce(duration);
 }
@@ -301,10 +301,10 @@ void DebugDrawManager::addLine(const irr::core::vector2di &p1, const irr::core::
 	typedef DebugDrawList_Line2D ListType;
 	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
-	drawList.P1List.push_back(p1);
-	drawList.P2List.push_back(p2);
-	drawList.ColorList.push_back(color);
-	drawList.ScaleList.push_back(lineWidth);
+	drawList.p1List.push_back(p1);
+	drawList.p2List.push_back(p2);
+	drawList.colorList.push_back(color);
+	drawList.scaleList.push_back(lineWidth);
 
 	Field<ListType>(*this).runValidateOnce(duration);
 }
@@ -317,9 +317,9 @@ void DebugDrawManager::addCross(const irr::core::vector2di &pos,
 	typedef DebugDrawList_Cross2D ListType;
 	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 
-	drawList.PosList.push_back(pos);
-	drawList.ColorList.push_back(color);
-	drawList.ScaleList.push_back(size);
+	drawList.posList.push_back(pos);
+	drawList.colorList.push_back(color);
+	drawList.scaleList.push_back(size);
 
 	Field<ListType>(*this).runValidateOnce(duration);
 }
@@ -333,10 +333,10 @@ void DebugDrawManager::addString(const irr::core::vector2di &pos,
 	typedef DebugDrawList_String2D ListType;
 	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
-	drawList.PosList.push_back(pos);
-	drawList.ColorList.push_back(color);
-	drawList.ScaleList.push_back(scale);
-	drawList.MsgList.push_back(msg);
+	drawList.posList.push_back(pos);
+	drawList.colorList.push_back(color);
+	drawList.scaleList.push_back(scale);
+	drawList.msgList.push_back(msg);
 
 	Field<ListType>(*this).runValidateOnce(duration);
 }
@@ -348,9 +348,9 @@ void DebugDrawManager::addCircle(const irr::core::vector2di &pos, float radius,
 	typedef DebugDrawList_Circle2D ListType;
 	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
-	drawList.PosList.push_back(pos);
-	drawList.ColorList.push_back(color);
-	drawList.ScaleList.push_back(radius);
+	drawList.posList.push_back(pos);
+	drawList.colorList.push_back(color);
+	drawList.scaleList.push_back(radius);
 
 	Field<ListType>(*this).runValidateOnce(duration);
 }
@@ -359,9 +359,9 @@ void DebugDrawManager::drawList(const DebugDrawList_Line2D &cmd)
 {
 	int loopCount = cmd.size();
 	for(int i = 0 ; i < loopCount ; ++i) {
-		float scale = cmd.ScaleList[i];
+		float scale = cmd.scaleList[i];
 		auto sceneNode = getBatchSceneNode(scale);
-		sceneNode->addLine(cmd.P1List[i], cmd.P2List[i], cmd.ColorList[i]);
+		sceneNode->addLine(cmd.p1List[i], cmd.p2List[i], cmd.colorList[i]);
 	}
 }
 
@@ -369,9 +369,9 @@ void DebugDrawManager::drawList(const DebugDrawList_Cross2D &cmd)
 {
 	int loopCount = cmd.size();
 	for(int i = 0 ; i < loopCount ; ++i) {
-		const auto &pos = cmd.PosList[i];
-		auto size = static_cast<int>(cmd.ScaleList[i]);
-		const auto &color = cmd.ColorList[i];
+		const auto &pos = cmd.posList[i];
+		auto size = static_cast<int>(cmd.scaleList[i]);
+		const auto &color = cmd.colorList[i];
 
 		vector2di top = pos + vector2di(0, size);
 		vector2di bottom = pos - vector2di(0, size);
@@ -389,16 +389,16 @@ void DebugDrawManager::drawList(const DebugDrawList_String2D &cmd)
 		return;
 	}
 
-	auto driver = Device->getVideoDriver();
+	auto driver = device_->getVideoDriver();
 	const irr::core::dimension2du& screenSize = driver->getScreenSize();
 	int w = screenSize.Width;
 	int h = screenSize.Height;
 
 	int loopCount = cmd.size();
 	for(int i = 0 ; i < loopCount ; ++i) {
-		const auto &pos = cmd.PosList[i];
-		const auto &color = cmd.ColorList[i];
-		auto msg = cmd.MsgList[i];
+		const auto &pos = cmd.posList[i];
+		const auto &color = cmd.colorList[i];
+		auto msg = cmd.msgList[i];
 		int x = pos.X;
 		int y = pos.Y;
 		g_normalFont14->draw(msg.data(), rect<s32>(x, y, w, h), color);
@@ -435,9 +435,9 @@ void DebugDrawManager::drawList(const DebugDrawList_Circle2D &cmd)
 
 	std::array<S3DVertex, numSegment> vertexList;
 	for(size_t i = 0 ; i < cmd.size() ; ++i) {
-		const auto &pos = cmd.PosList[i];
-		const auto &color = cmd.ColorList[i];
-		float radius = cmd.ScaleList[i];
+		const auto &pos = cmd.posList[i];
+		const auto &color = cmd.colorList[i];
+		float radius = cmd.scaleList[i];
 
 		std::copy(baseVertexList.begin(), baseVertexList.end(), vertexList.begin());
 		for(auto &vert : vertexList) {
@@ -455,9 +455,9 @@ void DebugDrawManager::drawList(const DebugDrawList_Line3D &cmd)
 {
 	int loopCount = cmd.size();
 	for(int i = 0 ; i < loopCount ; ++i) {
-		float scale = cmd.ScaleList[i];
+		float scale = cmd.scaleList[i];
 		auto sceneNode = getBatchSceneNode(scale);
-		sceneNode->addLine(cmd.P1List[i], cmd.P2List[i], cmd.ColorList[i]);
+		sceneNode->addLine(cmd.p1List[i], cmd.p2List[i], cmd.colorList[i]);
 	}
 }
 
@@ -479,9 +479,9 @@ void DebugDrawManager::drawList(const DebugDrawList_Sphere3D &cmd)
 	
 	SphereFactoryType::vertex_list_type vertexList;
 	for(size_t i = 0 ; i < cmd.size() ; i++) {
-		const auto &color = cmd.ColorList[i];
-		const auto &pos = cmd.PosList[i];
-		auto scale = cmd.ScaleList[i];
+		const auto &color = cmd.colorList[i];
+		const auto &pos = cmd.posList[i];
+		auto scale = cmd.scaleList[i];
 
 		std::copy(baseVertexList.begin(), baseVertexList.end(), vertexList.begin());
 		for(auto &vert : vertexList) {
@@ -507,8 +507,8 @@ void DebugDrawManager::drawList(const DebugDrawList_Axis3D &cmd)
 
 	int loopCount = cmd.size();
 	for(int i = 0 ; i < loopCount ; ++i) {
-		auto size = cmd.ScaleList[i];
-		auto xf = cmd.XfList[i];
+		auto size = cmd.scaleList[i];
+		auto xf = cmd.xfList[i];
 
 		vector3df zero(0, 0, 0);
 		vector3df x(size, 0, 0);
