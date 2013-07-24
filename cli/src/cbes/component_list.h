@@ -14,7 +14,7 @@ public:
 
 class BaseComponent : public IFamilyComponentIdSupport {
 public:
-	virtual void setUp() = 0;
+	virtual void startUp() = 0;
 	virtual void shutDown() = 0;
 	virtual void update(int ms) = 0;
 };
@@ -25,7 +25,7 @@ public:
 	virtual ~BaseComponentList() {}
 
 	virtual void update(int ms) = 0;
-	virtual void setUp() = 0;
+	virtual void startUp() = 0;
 	virtual void shutDown() = 0;
 	void registerObject(int compId, Object *obj);
 	Object *getGameObject(int compId) { return GameObjectList[compId]; }
@@ -146,7 +146,7 @@ public:
 	// CompHealthList를 참고
 	virtual void initMsgHandler() { /* TODO implement */ }
 
-	virtual void setUp() { initMsgHandler(); }
+	virtual void startUp() { initMsgHandler(); }
 	virtual void shutDown() { }
 
 protected:
@@ -215,7 +215,7 @@ int SimpleComponentList<T>::create()
 {
 	int compId = BaseComponentList::create();
 	T &obj = Parent::CompList[compId];
-	obj.setUp();
+	obj.startUp();
 	return compId;
 }
 
@@ -233,7 +233,7 @@ int InheritanceComponentList<T>::add(T *obj)
 {
 	int compId = BaseComponentList::create();
 	Parent::CompList[compId] = obj;
-	obj->setUp();
+	obj->startUp();
 	return compId;
 }
 

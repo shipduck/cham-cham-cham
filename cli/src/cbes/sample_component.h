@@ -26,7 +26,7 @@ public:
 	int create(const healt_value_t hp);
 
 	virtual void update(int ms);
-	virtual void setUp();
+	virtual void startUp();
 	virtual void shutDown();
 
 	virtual void initMsgHandler();
@@ -61,7 +61,7 @@ public:
 	};
 
 public:
-	virtual void setUp() {}
+	virtual void startUp() {}
 	virtual void shutDown() {}
 	virtual void update(int ms) {}
 
@@ -98,7 +98,7 @@ class CompVisualSphere : public ICompVisual {
 public:
 	virtual comp_id_type getComponentId() const { return kCompVisualSphere; }
 public:
-	virtual void setUp() {}
+	virtual void startUp() {}
 	virtual void shutDown() {}
 	virtual void update(int ms);
 	virtual void render() const;

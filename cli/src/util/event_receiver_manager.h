@@ -45,7 +45,7 @@ public:
 	EventReceiverManager();
 	~EventReceiverManager();
 
-	void setUp(irr::IrrlichtDevice *dev);
+	void startUp(irr::IrrlichtDevice *dev);
 	void shutDown();
 
 	virtual bool OnEvent(const irr::SEvent &evt);

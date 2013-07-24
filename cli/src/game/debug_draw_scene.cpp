@@ -23,9 +23,9 @@ DebugDrawScene::~DebugDrawScene()
 {
 }
 
-void DebugDrawScene::setUp()
+void DebugDrawScene::startUp()
 {
-	Scene::setUp();
+	Scene::startUp();
 
 	Device->setWindowCaption(L"Irrlicht Engine Debug Draw");
 

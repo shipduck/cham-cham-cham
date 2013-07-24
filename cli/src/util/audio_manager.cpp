@@ -12,7 +12,7 @@ AudioManager::AudioManager()
 AudioManager::~AudioManager()
 {
 }
-void AudioManager::setUp()
+void AudioManager::startUp()
 {
 	ALboolean useSound = alutInit(NULL, nullptr);
 	if(useSound == false) {
@@ -44,7 +44,7 @@ void AudioManager::addBGM(const std::string &name, const BGM &bgm)
 	BgmDict[name] = bgm;
 }
 
-void BGM::setUp(const std::string &file)
+void BGM::startUp(const std::string &file)
 {
 	this->File = file;
 }

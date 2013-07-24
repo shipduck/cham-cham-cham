@@ -14,7 +14,7 @@ EventReceiverManager::EventReceiverManager()
 EventReceiverManager::~EventReceiverManager()
 {
 }
-void EventReceiverManager::setUp(irr::IrrlichtDevice *dev)
+void EventReceiverManager::startUp(irr::IrrlichtDevice *dev)
 {
 	auto* joystick = new JoystickDevice();
 	joystick->setDevice(dev);

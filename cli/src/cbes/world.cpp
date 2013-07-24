@@ -18,20 +18,20 @@ static_assert(TL::Length<CompListTypeList>::value == cNumFamily, "");
 template<typename TList> struct CompListFunctor;
 template<>
 struct CompListFunctor<NullType> {
-	static void setUp(World *world) {}
+	static void startUp(World *world) {}
 };
 
 template<typename T, typename U>
 struct CompListFunctor< Typelist<T, U> > {
-	static void setUp(World *world)
+	static void startUp(World *world)
 	{
 		static_assert(std::is_base_of<BaseComponentList, T>::value == 1, "not valid component list class");
 
 		auto familyCode = T::kFamily;
 		T *compList = new T();
-		compList->setUp();
+		compList->startUp();
 		world->setCompList(familyCode, compList);
-		CompListFunctor<U>::setUp(world);
+		CompListFunctor<U>::startUp(world);
 	}
 };
 
@@ -40,7 +40,7 @@ World::World()
 {
 	std::fill(CompListMap.begin(), CompListMap.end(), nullptr);
 
-	CompListFunctor<CompListTypeList>::setUp(this);
+	CompListFunctor<CompListTypeList>::startUp(this);
 
 	for(BaseComponentList *compList : CompListMap) {
 		SR_ASSERT(compList != nullptr && "component list not assigned");

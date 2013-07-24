@@ -46,7 +46,7 @@ void DebugDrawListMixin_Node::clear()
 	NodeList.clear(); 
 }
 
-void DebugDrawManager::setUp(irr::IrrlichtDevice *dev)
+void DebugDrawManager::startUp(irr::IrrlichtDevice *dev)
 {
 	this->Device = dev;
 

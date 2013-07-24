@@ -11,7 +11,7 @@ public:
 	AudioManager();
 	~AudioManager();
 
-	void setUp();
+	void startUp();
 	void shutDown();
 
 	bool isSupport() { return SupportAL; }
@@ -29,7 +29,7 @@ public:
 	BGM() : BgmBuf(0), BgmSrc(0) {}
 	~BGM() {}
 	
-	void setUp(const std::string &file);
+	void startUp(const std::string &file);
 
 	bool open();
 	bool close();

@@ -10,7 +10,7 @@ string notExistFile = "ext/irrlicht/media/not_exist.wav";
 TEST(AudioManager, init)
 {
 	AudioManager audioMgr;
-	audioMgr.setUp();
+	audioMgr.startUp();
 	EXPECT_TRUE(audioMgr.isSupport());
 	
 	audioMgr.shutDown();
@@ -20,7 +20,7 @@ TEST(AudioManager, init)
 class BGMTest : public ::testing::Test {
 protected:
 	virtual void SetUp() {
-		audioMgr.setUp();
+		audioMgr.startUp();
 	}
 	virtual void TearDown() {
 		audioMgr.shutDown();
@@ -32,7 +32,7 @@ protected:
 TEST_F(BGMTest, open_close_success)
 {
 	BGM bgm;
-	bgm.setUp(existFile);
+	bgm.startUp(existFile);
 	EXPECT_EQ(true, bgm.open());
 	EXPECT_EQ(true, bgm.close());
 }
@@ -40,7 +40,7 @@ TEST_F(BGMTest, open_close_success)
 TEST_F(BGMTest, open_close_no_file)
 {
 	BGM bgm;
-	bgm.setUp(notExistFile);
+	bgm.startUp(notExistFile);
 	EXPECT_EQ(false, bgm.open());
 	EXPECT_EQ(false, bgm.close());
 }
@@ -49,7 +49,7 @@ TEST_F(BGMTest, play_pause)
 {
 	//소리가 나면 성공
 	BGM bgm;
-	bgm.setUp(existFile);
+	bgm.startUp(existFile);
 	bgm.open();
 	bgm.play();
 	Sleep(500);

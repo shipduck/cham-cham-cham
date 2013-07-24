@@ -47,7 +47,7 @@ void CompHealthList::onDestroyMessage(int compId, DestroyMessage *msg)
 	}
 }
 
-void CompHealthList::setUp()
+void CompHealthList::startUp()
 {
 	initMsgHandler();
 }

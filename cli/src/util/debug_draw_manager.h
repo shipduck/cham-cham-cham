@@ -281,7 +281,7 @@ public:
 	DebugDrawManager() : Device(nullptr), batchSceneNode(nullptr) {}
 	~DebugDrawManager() {}
 
-	void setUp(irr::IrrlichtDevice *dev);
+	void startUp(irr::IrrlichtDevice *dev);
 	void shutDown();
 	void drawAll();
 	void updateAll(int ms);

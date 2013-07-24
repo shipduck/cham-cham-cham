@@ -19,7 +19,7 @@ Scene::~Scene()
 {
 }
 
-void Scene::setUp()
+void Scene::startUp()
 {
 	auto guienv = Device->getGUIEnvironment();
 	auto smgr = Device->getSceneManager();

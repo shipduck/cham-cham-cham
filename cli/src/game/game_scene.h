@@ -12,7 +12,7 @@ public:
 	GameScene(irr::IrrlichtDevice *dev);
 	virtual ~GameScene();
 
-	virtual void setUp();
+	virtual void startUp();
 	virtual void shutDown();
 
 	virtual void update(int ms);

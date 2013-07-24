@@ -4,7 +4,7 @@
 #include "util/debug_draw_manager.h"
 #include "util/audio_manager.h"
 
-#include "irr/head_tracking.h"
+#include "irr/head_tracker.h"
 #include "irr/hmd_event_receiver.h"
 
 // scene
@@ -43,7 +43,7 @@ int entrypoint(int argc, char* argv[])
 	if (!device){
 		return 1;
 	}
-	gEventReceiverMgr->setUp(device);
+	gEventReceiverMgr->startUp(device);
 
 	auto joystickDev = gEventReceiverMgr->getJoystickDev();
 	joystickDev.showInfo();
@@ -53,7 +53,7 @@ int entrypoint(int argc, char* argv[])
 	ISceneManager* smgr = device->getSceneManager();
 
 	//set debug tool
-	gDebugDrawMgr->setUp(device);
+	gDebugDrawMgr->startUp(device);
 	//gNormalFont12 = guienv->getFont("res/font_12.xml");
 	gNormalFont14 = guienv->getFont("res/font_14.xml");
 
@@ -63,17 +63,17 @@ int entrypoint(int argc, char* argv[])
 	//simple scene framework
 	//std::unique_ptr<Scene> scene(new DebugDrawScene(device));
 	std::unique_ptr<Scene> scene(new GameScene(device));
-	scene->setUp();
+	scene->startUp();
 
 	//Oculus Rift Head Tracking
-	HeadTracking headTracking;
-	headTracking.startUp();
+	HeadTracker headTracker;
+	headTracker.startUp();
 
-	gAudioMgr->setUp();
+	gAudioMgr->startUp();
 	if(gAudioMgr->isSupport()) {
 		const std::string bg("res/sound/bg.wav");
 		BGM bgm;
-		bgm.setUp(bg);
+		bgm.startUp(bg);
 		bgm.open();
 		bgm.play();
 		gAudioMgr->addBGM("bg", bgm);
@@ -99,9 +99,9 @@ int entrypoint(int argc, char* argv[])
 		}
 
 		// Read-Write Head Tracking Sensor Value to Camera
-		if(headTracking.isConnected()) {
+		if(headTracker.isConnected()) {
 			HeadTrackingEvent evt;
-			headTracking.getValue(&evt.Yaw, &evt.Pitch, &evt.Roll);
+			headTracker.getValue(&evt.Yaw, &evt.Pitch, &evt.Roll);
 			gEventReceiverMgr->OnEvent(evt);
 		}
 
@@ -146,7 +146,7 @@ int entrypoint(int argc, char* argv[])
 	device->drop();	
 	
 	//Deinitialize Oculus LibOVR
-	headTracking.shutDown();
+	headTracker.shutDown();
 	
 	return 0;
 }

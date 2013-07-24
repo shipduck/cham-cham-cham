@@ -146,7 +146,7 @@ TEST(ComponentListTypeHolder, list_type)
 TEST(CompHealthList, onMessage)
 {
 	CompHealthList compList;
-	compList.setUp();
+	compList.startUp();
 
 	int compIdA = compList.create(1);
 	int compIdB = compList.create(1);

@@ -33,9 +33,9 @@ GameScene::~GameScene()
 {
 }
 
-void GameScene::setUp()
+void GameScene::startUp()
 {
-	Scene::setUp();
+	Scene::startUp();
 
 	Device->setWindowCaption(L"Game Scene");
 

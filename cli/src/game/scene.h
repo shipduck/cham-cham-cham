@@ -8,7 +8,7 @@ public:
 	Scene(irr::IrrlichtDevice *dev);
 	virtual ~Scene();
 
-	virtual void setUp();
+	virtual void startUp();
 	virtual void shutDown();
 
 	virtual void update(int ms) = 0;

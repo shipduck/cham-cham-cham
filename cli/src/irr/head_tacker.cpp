@@ -1,19 +1,18 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
-#include "head_tracking.h"
+#include "head_tracker.h"
 
 using namespace OVR;
 
-HeadTracking::HeadTracking() 
+HeadTracker::HeadTracker() 
 {
 }
 
-HeadTracking::~HeadTracking() 
+HeadTracker::~HeadTracker() 
 {
-	shutDown(); 
 }
 
-bool HeadTracking::startUp()
+bool HeadTracker::startUp()
 {
 	OVR::System::Init();
 
@@ -33,7 +32,7 @@ bool HeadTracking::startUp()
 	}
 }
 
-bool HeadTracking::shutDown()
+bool HeadTracker::shutDown()
 {
 	Sensor.Clear();
     HMD.Clear();
@@ -43,7 +42,7 @@ bool HeadTracking::shutDown()
 	return true;
 }
 
-bool HeadTracking::getValue(float *yaw, float *pitch, float *roll)
+bool HeadTracker::getValue(float *yaw, float *pitch, float *roll)
 {
 	if(Sensor == nullptr) {
 		*yaw = 0;
@@ -66,7 +65,7 @@ bool HeadTracking::getValue(float *yaw, float *pitch, float *roll)
 	return true;
 }
 
-bool HeadTracking::isConnected() const
+bool HeadTracker::isConnected() const
 {
 	if(Sensor == nullptr) {
 		return false;
