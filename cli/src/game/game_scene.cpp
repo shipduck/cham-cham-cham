@@ -80,7 +80,7 @@ void GameScene::startUp()
 	
 	// event receiver 등록
 	// TODO 이벤트 리시버 제거기능이 없으면 씬 교체시에 문제 발생함
-	eventReceiver_ = static_cast<GameEventReceiver*>(gEventReceiverMgr->addReceiver(new GameEventReceiver(), 0));
+	eventReceiver_ = static_cast<GameEventReceiver*>(g_eventReceiverMgr->addReceiver(new GameEventReceiver(), 0));
 }
 
 void GameScene::initCam()
@@ -420,5 +420,5 @@ void GameScene::update(int ms)
 	auto camPos = camNode->getPosition();
 	auto camPosMsg = (wformat(L"CamPos : %.2f, %.2f, %.2f") % camPos.X % camPos.Y % camPos.Z).str();
 	SColor white(255, 255, 255, 255);
-	gDebugDrawMgr->addString(vector2di(0, 0), camPosMsg, white);
+	g_debugDrawMgr->addString(vector2di(0, 0), camPosMsg, white);
 }

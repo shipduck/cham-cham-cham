@@ -37,15 +37,15 @@ int entrypoint(int argc, char* argv[])
 	for (int i=1;i<argc;i++) fullscreen |= !strcmp("-f", argv[i]);
 	//fullscreen = true;
 	
-	gEventReceiverMgr->addReceiver(new ConsoleEventReceiver(), 0);
-	gHMDEventReceiver = static_cast<HMDEventReceiver*>(gEventReceiverMgr->addReceiver(new HMDEventReceiver(), 0));
-	IrrlichtDevice *device = createDevice(EDT_OPENGL, dimension2d<u32>(SCREEN_WIDTH, SCREEN_HEIGHT), 32, fullscreen, stencil, vsync, gEventReceiverMgr);
+	g_eventReceiverMgr->addReceiver(new ConsoleEventReceiver(), 0);
+	g_hmdEventReceiver = static_cast<HMDEventReceiver*>(g_eventReceiverMgr->addReceiver(new HMDEventReceiver(), 0));
+	IrrlichtDevice *device = createDevice(EDT_OPENGL, dimension2d<u32>(SCREEN_WIDTH, SCREEN_HEIGHT), 32, fullscreen, stencil, vsync, g_eventReceiverMgr);
 	if (!device){
 		return 1;
 	}
-	gEventReceiverMgr->startUp(device);
+	g_eventReceiverMgr->startUp(device);
 
-	auto joystickDev = gEventReceiverMgr->getJoystickDev();
+	auto joystickDev = g_eventReceiverMgr->getJoystickDev();
 	joystickDev.showInfo();
 	
 	IVideoDriver* driver = device->getVideoDriver();
@@ -53,9 +53,9 @@ int entrypoint(int argc, char* argv[])
 	ISceneManager* smgr = device->getSceneManager();
 
 	//set debug tool
-	gDebugDrawMgr->startUp(device);
-	//gNormalFont12 = guienv->getFont("res/font_12.xml");
-	gNormalFont14 = guienv->getFont("res/font_14.xml");
+	g_debugDrawMgr->startUp(device);
+	//g_normalFont12 = guienv->getFont("res/font_12.xml");
+	g_normalFont14 = guienv->getFont("res/font_14.xml");
 
 	//initialize the console
 	setUpConsole(device);
@@ -69,14 +69,14 @@ int entrypoint(int argc, char* argv[])
 	HeadTracker headTracker;
 	headTracker.startUp();
 
-	gAudioMgr->startUp();
-	if(gAudioMgr->isSupport()) {
+	g_audioMgr->startUp();
+	if(g_audioMgr->isSupport()) {
 		const std::string bg("res/sound/bg.wav");
 		BGM bgm;
 		bgm.startUp(bg);
 		bgm.open();
 		bgm.play();
-		gAudioMgr->addBGM("bg", bgm);
+		g_audioMgr->addBGM("bg", bgm);
 	}
 
 	int lastFPS = -1;
@@ -102,7 +102,7 @@ int entrypoint(int argc, char* argv[])
 		if(headTracker.isConnected()) {
 			HeadTrackingEvent evt;
 			headTracker.getValue(&evt.Yaw, &evt.Pitch, &evt.Roll);
-			gEventReceiverMgr->OnEvent(evt);
+			g_eventReceiverMgr->OnEvent(evt);
 		}
 
 		scene->update(frameDeltaTime);
@@ -111,11 +111,11 @@ int entrypoint(int argc, char* argv[])
 			scene->draw();
 
 			// debug render
-			gDebugDrawMgr->drawAll();
+			g_debugDrawMgr->drawAll();
 			guienv->drawAll();	
 
-			gConsole.renderConsole(guienv, driver, frameDeltaTime);
-			//if(!gConsole.isVisible()) {
+			g_console.renderConsole(guienv, driver, frameDeltaTime);
+			//if(!g_console.isVisible()) {
 			//	drawConsoleCaptions(device);
 			//}
 
@@ -124,7 +124,7 @@ int entrypoint(int argc, char* argv[])
 
 		//debug draw mgr의 업데이트를 나중에 처리해야 1프레임만 렌더링되는 객체도
 		//제대로 렌더링된다
-		gDebugDrawMgr->updateAll(frameDeltaTime);
+		g_debugDrawMgr->updateAll(frameDeltaTime);
 		
 		int fps = driver->getFPS();
 		if (lastFPS != fps) {
@@ -140,9 +140,9 @@ int entrypoint(int argc, char* argv[])
 	//shut down scene before device drop!
 	scene->shutDown();
 
-	gDebugDrawMgr->shutDown();
-	gAudioMgr->shutDown();
-	gEventReceiverMgr->shutDown();
+	g_debugDrawMgr->shutDown();
+	g_audioMgr->shutDown();
+	g_eventReceiverMgr->shutDown();
 	device->drop();	
 	
 	//Deinitialize Oculus LibOVR

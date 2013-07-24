@@ -3,7 +3,7 @@
 #include "game_console.h"
 #include "util/debug_draw_manager.h"
 
-IC_Console gConsole;
+IC_Console g_console;
 
 bool ConsoleEventReceiver::OnEvent(const irr::SEvent& event) 
 {
@@ -12,7 +12,7 @@ bool ConsoleEventReceiver::OnEvent(const irr::SEvent& event)
 
 void drawConsoleCaptions(irr::IrrlichtDevice *device)
 {
-	auto font = gNormalFont14;
+	auto font = g_normalFont14;
 	if(font == nullptr) {
 		font = device->getGUIEnvironment()->getBuiltInFont();
 	}
@@ -59,28 +59,28 @@ bool onConsoleEvent(const irr::SEvent &event)
 	if(event.EventType == irr::EET_KEY_INPUT_EVENT ) {
 		if(event.KeyInput.PressedDown) {
 			if(event.KeyInput.Key == irr::KEY_ESCAPE) {
-				if(gConsole.isVisible()) {
-					gConsole.setVisible(false);
+				if(g_console.isVisible()) {
+					g_console.setVisible(false);
 					return true;
 				}
 			} else if(event.KeyInput.Key == IC_Console::IC_KEY_TILDE) {
-				if(!gConsole.isVisible()) {
-					gConsole.setVisible(true);
+				if(!g_console.isVisible()) {
+					g_console.setVisible(true);
 					return true;
 				} else if(!event.KeyInput.Control) {
-					gConsole.setVisible(false);
+					g_console.setVisible(false);
 					return true;
 				}
-			} if(gConsole.isVisible()) {
-				gConsole.handleKeyPress(event.KeyInput.Char, event.KeyInput.Key,event.KeyInput.Shift, event.KeyInput.Control);
+			} if(g_console.isVisible()) {
+				g_console.handleKeyPress(event.KeyInput.Char, event.KeyInput.Key,event.KeyInput.Shift, event.KeyInput.Control);
 				return true;
 			}
 		}
 	} else if(event.EventType == irr::EET_LOG_TEXT_EVENT) {
-		gConsole.logMessage_ANSI(event.LogEvent.Level,event.LogEvent.Text);
+		g_console.logMessage_ANSI(event.LogEvent.Level,event.LogEvent.Text);
 		return true;
 	} else if(event.EventType == irr::EET_MOUSE_INPUT_EVENT) {
-		return gConsole.isVisible();
+		return g_console.isVisible();
 	}
 	return false;
 }
@@ -88,16 +88,16 @@ bool onConsoleEvent(const irr::SEvent &event)
 void setUpConsole(irr::IrrlichtDevice *device)
 {
 	//this is how you alter some of the config params
-	gConsole.getConfig().dimensionRatios.Y = 0.8f;
-	gConsole.getConfig().fontName = "res/font_14.xml";
+	g_console.getConfig().dimensionRatios.Y = 0.8f;
+	g_console.getConfig().fontName = "res/font_14.xml";
 
 	auto screenSize = device->getVideoDriver()->getScreenSize();
 	int w = screenSize.Width;
 	int h = screenSize.Height;
 
 	//now initialize
-	gConsole.initializeConsole(device->getGUIEnvironment(), dimension2d<s32>(w, h));
+	g_console.initializeConsole(device->getGUIEnvironment(), dimension2d<s32>(w, h));
 
 	//register common commands
-	gConsole.loadDefaultCommands(device);
+	g_console.loadDefaultCommands(device);
 }

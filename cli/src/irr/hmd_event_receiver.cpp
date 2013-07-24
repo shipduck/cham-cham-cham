@@ -5,7 +5,7 @@
 using namespace irr;
 
 HMDEventReceiver hmdEventReceiverLocal;
-HMDEventReceiver *gHMDEventReceiver = &hmdEventReceiverLocal;
+HMDEventReceiver *g_hmdEventReceiver = &hmdEventReceiverLocal;
 
 bool HMDEventReceiver::OnEvent(const irr::SEvent &evt)
 {

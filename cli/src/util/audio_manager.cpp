@@ -3,7 +3,7 @@
 #include "audio_manager.h"
 
 AudioManager audioManagerLocal;
-AudioManager *gAudioMgr = &audioManagerLocal;
+AudioManager *g_audioMgr = &audioManagerLocal;
 
 AudioManager::AudioManager()
 	: SupportAL(false)

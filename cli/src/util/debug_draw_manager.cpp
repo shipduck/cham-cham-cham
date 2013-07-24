@@ -13,10 +13,10 @@ using namespace gui;
 
 //singleton
 DebugDrawManager debugDrawMgrLocal;
-DebugDrawManager *gDebugDrawMgr = &debugDrawMgrLocal;
+DebugDrawManager *g_debugDrawMgr = &debugDrawMgrLocal;
 
-irr::gui::IGUIFont *gNormalFont12 = nullptr;
-irr::gui::IGUIFont *gNormalFont14 = nullptr;
+irr::gui::IGUIFont *g_normalFont12 = nullptr;
+irr::gui::IGUIFont *g_normalFont14 = nullptr;
 
 
 DebugDrawListMixin_Node::~DebugDrawListMixin_Node()
@@ -276,7 +276,7 @@ void DebugDrawManager::addString(const irr::core::vector3df &pos,
 
 	//create scene node
 	ISceneManager* smgr = Device->getSceneManager();
-	ITextSceneNode *node = smgr->addTextSceneNode(gNormalFont14, msg.data(), color);
+	ITextSceneNode *node = smgr->addTextSceneNode(g_normalFont14, msg.data(), color);
 	if(node) {
 		SMaterial material;
 		material.Wireframe = true;
@@ -385,7 +385,7 @@ void DebugDrawManager::drawList(const DebugDrawList_Cross2D &cmd)
 }
 void DebugDrawManager::drawList(const DebugDrawList_String2D &cmd)
 {
-	if(!gNormalFont14) {
+	if(!g_normalFont14) {
 		return;
 	}
 
@@ -401,7 +401,7 @@ void DebugDrawManager::drawList(const DebugDrawList_String2D &cmd)
 		auto msg = cmd.MsgList[i];
 		int x = pos.X;
 		int y = pos.Y;
-		gNormalFont14->draw(msg.data(), rect<s32>(x, y, w, h), color);
+		g_normalFont14->draw(msg.data(), rect<s32>(x, y, w, h), color);
 	}
 }
 

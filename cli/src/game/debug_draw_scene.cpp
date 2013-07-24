@@ -37,7 +37,7 @@ void DebugDrawScene::startUp()
 	Device->getCursorControl()->setVisible(false);
 
 	//duration based는 아직
-	//gDebugDrawMgr->addSphere(core::vector3df(30,0,30), 5, green, 5000);
+	//g_debugDrawMgr->addSphere(core::vector3df(30,0,30), 5, green, 5000);
 }
 
 void DebugDrawScene::shutDown()
@@ -52,19 +52,19 @@ void DebugDrawScene::update(int ms)
 
 	std::wstring msg(L"hello world");
 
-	gDebugDrawMgr->addSphere(core::vector3df(0,0,30), 10, red);
-	gDebugDrawMgr->addLine(vector3df(10, 0, 30), vector3df(10, 200, 200), green, 1.0f);
-	gDebugDrawMgr->addLine(vector3df(10, 0, 30), vector3df(10, 200, 300), red, 5.0f);
+	g_debugDrawMgr->addSphere(core::vector3df(0,0,30), 10, red);
+	g_debugDrawMgr->addLine(vector3df(10, 0, 30), vector3df(10, 200, 200), green, 1.0f);
+	g_debugDrawMgr->addLine(vector3df(10, 0, 30), vector3df(10, 200, 300), red, 5.0f);
 	matrix4 axisMat = core::matrix4();
 	axisMat.setTranslation(vector3df(-20, 0, 30));
 	axisMat.setRotationDegrees(vector3df(0, 0, 45));
 
-	gDebugDrawMgr->addAxis(axisMat, 5);
-	gDebugDrawMgr->addCross(vector3df(-10, 0, 30), blue, 5);
-	gDebugDrawMgr->addString(vector3df(0, 0, 30), msg, blue, 2.0f);
+	g_debugDrawMgr->addAxis(axisMat, 5);
+	g_debugDrawMgr->addCross(vector3df(-10, 0, 30), blue, 5);
+	g_debugDrawMgr->addString(vector3df(0, 0, 30), msg, blue, 2.0f);
 
-	gDebugDrawMgr->addLine(vector2di(0, 0), vector2di(50, 100), blue, 5.0f);
-	gDebugDrawMgr->addCross(vector2di(50, 100), red, 5.0f);
-	gDebugDrawMgr->addCircle(vector2di(50, 100), 10.0f, green);
-	gDebugDrawMgr->addString(vector2di(50, 100), msg, white);
+	g_debugDrawMgr->addLine(vector2di(0, 0), vector2di(50, 100), blue, 5.0f);
+	g_debugDrawMgr->addCross(vector2di(50, 100), red, 5.0f);
+	g_debugDrawMgr->addCircle(vector2di(50, 100), 10.0f, green);
+	g_debugDrawMgr->addString(vector2di(50, 100), msg, white);
 }

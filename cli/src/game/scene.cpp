@@ -75,7 +75,7 @@ void Scene::draw()
 	ISceneManager* smgr = Device->getSceneManager();
 	
 	// draw the 3d scene
-	if(gHMDEventReceiver->isSupportHMD()) {
+	if(g_hmdEventReceiver->isSupportHMD()) {
 		drawAllStereo(smgr);
 	} else {
 		drawAllNormal(smgr);
