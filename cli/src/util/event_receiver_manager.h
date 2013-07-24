@@ -18,11 +18,11 @@ public:
 
 class EventReceiverManager : public ICustomEventReceiver {
 public:
-	struct PriorityEventReceiver {
-		PriorityEventReceiver() : priority(0) {}
-		PriorityEventReceiver(PriorityEventReceiver&& o) 
+	struct SPriorityEventReceiver {
+		SPriorityEventReceiver() : priority(0) {}
+		SPriorityEventReceiver(SPriorityEventReceiver && o) 
 			: priority(o.priority), receiver(std::move(o.receiver)) { }
-		PriorityEventReceiver &operator=(PriorityEventReceiver&& o) {
+		SPriorityEventReceiver &operator=(SPriorityEventReceiver&& o) {
 			this->priority = o.priority;
 			this->receiver = std::move(o.receiver);
 			return *this;
@@ -31,7 +31,7 @@ public:
 		int priority;
 	};
 
-	typedef std::vector<PriorityEventReceiver> PriorityReceiverListType;
+	typedef std::vector<SPriorityEventReceiver> PriorityReceiverListType;
 
 public:
 	EventReceiverManager();

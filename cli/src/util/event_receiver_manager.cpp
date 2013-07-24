@@ -39,13 +39,13 @@ ICustomEventReceiver *EventReceiverManager::addReceiver(ICustomEventReceiver *re
 	} else {
 		receiverList = &lowPriorityReceiverList_;
 	}
-	PriorityEventReceiver tmp;
+	SPriorityEventReceiver tmp;
 	tmp.receiver.reset(receiver);
 	tmp.priority = priority;
 	receiverList->push_back(std::move(tmp));
 
 	std::sort(receiverList->begin(), receiverList->end(),
-		[](const PriorityEventReceiver &a, const PriorityEventReceiver &b) {
+		[](const SPriorityEventReceiver &a, const SPriorityEventReceiver &b) {
 			return a.priority < b.priority;
 	});
 	return receiver;
