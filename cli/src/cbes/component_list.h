@@ -37,7 +37,7 @@ public:
 
 public:
 	virtual void initMsgHandler() = 0;
-	virtual void onMessage(int compId, const BaseMessage *msg);
+	virtual void onMessage(int compId, const SBaseMessage *msg);
 
 protected:
 	template<typename T, typename MsgT>

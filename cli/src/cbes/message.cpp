@@ -2,8 +2,8 @@
 #include "stdafx.h"
 #include "message.h"
 
-DestroyMessage DestroyMessage::create(int objId) {
-	DestroyMessage msg;
+SDestroyMessage SDestroyMessage::create(int objId) {
+	SDestroyMessage msg;
 	msg.ObjId = objId;
 	return msg;
 }

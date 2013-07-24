@@ -34,7 +34,7 @@ void CompHealthList::initMsgHandler()
 {
 	registerMsgFunc(this, &CompHealthList::onDestroyMessage);
 }
-void CompHealthList::onDestroyMessage(int compId, DestroyMessage *msg)
+void CompHealthList::onDestroyMessage(int compId, SDestroyMessage *msg)
 {
 	//component message 사용 예제 코드
 	CompHealthProxy comp = getComp(compId);

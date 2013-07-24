@@ -35,7 +35,7 @@ void BaseComponentList::destroy(int compId)
 	GameObjectList[compId] = nullptr;
 }
 
-void BaseComponentList::onMessage(int compId, const BaseMessage *msg)
+void BaseComponentList::onMessage(int compId, const SBaseMessage *msg)
 {
 	MsgHandler.HandleMsg(compId, msg);
 }

@@ -11,9 +11,9 @@
 class HandlerFunctionBase {
 public:
 	virtual ~HandlerFunctionBase() {}
-	void Exec(int compId, const BaseMessage *msg) { Call(compId, msg); }
+	void Exec(int compId, const SBaseMessage *msg) { Call(compId, msg); }
 private:
-	virtual void Call(int compId, const BaseMessage *msg) = 0;
+	virtual void Call(int compId, const SBaseMessage *msg) = 0;
 };
 
 template<typename T, typename MsgT>
@@ -22,7 +22,7 @@ public:
 	typedef void (T::*MemberFunc)(int, MsgT*);
 	MemberFunctionHandler(T *instance, MemberFunc mem_fun)
 		: instance_(instance), func_(mem_fun) { }
-	void Call(int compId, const BaseMessage *msg)
+	void Call(int compId, const SBaseMessage *msg)
 	{
 		const MsgT *tmp = static_cast<const MsgT*>(msg);
 		MsgT *tmp2 = const_cast<MsgT*>(tmp);
@@ -60,7 +60,7 @@ public:
 		}
 		handler_list_.clear();
 	}
-	void HandleMsg(int compId, const BaseMessage *msg) {
+	void HandleMsg(int compId, const SBaseMessage *msg) {
 		Handlers::iterator it = handler_list_.find(TypeInfo_(typeid(*msg)));
 		if(it != handler_list_.end()) {
 			it->second->Exec(compId, msg);

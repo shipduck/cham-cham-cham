@@ -154,7 +154,7 @@ TEST(CompHealthList, onMessage)
 	EXPECT_EQ(1, compList.getHealthAt(compIdA, CompHealthList::head));
 	EXPECT_EQ(1, compList.getHealthAt(compIdB, CompHealthList::head));
 
-	DestroyMessage msg = DestroyMessage::create(compIdA);
+	SDestroyMessage msg = SDestroyMessage::create(compIdA);
 	compList.onMessage(compIdA, &msg);
 
 	EXPECT_EQ(0, compList.getHealthAt(compIdA, CompHealthList::head));

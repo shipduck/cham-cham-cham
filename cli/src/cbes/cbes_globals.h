@@ -5,7 +5,7 @@ class Object;
 class World;
 class BaseComponentList;
 class BaseComponent;
-class BaseMessage;
+struct SBaseMessage;
 
 typedef int comp_id_type;
 typedef int obj_id_type;

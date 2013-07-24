@@ -30,7 +30,7 @@ public:
 	virtual void shutDown();
 
 	virtual void initMsgHandler();
-	void onDestroyMessage(int compId, DestroyMessage *msg);
+	void onDestroyMessage(int compId, SDestroyMessage *msg);
 
 	//Health interface
 public:
