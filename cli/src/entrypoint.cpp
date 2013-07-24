@@ -121,8 +121,7 @@ int entrypoint(int argc, char* argv[])
 
 		// Read-Write Head Tracking Sensor Value to Camera
 		if(g_headTracker->isConnected()) {
-			SHeadTrackingEvent evt;
-			g_headTracker->getValue(&evt.yaw, &evt.pitch, &evt.roll);
+			SHeadTrackingEvent evt = g_headTracker->getValue();
 			g_eventReceiverMgr->OnEvent(evt);
 		}
 
@@ -136,9 +135,6 @@ int entrypoint(int argc, char* argv[])
 			guienv->drawAll();	
 
 			g_console.renderConsole(guienv, driver, frameDeltaTime);
-			//if(!g_console.isVisible()) {
-			//	drawConsoleCaptions(device);
-			//}
 
 			driver->endScene();	//render end
 		}

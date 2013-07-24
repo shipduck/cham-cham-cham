@@ -7,6 +7,17 @@ using namespace OVR;
 HeadTracker headTrackerLocal;
 HeadTracker *g_headTracker = &headTrackerLocal;
 
+const SHeadTrackingEvent &SHeadTrackingEvent::FailEvent()
+{
+	static bool init = false;
+	static SHeadTrackingEvent evt;
+	if(init == false) {
+		init = true;
+		evt.success = false;
+	}
+	return evt;
+}
+
 HeadTracker::HeadTracker() 
 {
 }
@@ -46,13 +57,10 @@ bool HeadTracker::shutDown()
 	return true;
 }
 
-bool HeadTracker::getValue(float *yaw, float *pitch, float *roll)
+SHeadTrackingEvent HeadTracker::getValue() const
 {
 	if(Sensor == nullptr) {
-		*yaw = 0;
-		*pitch = 0;
-		*roll = 0;
-		return false;
+		return SHeadTrackingEvent::FailEvent();
 	}
 
 	// *** Per Frame
@@ -64,9 +72,9 @@ bool HeadTracker::getValue(float *yaw, float *pitch, float *roll)
     Matrix4f bodyFrameMatrix(q); 
 
     // Get Euler angles from quaternion, in specified axis rotation order.
-    q.GetEulerAngles<Axis_Y, Axis_X, Axis_Z>(yaw, pitch, roll);
-
-	return true;
+	SHeadTrackingEvent evt;
+    q.GetEulerAngles<Axis_Y, Axis_X, Axis_Z>(&evt.yaw, &evt.pitch, &evt.roll);
+	return evt;
 }
 
 bool HeadTracker::isConnected() const

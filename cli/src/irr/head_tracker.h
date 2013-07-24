@@ -2,6 +2,18 @@
 #pragma once
 #include <OVR.h>
 
+struct SHeadTrackingEvent {
+	SHeadTrackingEvent() : yaw(0), pitch(0), roll(0), success(true) {}
+	SHeadTrackingEvent(float yaw, float pitch, float roll)
+		: yaw(yaw), pitch(pitch), roll(roll), success(true) {}
+	float yaw;
+	float pitch;
+	float roll;
+	bool success;
+
+	static const SHeadTrackingEvent &FailEvent();
+};
+
 class HeadTracker {
 public:
 	HeadTracker();
@@ -9,7 +21,7 @@ public:
 
 	bool startUp();
 	bool shutDown();
-	bool getValue(float *yaw, float *pitch, float *roll);
+	SHeadTrackingEvent getValue() const;
 	bool isConnected() const;
 
 private:
@@ -18,15 +30,6 @@ private:
 	OVR::Ptr<OVR::SensorDevice> Sensor;
 	OVR::SensorFusion FusionResult;
 	OVR::HMDInfo HmdInfo;
-};
-
-struct SHeadTrackingEvent {
-	SHeadTrackingEvent() : yaw(0), pitch(0), roll(0) {}
-	SHeadTrackingEvent(float yaw, float pitch, float roll)
-		: yaw(yaw), pitch(pitch), roll(roll) {}
-	float yaw;
-	float pitch;
-	float roll;
 };
 
 extern HeadTracker *g_headTracker;
