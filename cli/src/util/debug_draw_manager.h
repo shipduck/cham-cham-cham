@@ -366,8 +366,8 @@ private:
 };
 
 // 주력으로 사용할것을 전역변수로 걸어놔야 속편하다
-extern DebugDrawManager *gDebugDrawMgr;
+extern DebugDrawManager *g_debugDrawMgr;
 
-extern irr::gui::IGUIFont *gNormalFont12;
-extern irr::gui::IGUIFont *gNormalFont14;
+extern irr::gui::IGUIFont *g_normalFont12;
+extern irr::gui::IGUIFont *g_normalFont14;
 

@@ -4,7 +4,7 @@
 class JoystickDevice;
 class EventReceiverManager;
 
-extern EventReceiverManager *gEventReceiverMgr;
+extern EventReceiverManager *g_eventReceiverMgr;
 
 struct HeadTrackingEvent {
 	HeadTrackingEvent() : Yaw(0), Pitch(0), Roll(0) {}

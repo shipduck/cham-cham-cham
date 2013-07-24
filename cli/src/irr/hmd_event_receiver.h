@@ -15,4 +15,4 @@ private:
 	bool supportHMD_;
 };
 
-extern HMDEventReceiver *gHMDEventReceiver;
+extern HMDEventReceiver *g_hmdEventReceiver;
