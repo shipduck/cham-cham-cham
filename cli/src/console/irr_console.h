@@ -21,6 +21,9 @@ enum LineProperty {
 	LINEPROP_FUNCTION,    // a function
 	LINEPROP_ERROR,       // an error
 	LINEPROP_HELP,         //help text
+	LINEPROP_DEBUG,
+	LINEPROP_INFO,
+	LINEPROP_WARNING,
 	NUM_LINEPROP,
 };
 

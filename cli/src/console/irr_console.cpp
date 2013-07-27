@@ -33,6 +33,9 @@ const irr::video::SColor functionColor(255, 64, 255, 64);
 const irr::video::SColor errorColor(255, 255, 128, 64);
 const irr::video::SColor helpColor(255,  110, 130, 200);
 const irr::video::SColor consoleColor(120, 25, 60, 130);
+const irr::video::SColor debugColor(255, 255, 128, 64);
+const irr::video::SColor infoColor(255, 255, 128, 64);
+const irr::video::SColor warningColor(255, 255, 128, 64);
 
 const std::array<SColor, NUM_LINEPROP> &getLineColorTable()
 {
@@ -45,6 +48,9 @@ const std::array<SColor, NUM_LINEPROP> &getLineColorTable()
 		colorList[LINEPROP_FUNCTION] = functionColor;
 		colorList[LINEPROP_ERROR] = errorColor;
 		colorList[LINEPROP_HELP] = helpColor;
+		colorList[LINEPROP_DEBUG] = debugColor;
+		colorList[LINEPROP_INFO] = infoColor;
+		colorList[LINEPROP_WARNING] = warningColor;
 	}
 	return colorList;
 }
@@ -712,7 +718,14 @@ bool IrrConsole::OnEvent(const irr::SEvent &event)
 			}
 		}
 	} else if(event.EventType == irr::EET_LOG_TEXT_EVENT) {
-		//g_oldConsole.logMessage_ANSI(event.LogEvent.Level,event.LogEvent.Text);
+		std::array<LineProperty, 5> linePropTable;
+		linePropTable[ELL_DEBUG] = LINEPROP_DEBUG;
+		linePropTable[ELL_INFORMATION] = LINEPROP_INFO;
+		linePropTable[ELL_WARNING] = LINEPROP_WARNING;
+		linePropTable[ELL_ERROR] = LINEPROP_ERROR;
+		linePropTable[ELL_NONE] = LINEPROP_COMMAND;
+		LineProperty lineProperty = linePropTable[event.LogEvent.Level];
+		EnterLogLine(event.LogEvent.Text, lineProperty);
 		return true;
 	} else if(event.EventType == irr::EET_MOUSE_INPUT_EVENT) {
 		return IsOpen();
@@ -1416,6 +1429,5 @@ void setUpConsole(irr::IrrlichtDevice *device)
 	g_console->Init(device, config);
 
 	//add function
-	CVarUtils::CreateCVar( "driver_info", ConsoleDriverInfo, "Display Irrlicht Driver Info" );
-	
+	CVarUtils::CreateCVar( "driver_info", ConsoleDriverInfo, "Display Irrlicht Driver Info" );	
 }
