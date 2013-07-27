@@ -93,10 +93,12 @@ void IrrConsole::Init(irr::IrrlichtDevice *device, const ConsoleConfig &cfg)
 	m_bSavingScript = false;
 	m_bConsoleOpen = false;
 	m_bIsChanging = false;
-	m_nTextHeight = 14;  // TODO Hard coded for now??? debug font에서 긁어오는 방식으로 고치자
-	m_nTextWidth = 14;	//TODO
 	m_nScrollPixels = 0;
 	m_nCommandNum = 0;
+
+	// TODO Hard coded for now?
+	m_nTextHeight = 14;  
+	m_nTextWidth = 15;
 
 	// setup member CVars
 	m_Timer.Stamp();
@@ -270,7 +272,7 @@ IrrConsole::IrrConsole()
 	m_nConsoleLineSpacing( CVarUtils::CreateCVar<int>(    "console.LineSpacing", 5 ) ), // pixels between lines
 	m_nConsoleLeftMargin( CVarUtils::CreateCVar<int>(     "console.LeftMargin", 5 ) ),   // left margin in pixels
 	m_nConsoleVerticalMargin( CVarUtils::CreateCVar<int>( "console.VertMargin", 8 ) ),
-	m_nConsoleMaxLines( CVarUtils::CreateCVar<int>(       "console.MaxLines", 200 ) ),
+	m_nConsoleMaxLines( CVarUtils::CreateCVar<int>(       "console.MaxLines", 4000 ) ),
 	m_fOverlayPercent( CVarUtils::CreateCVar<float>(      "console.OverlayPercent", 0.75f ) ),
 	m_sHistoryFileName( CVarUtils::CreateCVar<> (         "console.history.HistoryFileName", std::string( CONSOLE_HISTORY_FILE ) ) ),
 	m_sScriptFileName( CVarUtils::CreateCVar<> (          "script.ScriptFileName", std::string( CONSOLE_SCRIPT_FILE ) ) ),
@@ -1292,7 +1294,7 @@ void IrrConsole::RenderConsole(irr::gui::IGUIEnvironment* guienv, irr::video::IV
 			irr::video::SColor color = getLineColor((*it).m_nOptions);
 
 			//wrap text to multiple lines if necessary
-			int chars_per_line = (int)(1.65 * m_ConsoleRect.getWidth() / m_nTextHeight);
+			int chars_per_line = (int)(1.65 * m_ConsoleRect.getWidth() / m_nTextWidth);
 			if( chars_per_line == 0 ) {
 				// What should we do if the window has width == 0 ?
 				return;
@@ -1301,8 +1303,7 @@ void IrrConsole::RenderConsole(irr::gui::IGUIEnvironment* guienv, irr::video::IV
 			int iterations = (fulltext.length() / chars_per_line) + 1;
 			for(int j = iterations -1; j >= 0 ; j-- ) {
 				//print one less line now that I have wrapped to another line
-				if( j < iterations - 1) 
-				{
+				if( j < iterations - 1) {
 					lines--;
 					lineLoc -= m_nTextHeight + m_nConsoleLineSpacing;
 				}
