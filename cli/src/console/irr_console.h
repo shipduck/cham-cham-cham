@@ -9,8 +9,8 @@ $Id: IrrConsole.h 175 2010-03-28 18:47:29Z gsibley $
 
 #pragma once
 
-#include "Cvar.h"
-#include "Timestamp.h"
+#include "cvars/Cvar.h"
+#include "cvars/Timestamp.h"
 #include "util/event_receiver_manager.h"
 
 ////////////////////////////////////////////////////////////////////////////////

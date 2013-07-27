@@ -7,9 +7,9 @@
     $Id: TrieNode.cpp 162 2010-02-15 19:11:05Z gsibley $
  */
 
-
-#include "CVars/TrieNode.h" 
-#include "CVars/CVar.h"
+#include "stdafx.h"
+#include "cvars/TrieNode.h" 
+#include "cvars/CVar.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 TrieNode::TrieNode() { 

@@ -1,4 +1,6 @@
-#include <CVars/CVar.h>
+﻿// Ŭnicode please 
+#include "stdafx.h"
+#include "cvars/CVar.h"
 
 // Single global instance
 Trie* g_pCVarTrie = NULL;

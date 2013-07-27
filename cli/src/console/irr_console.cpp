@@ -2,8 +2,8 @@
 #include "stdafx.h"
 #include "irr_console.h"
 
-#include "CVar.h"
-#include "TrieNode.h"
+#include "cvars/CVar.h"
+#include "cvars/TrieNode.h"
 
 #include "console_function.h"
 #include "base/string_util.h"

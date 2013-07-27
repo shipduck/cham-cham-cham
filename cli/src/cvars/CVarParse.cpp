@@ -7,7 +7,7 @@
    $Id: CVarParse.cpp 162 2010-02-15 19:11:05Z gsibley $
 
  */
-
+#include "stdafx.h"
 #include "CVar.h"
 
 using namespace CVarUtils;

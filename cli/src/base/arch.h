@@ -77,3 +77,9 @@
 #define SR_IF_DX11(EXPR)
 #endif
 
+// s32, f32같은거 대신 int, float같은거 그냥 사용한게 뻑날 가능성 떄문에
+// 타입 크기 검증을 했다
+static_assert(sizeof(char) == 1, "char is 1 byte");
+static_assert(sizeof(short) == 2, "short is 2 byte");
+static_assert(sizeof(int) == 4, "int is 4 byte");
+static_assert(sizeof(float) == 4, "float is 4 byte");

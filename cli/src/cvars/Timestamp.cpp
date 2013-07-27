@@ -7,7 +7,7 @@
     $Id: Timestamp.cpp 162 2010-02-15 19:11:05Z gsibley $
 
  */
-
+#include "stdafx.h"
 #include <time.h>
 #include <iostream>
 #include <stdio.h>
