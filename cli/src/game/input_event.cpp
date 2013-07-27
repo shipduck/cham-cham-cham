@@ -197,6 +197,6 @@ void GameEventReceiver::onEvent(const irr::SEvent::SKeyInput &evt)
 
 void GameEventReceiver::onEvent(const irr::SEvent::SMouseInput &evt)
 {
-	printf("mouse\n");
+	//printf("mouse\n");
 	//TODO
 }

@@ -36,9 +36,9 @@
 #include <typeinfo>
 #include <algorithm>
 
-#include <CVars/CVarVersion.h>
-#include <CVars/Trie.h>
-#include <CVars/TrieNode.h>
+#include "CVarVersion.h"
+#include "Trie.h"
+#include "TrieNode.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // A global Trie structure holds all of the variables organized by their string
@@ -203,13 +203,13 @@ std::string CVarTypeString( T *t )
 template <class T>
 void StringToCVarValue( T *t, const std::string &sValue )
 {
-    std::istringstream iss( sValue );
+	std::istringstream iss( sValue );
     iss >> *t;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Console functions must have the following signature
-typedef bool (*ConsoleFunc)( std::vector<std::string> *args);
+typedef bool (*ConsoleFunc)( const std::vector<std::string> &args);
 
 ////////////////////////////////////////////////////////////////////////////////
 inline std::ostream &operator<<(std::ostream &stream, ConsoleFunc &ob)

@@ -162,7 +162,7 @@ namespace CVarUtils
         }
 
         if( bExecute ) {
-            const bool res = (*func)( &argslist );
+            const bool res = (*func)( argslist );
             if( !res ) {
                 bSuccess = false;
             }

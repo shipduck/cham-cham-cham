@@ -12,7 +12,7 @@
 #include "game/game_scene.h"
 
 #include "util/event_receiver_manager.h"
-#include "game/game_console.h"
+#include "console/irr_console.h"
 
 using namespace irr;
 using namespace core;
@@ -20,7 +20,6 @@ using namespace scene;
 using namespace video;
 using namespace io;
 using namespace gui;
-
 
 // Configuration
 int SCREEN_WIDTH = 1280;
@@ -135,7 +134,8 @@ int entrypoint(int argc, char* argv[])
 			g_debugDrawMgr->drawAll();
 			guienv->drawAll();	
 
-			g_console.renderConsole(guienv, driver, frameDeltaTime);
+			//g_oldConsole.renderConsole(guienv, driver, frameDeltaTime);
+			g_console->RenderConsole(guienv, driver, frameDeltaTime);
 
 			driver->endScene();	//render end
 		}
