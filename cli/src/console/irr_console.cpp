@@ -1304,7 +1304,7 @@ void IrrConsole::RenderConsole(irr::gui::IGUIEnvironment* guienv, irr::video::IV
 				if( j < iterations - 1) 
 				{
 					lines--;
-					lineLoc += m_nTextHeight + m_nConsoleLineSpacing;
+					lineLoc -= m_nTextHeight + m_nConsoleLineSpacing;
 				}
 				count++;
 				int start = fulltext.substr(j*chars_per_line, chars_per_line).find_first_not_of( ' ' );
@@ -1325,7 +1325,7 @@ void IrrConsole::RenderText(const std::string &text, int x, int y, const irr::vi
 {
 	int lineHeight = m_nTextHeight + m_nConsoleLineSpacing;
 	std::wstring wstr = StringUtil::string2wstring(text);
-	rect<s32> pos(x, y - lineHeight/2, x + m_ConsoleRect.getWidth(), y + lineHeight * 5);
+	rect<s32> pos(x, y - lineHeight/2, x + m_ConsoleRect.getWidth(), y + lineHeight/2);
 	m_pGuiFont->draw(wstr.c_str(), pos, color, false, false, &m_ConsoleRect);
 }
 
