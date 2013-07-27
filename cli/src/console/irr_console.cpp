@@ -11,7 +11,7 @@
 /// TODO these should move to CVARS
 #define CONSOLE_HELP_FILE "helpfile.txt"
 #define CONSOLE_HISTORY_FILE ".cvar_history"
-#define CONSOLE_SETTINGS_FILE ".glconsole_settings"
+#define CONSOLE_SETTINGS_FILE ".console_settings"
 #define CONSOLE_SCRIPT_FILE "default.script"
 #define CONSOLE_INITIAL_SCRIPT_FILE "initial.script"
 
@@ -53,13 +53,6 @@ const SColor getLineColor(LineProperty p)
 	return getLineColorTable()[p];
 }
 
-
-
-
-irr::core::stringw ToWideString(const irr::core::stringc &str);
-irr::core::stringc ToString(const irr::core::stringw &str);
-
-
 ////////////////////////////////////////////////////////////////////////////////
 /// Return whether first element is greater than the second.
 bool StringIndexPairGreater( const std::pair<std::string,int> &e1, const std::pair<std::string,int> &e2 );
@@ -76,6 +69,7 @@ std::string& RemoveSpaces( std::string &str );
 /// Initialise the console. Sets up all the default values.
 void IrrConsole::Init(irr::IrrlichtDevice *device, const ConsoleConfig &cfg)
 {
+	m_pDevice = device;
 	m_ConsoleConfig = cfg;
 	//load the font
 	auto guienv = device->getGUIEnvironment();
@@ -86,16 +80,15 @@ void IrrConsole::Init(irr::IrrlichtDevice *device, const ConsoleConfig &cfg)
 	cout << "font loaded!!" << std::endl;
 
 	//calculate the console rectangle
-	auto screenSize = device->getVideoDriver()->getScreenSize();
-	int w = screenSize.Width;
-	int h = screenSize.Height;
-	CalculateConsoleRect(dimension2d<s32>(w, h));
+	m_ScreenSize = device->getVideoDriver()->getScreenSize();
+	CalculateConsoleRect(m_ScreenSize);
 
 	m_bExecutingHistory = false;
 	m_bSavingScript = false;
 	m_bConsoleOpen = false;
 	m_bIsChanging = false;
 	m_nTextHeight = 14;  // TODO Hard coded for now??? debug font에서 긁어오는 방식으로 고치자
+	m_nTextWidth = 14;	//TODO
 	m_nScrollPixels = 0;
 	m_nCommandNum = 0;
 
@@ -268,7 +261,7 @@ IrrConsole::IrrConsole()
 	m_fConsoleBlinkRate( CVarUtils::CreateCVar<float>(    "console.BlinkRate", 4.0f ) ), // cursor blinks per sec
 	m_fConsoleAnimTime( CVarUtils::CreateCVar<float>(     "console.AnimTime", 0.1f ) ),     // time the console animates
 	m_nConsoleMaxHistory( CVarUtils::CreateCVar<int>(     "console.history.MaxHistory", 100 ) ), // max lines ofconsole history
-	m_nConsoleLineSpacing( CVarUtils::CreateCVar<int>(    "console.LineSpacing", 2 ) ), // pixels between lines
+	m_nConsoleLineSpacing( CVarUtils::CreateCVar<int>(    "console.LineSpacing", 5 ) ), // pixels between lines
 	m_nConsoleLeftMargin( CVarUtils::CreateCVar<int>(     "console.LeftMargin", 5 ) ),   // left margin in pixels
 	m_nConsoleVerticalMargin( CVarUtils::CreateCVar<int>( "console.VertMargin", 8 ) ),
 	m_nConsoleMaxLines( CVarUtils::CreateCVar<int>(       "console.MaxLines", 200 ) ),
@@ -277,7 +270,8 @@ IrrConsole::IrrConsole()
 	m_sScriptFileName( CVarUtils::CreateCVar<> (          "script.ScriptFileName", std::string( CONSOLE_SCRIPT_FILE ) ) ),
 	m_sSettingsFileName( CVarUtils::CreateCVar<> (        "console.settings.SettingsFileName", std::string( CONSOLE_SETTINGS_FILE ) ) ),
 	m_sInitialScriptFileName( CVarUtils::CreateCVar<> (   "console.InitialScriptFileName", std::string( CONSOLE_INITIAL_SCRIPT_FILE ) ) ),
-	m_pGuiFont(nullptr)
+	m_pGuiFont(nullptr),
+	m_pDevice(nullptr)
 {
 	m_bSavingScript = false;
 	m_bConsoleOpen = 0;
@@ -293,41 +287,41 @@ IrrConsole::~IrrConsole()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- * This will output text to the GL console
- */
+* This will output text to the GL console
+*/
 void IrrConsole::Printf(const char *msg, ... )
 {
-    char msgBuf[1024];
-    va_list va_alist;
+	char msgBuf[1024];
+	va_list va_alist;
 
-    if (!msg) return;
+	if (!msg) return;
 
-    va_start( va_alist, msg );
-    vsnprintf( msgBuf, 1024, msg, va_alist );
-    va_end( va_alist );
-    msgBuf[1024 - 1] = '\0';
+	va_start( va_alist, msg );
+	vsnprintf( msgBuf, 1024, msg, va_alist );
+	va_end( va_alist );
+	msgBuf[1024 - 1] = '\0';
 
-    EnterLogLine( msgBuf );
+	EnterLogLine( msgBuf );
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- * same as Printf() except it also prints to the terminal
- */
+* same as Printf() except it also prints to the terminal
+*/
 void IrrConsole::Printf_All(const char *msg, ... )
 {
-    char msgBuf[1024];
-    va_list va_alist;
+	char msgBuf[1024];
+	va_list va_alist;
 
-    if (!msg) return;
+	if (!msg) return;
 
-    va_start( va_alist, msg );
-    vsnprintf( msgBuf, 1024, msg, va_alist );
-    va_end( va_alist );
-    msgBuf[1024 - 1] = '\0';
+	va_start( va_alist, msg );
+	vsnprintf( msgBuf, 1024, msg, va_alist );
+	va_end( va_alist );
+	msgBuf[1024 - 1] = '\0';
 
-    EnterLogLine( msgBuf );
-    printf( "%s", msgBuf );
+	EnterLogLine( msgBuf );
+	printf( "%s", msgBuf );
 }
 
 
@@ -462,7 +456,7 @@ void IrrConsole::ScriptShow()
 	m_bSavingScript = false;
 	for( int ii = m_ScriptText.size()-1; ii >= 0 ; --ii ) {
 		if( m_ScriptText[ii].m_nOptions == LINEPROP_COMMAND ) {
-			EnterLogLine( m_ScriptText[ii].m_sText.c_str(), LINEPROP_COMMAND );
+			EnterLogLine( m_ScriptText[ii].m_sText, LINEPROP_COMMAND );
 		}
 	}
 	m_bSavingScript = bWasSavingScript;
@@ -812,18 +806,15 @@ void IrrConsole::ClearCurrentCommand()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Add a line to the history log.
-void IrrConsole::EnterLogLine(const char *line, const LineProperty prop, bool display)
+void IrrConsole::EnterLogLine(const std::string &line, const LineProperty prop, bool display)
 {
 	if( (int)m_sConsoleText.size() >= m_nConsoleMaxHistory ) {
 		m_sConsoleText.pop_back();
 	}
 
-	if( line != nullptr ) {
-		m_sConsoleText.push_front( ConsoleLine(std::string(line), prop, display) );
-
-		if( m_bSavingScript && prop != LINEPROP_ERROR ) {
-			m_ScriptText.push_front( ConsoleLine(std::string(line), prop, display) );
-		}
+	m_sConsoleText.push_front(ConsoleLine(line, prop, display));
+	if( m_bSavingScript && prop != LINEPROP_ERROR ) {
+		m_ScriptText.push_front(ConsoleLine(line, prop, display));
 	}
 }
 
@@ -910,40 +901,40 @@ int IrrConsole::_FindRecursionLevel( std::string sCommand )
 
 void IrrConsole::PrintAllCVars()
 {
-    TrieNode* node = g_pCVarTrie->FindSubStr(  RemoveSpaces( m_sCurrentCommandBeg ) );
-    if( !node ) {
-        return;
-    }
+	TrieNode* node = g_pCVarTrie->FindSubStr(  RemoveSpaces( m_sCurrentCommandBeg ) );
+	if( !node ) {
+		return;
+	}
 
-    std::cout << "CVars:" << std::endl;
+	std::cout << "CVars:" << std::endl;
 
-    // Retrieve suggestions (retrieve all leaves by traversing from current node)
-    std::vector<TrieNode*> suggest = g_pCVarTrie->CollectAllNodes( node );
-    std::sort( suggest.begin(), suggest.end() );
-    //output suggestions
-    unsigned int nLongestName = 0;
-    unsigned int nLongestVal = 0;
-    for( unsigned int ii = 0; ii < suggest.size(); ii++ ){
-        std::string sName = ( (CVarUtils::CVar<int>*) suggest[ii]->m_pNodeData )->m_sVarName;
-        std::string sVal = CVarUtils::GetValueAsString( suggest[ii]->m_pNodeData );
-        if( sName.length() > nLongestName ){
-            nLongestName = sName.length();
-        }
-        if( sVal.length() > nLongestVal ){
-            nLongestVal = sVal.length();
-        }
-     }
+	// Retrieve suggestions (retrieve all leaves by traversing from current node)
+	std::vector<TrieNode*> suggest = g_pCVarTrie->CollectAllNodes( node );
+	std::sort( suggest.begin(), suggest.end() );
+	//output suggestions
+	unsigned int nLongestName = 0;
+	unsigned int nLongestVal = 0;
+	for( unsigned int ii = 0; ii < suggest.size(); ii++ ){
+		std::string sName = ( (CVarUtils::CVar<int>*) suggest[ii]->m_pNodeData )->m_sVarName;
+		std::string sVal = CVarUtils::GetValueAsString( suggest[ii]->m_pNodeData );
+		if( sName.length() > nLongestName ){
+			nLongestName = sName.length();
+		}
+		if( sVal.length() > nLongestVal ){
+			nLongestVal = sVal.length();
+		}
+	}
 
-    if( suggest.size() > 1) {
-        for( unsigned int ii = 0; ii < suggest.size(); ii++ ){
-            std::string sName = ( (CVarUtils::CVar<int>*) suggest[ii]->m_pNodeData )->m_sVarName;
-            std::string sVal = CVarUtils::GetValueAsString( suggest[ii]->m_pNodeData );
-            std::string sHelp = CVarUtils::GetHelp( sName ); 
-            sName.resize( nLongestName, ' ' );
-            sVal.resize( nLongestVal, ' ' );
-            printf( "%-s: Default value = %-30s   %-50s\n", sName.c_str(), sVal.c_str(), sHelp.empty() ? "" : sHelp.c_str() );
-        }
-    }
+	if( suggest.size() > 1) {
+		for( unsigned int ii = 0; ii < suggest.size(); ii++ ){
+			std::string sName = ( (CVarUtils::CVar<int>*) suggest[ii]->m_pNodeData )->m_sVarName;
+			std::string sVal = CVarUtils::GetValueAsString( suggest[ii]->m_pNodeData );
+			std::string sHelp = CVarUtils::GetHelp( sName ); 
+			sName.resize( nLongestName, ' ' );
+			sVal.resize( nLongestVal, ' ' );
+			printf( "%-s: Default value = %-30s   %-50s\n", sName.c_str(), sVal.c_str(), sHelp.empty() ? "" : sHelp.c_str() );
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1024,9 +1015,10 @@ void IrrConsole::_TabComplete()
 				std::string tmp = suggest_name_index_set[ii].first;
 				tmp.resize( longest, ' ' );
 
-				cmdlines.push_back( commands );
-				commands.clear();
-
+				if( (commands+tmp).length() > m_ScreenSize.Width / m_nTextWidth ) {
+					cmdlines.push_back( commands );
+					commands.clear();
+				}
 				if( !_IsConsoleFunc( suggest[suggest_name_index_set[ii].second] ) ) {
 					commands += tmp;
 				}
@@ -1037,8 +1029,10 @@ void IrrConsole::_TabComplete()
 			for( unsigned int ii = 0; ii < suggest_name_index_set.size() ; ii++ ) {
 				std::string tmp = suggest_name_index_set[ii].first;
 				tmp.resize( longest, ' ' );
-				funclines.push_back( functions );
-				functions.clear();
+				if( (functions+tmp).length() > m_ScreenSize.Width / m_nTextWidth ) {
+					funclines.push_back( functions );
+					functions.clear();
+				}
 				if( _IsConsoleFunc( suggest[suggest_name_index_set[ii].second] ) ) {
 					functions += tmp;
 				}
@@ -1050,10 +1044,10 @@ void IrrConsole::_TabComplete()
 				EnterLogLine( " ", LINEPROP_LOG );
 			}
 			for( unsigned int ii = 0; ii < cmdlines.size(); ii++ ) {
-				EnterLogLine( cmdlines[ii].c_str(), LINEPROP_LOG );
+				EnterLogLine( cmdlines[ii], LINEPROP_LOG );
 			}
 			for( unsigned int ii = 0; ii < funclines.size(); ii++ ) {
-				EnterLogLine( funclines[ii].c_str(), LINEPROP_FUNCTION );
+				EnterLogLine( funclines[ii], LINEPROP_FUNCTION );
 			}
 
 
@@ -1099,7 +1093,7 @@ bool IrrConsole::_ProcessCurrentCommand( bool bExecute )
 
 	// Make sure the command gets added to the history
 	if( !m_sCurrentCommand.empty() ) {
-		EnterLogLine( m_sCurrentCommand.c_str(), LINEPROP_COMMAND, false );
+		EnterLogLine( m_sCurrentCommand, LINEPROP_COMMAND, false );
 	}
 
 	// Simply print value if the command is just a variable
@@ -1107,7 +1101,7 @@ bool IrrConsole::_ProcessCurrentCommand( bool bExecute )
 		//execute function if this is a function cvar
 		if( _IsConsoleFunc( node ) ) {
 			bSuccess &= CVarUtils::ExecuteFunction( m_sCurrentCommand, (CVarUtils::CVar<ConsoleFunc>*) node->m_pNodeData, sRes, bExecute );
-			EnterLogLine( m_sCurrentCommand.c_str(), LINEPROP_FUNCTION );
+			EnterLogLine( m_sCurrentCommand, LINEPROP_FUNCTION );
 		}
 		else { //print value associated with this cvar
 			EnterLogLine( ( m_sCurrentCommand + " = " + 
@@ -1129,13 +1123,13 @@ bool IrrConsole::_ProcessCurrentCommand( bool bExecute )
 					if( bExecute ) {
 						CVarUtils::SetValueFromString( node->m_pNodeData, value );
 					}
-					EnterLogLine( ( command + " = " + value ).c_str(), LINEPROP_LOG );
+					EnterLogLine( ( command + " = " + value ), LINEPROP_LOG );
 				}
 			}
 			else {  
 				if( bExecute ) {
 					std::string out = "-glconsole: " + command + ": command not found"; 
-					EnterLogLine( out.c_str(), LINEPROP_ERROR );
+					EnterLogLine( out, LINEPROP_ERROR );
 				}
 				bSuccess = false;
 			}
@@ -1148,12 +1142,12 @@ bool IrrConsole::_ProcessCurrentCommand( bool bExecute )
 			//check if this is a valid function name
 			if( ( node = g_pCVarTrie->Find( function ) ) && _IsConsoleFunc( node ) ) {
 				bSuccess &= CVarUtils::ExecuteFunction( m_sCurrentCommand, (CVarUtils::CVar<ConsoleFunc>*)node->m_pNodeData, sRes, bExecute );
-				EnterLogLine( m_sCurrentCommand.c_str(), LINEPROP_FUNCTION );
+				EnterLogLine( m_sCurrentCommand, LINEPROP_FUNCTION );
 			}
 			else {
 				if( bExecute ) {
 					std::string out = "-glconsole: " + function + ": function not found"; 
-					EnterLogLine( out.c_str(), LINEPROP_ERROR );
+					EnterLogLine( out, LINEPROP_ERROR );
 				}
 				bSuccess = false;
 			}
@@ -1161,7 +1155,7 @@ bool IrrConsole::_ProcessCurrentCommand( bool bExecute )
 		else if( !m_sCurrentCommand.empty() ) {
 			if( bExecute ) {
 				std::string out = "-glconsole: " + m_sCurrentCommand + ": command not found"; 
-				EnterLogLine( out.c_str(), LINEPROP_ERROR );
+				EnterLogLine( out, LINEPROP_ERROR );
 			}
 			bSuccess = false;
 		}
@@ -1235,138 +1229,91 @@ void IrrConsole::RenderConsole(irr::gui::IGUIEnvironment* guienv, irr::video::IV
 		return;
 	}
 
-	//if bg is to be drawn fill the console bg with color
-	if(m_ConsoleConfig.bShowBG) {
-		//draw the bg as per configured color
-		videoDriver->draw2DRectangle(consoleColor, m_ConsoleRect);
+	//draw the bg as per configured color
+	videoDriver->draw2DRectangle(consoleColor, m_ConsoleRect);
+
+	int consoleHeight = m_ConsoleRect.getHeight();
+
+	int lines = (consoleHeight / m_nTextHeight);
+	int scrollLines = (m_nScrollPixels / m_nTextHeight);
+	lines += scrollLines;
+
+	//start drawing from bottom of console up...
+	int lineLoc = consoleHeight - 1 - m_nConsoleVerticalMargin;
+
+	//draw command line first
+	char blink = ' ';
+	//figure out if blinking cursor is on or off
+	if( _IsCursorOn() ) {
+		blink = '_';
 	}
 
-	//we calculate where the message log shall be printed and where the prompt shall be printed
-	rect<s32> textRect,shellRect;
-	CalculatePrintRects(textRect, shellRect);
+	RenderText("> " + m_sCurrentCommandBeg, m_nConsoleLeftMargin, lineLoc + m_nScrollPixels, commandColor);
 
-	//now, render the messages
-	u32 maxLines, lineHeight;
-	s32 fontHeight;
-	if(!CalculateLimits(maxLines, lineHeight, fontHeight)) {
-		return;
+	int size = m_sCurrentCommandBeg.length();
+	std::string em = "";
+	for(int i=0;i<size;i++) {
+		em = em + " ";
 	}
+	RenderText("> " + em + blink, m_nConsoleLeftMargin, lineLoc + m_nScrollPixels, commandColor);
+	RenderText("> " + em + m_sCurrentCommandEnd, m_nConsoleLeftMargin, lineLoc + m_nScrollPixels, commandColor);
 
-	//calculate the line rectangle
-	rect<s32> lineRect(textRect.UpperLeftCorner.X,textRect.UpperLeftCorner.Y,textRect.LowerRightCorner.X,textRect.UpperLeftCorner.Y + lineHeight);
+	lineLoc -= m_nTextHeight + m_nConsoleLineSpacing;
 
-	//TODO scissor test를 적용하면 성능이 좋아질듯?
-	//glScissor( 1 ,m_Viewport.height - _GetConsoleHeight() + 1, //bottom coord
-	//	m_Viewport.width, //width
-	//	consoleHeight - m_nConsoleVerticalMargin ); //top coord
-	/*
-	for(u32 i = 0; i < m_sConsoleText.size() ; i++) {
-		//we draw each line with the configured font and color vertically centered in the rectangle
-		const std::string &text = m_sConsoleText[i].m_sText;
-		m_pGuiFont->draw(StringUtil::string2wstring(text).c_str(), lineRect, commandColor, false, true);
-
-		//update line rectangle
-		lineRect.UpperLeftCorner.Y += lineHeight;
-		lineRect.LowerRightCorner.Y += lineHeight;
-	}
-	*/
-
-	{
-		float consoleHeight = m_ConsoleRect.getHeight();
-
-		int lines = (consoleHeight / m_nTextHeight);
-        int scrollLines = (m_nScrollPixels / m_nTextHeight);
-        lines += scrollLines;
-
-        //start drawing from bottom of console up...
-		int lineLoc = m_ConsoleRect.getHeight()-1 - consoleHeight + m_nConsoleVerticalMargin;
-
-        //draw command line first
-        char blink = ' ';
-        //figure out if blinking cursor is on or off
-        if( _IsCursorOn() ) {
-            blink = '_';
-        }
-
-		m_pGuiFont->draw(StringUtil::string2wstring("> " + m_sCurrentCommandBeg).c_str(),
-			rect<s32>(m_nConsoleLeftMargin, lineLoc - m_nScrollPixels, 1000, 1000),
-			commandColor, false, true);
-        int size = m_sCurrentCommandBeg.length();
-        std::string em = "";
-        for(int i=0;i<size;i++) {
-            em = em + " ";
-        }
-        m_pGuiFont->draw(StringUtil::string2wstring("> " + em + blink).c_str(),
-			rect<s32>(m_nConsoleLeftMargin, lineLoc - m_nScrollPixels, 1000, 1000),
-			commandColor, false, true);
-        m_pGuiFont->draw(StringUtil::string2wstring("> " + em + m_sCurrentCommandEnd).c_str(),
-			rect<s32>(m_nConsoleLeftMargin, lineLoc - m_nScrollPixels, 1000, 1000),
-			commandColor, false, true);
-
-        lineLoc += m_nTextHeight + m_nConsoleLineSpacing;
-
-        int count = 0;
-        for(  int i = 1 ; i < lines; i++ ) {	
-            if( count >= m_nConsoleMaxLines) {
-                continue;
+	int count = 0;
+	for(  int i = 1 ; i < lines; i++ ) {	
+		if( count >= m_nConsoleMaxLines) {
+			continue;
+		}
+		if( (int)m_sConsoleText.size() > i - 1 ) {
+			//skip this line if it was marked not to be displayed
+			if( !(m_sConsoleText.begin() + (i-1))->m_bDisplay) {
+				lines++;
+				continue;
 			}
-            if( (int)m_sConsoleText.size() > i - 1 ) {
-                //skip this line if it was marked not to be displayed
-                if( !(m_sConsoleText.begin() + (i-1))->m_bDisplay) {
-                    lines++;
-                    continue;
-                }
 
-                std::deque<ConsoleLine>::iterator it = m_sConsoleText.begin() + i - 1;
-                std::string fulltext = (*it).m_sText;
+			std::deque<ConsoleLine>::iterator it = m_sConsoleText.begin() + i - 1;
+			std::string fulltext = (*it).m_sText;
 
-				//set the appropriate color
-				irr::video::SColor color = getLineColor((*it).m_nOptions);
-                
-                //wrap text to multiple lines if necessary
-				int chars_per_line = (int)(1.65 * m_ConsoleRect.getWidth() / m_nTextHeight);
-                if( chars_per_line == 0 ) {
-                    // What should we do if the window has width == 0 ?
-                    return;
-                }
+			//set the appropriate color
+			irr::video::SColor color = getLineColor((*it).m_nOptions);
 
-                int iterations = (fulltext.length() / chars_per_line) + 1;
-                for(int j = iterations -1; j >= 0 ; j-- ) {
-                    //print one less line now that I have wrapped to another line
-                    if( j < iterations - 1) 
-                    {
-                        lines--;
-                        lineLoc += m_nTextHeight + m_nConsoleLineSpacing;
-                    }
-                    count++;
-                    int start = fulltext.substr(j*chars_per_line, chars_per_line).find_first_not_of( ' ' );
-                    if( start >= 0  ) { 
-                        m_pGuiFont->draw(StringUtil::string2wstring(fulltext.substr(j*chars_per_line+start, chars_per_line)).c_str(),
-							rect<s32>(m_nConsoleLeftMargin, lineLoc - m_nScrollPixels, 1000, 1000),
-							color, false, true);
-                    }
-                }
-            }
-            else
-                break;
+			//wrap text to multiple lines if necessary
+			int chars_per_line = (int)(1.65 * m_ConsoleRect.getWidth() / m_nTextHeight);
+			if( chars_per_line == 0 ) {
+				// What should we do if the window has width == 0 ?
+				return;
+			}
 
-            lineLoc += m_nTextHeight + m_nConsoleLineSpacing;
-        }
-    }
+			int iterations = (fulltext.length() / chars_per_line) + 1;
+			for(int j = iterations -1; j >= 0 ; j-- ) {
+				//print one less line now that I have wrapped to another line
+				if( j < iterations - 1) 
+				{
+					lines--;
+					lineLoc += m_nTextHeight + m_nConsoleLineSpacing;
+				}
+				count++;
+				int start = fulltext.substr(j*chars_per_line, chars_per_line).find_first_not_of( ' ' );
+				if( start >= 0  ) { 
+					RenderText(fulltext.substr(j*chars_per_line+start, chars_per_line), 
+						m_nConsoleLeftMargin, lineLoc + m_nScrollPixels, color);
+				}
+			}
+		} else {
+			break;
+		}
 
-	/*
-	//now, render the prompt
-	std::string shellText = m_ConsoleConfig.prompt;
-	shellText += "$>";
-	shellText += m_sCurrentCommandBeg;
-
-	//for blinking cursor
-	if(_IsCursorOn() == true) {
-		shellText += "_";
+		lineLoc -= (m_nTextHeight + m_nConsoleLineSpacing);
 	}
-	//draw the prompt string
-	m_pGuiFont->draw(shellText.c_str(), shellRect, commandColor, false, true);
-	*/
+}
+
+void IrrConsole::RenderText(const std::string &text, int x, int y, const irr::video::SColor &color)
+{
+	int lineHeight = m_nTextHeight + m_nConsoleLineSpacing;
+	std::wstring wstr = StringUtil::string2wstring(text);
+	rect<s32> pos(x, y - lineHeight/2, x + m_ConsoleRect.getWidth(), y + lineHeight * 5);
+	m_pGuiFont->draw(wstr.c_str(), pos, color, false, false, &m_ConsoleRect);
 }
 
 void IrrConsole::OpenConsole() 
@@ -1396,17 +1343,17 @@ void IrrConsole::ToggleConsole()
 void IrrConsole::ScrollDown(int pixels)
 {
 	if( m_bConsoleOpen ) {
-		m_nScrollPixels += pixels;
+		m_nScrollPixels -= pixels;
+		if( m_nScrollPixels < 0 ) {
+			m_nScrollPixels = 0;
+		}
 	}
 }
 
 void IrrConsole::ScrollUp(int pixels)
 {
 	if( m_bConsoleOpen ) {
-		m_nScrollPixels -= pixels;
-		if( m_nScrollPixels < 0 ) {
-			m_nScrollPixels = 0;
-		}
+		m_nScrollPixels += pixels;	
 	}
 }
 
@@ -1422,13 +1369,13 @@ void IrrConsole::ScrollDownLine()
 
 void IrrConsole::ScrollUpPage() 
 { 
-	//ScrollUp( (int)((m_Viewport.height*m_fOverlayPercent) - 2*m_nCharHeight)); 
+	ScrollUp( (int)((m_ConsoleRect.getHeight()*m_fOverlayPercent) - 2*m_nTextHeight)); 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 void IrrConsole::ScrollDownPage()
 { 
-	//ScrollDown( (int)( (m_Viewport.height*m_fOverlayPercent) - 2*m_nCharHeight ) ); 
+	ScrollDown( (int)( (m_ConsoleRect.getHeight() *m_fOverlayPercent) - 2*m_nTextHeight ) ); 
 }
 
 //! calculate the whole console rect
@@ -1443,67 +1390,13 @@ void IrrConsole::CalculateConsoleRect(const irr::core::dimension2d<s32>& screenS
 		consoleDim.Height= (s32)((f32)consoleDim.Height * m_ConsoleConfig.dimensionRatios.Y);
 
 		//set vertical alignment
-		if(m_ConsoleConfig.valign == VAL_TOP) {
-			m_ConsoleRect.UpperLeftCorner.Y = 0;
-		} else if(m_ConsoleConfig.valign == VAL_BOTTOM)	{
-			m_ConsoleRect.UpperLeftCorner.Y = screenSize.Height - consoleDim.Height;
-		} else if(m_ConsoleConfig.valign == VAL_MIDDLE) {
-			m_ConsoleRect.UpperLeftCorner.Y = (screenSize.Height - consoleDim.Height) / 2; 
-		}
+		m_ConsoleRect.UpperLeftCorner.Y = 0;
+		m_ConsoleRect.UpperLeftCorner.X = 0;
 
-		//set horizontal alignment
-		if(m_ConsoleConfig.halign == HAL_LEFT) {
-			m_ConsoleRect.UpperLeftCorner.X = 0;
-		} else if(m_ConsoleConfig.halign == HAL_RIGHT) {
-			m_ConsoleRect.UpperLeftCorner.X = screenSize.Width - consoleDim.Width;
-		} else if(m_ConsoleConfig.halign == HAL_CENTER)	{
-			m_ConsoleRect.UpperLeftCorner.X = (screenSize.Width - consoleDim.Width) / 2; 
-		}
-		
 		//set the lower right corner stuff
 		m_ConsoleRect.LowerRightCorner.X = m_ConsoleRect.UpperLeftCorner.X + consoleDim.Width;
 		m_ConsoleRect.LowerRightCorner.Y = m_ConsoleRect.UpperLeftCorner.Y + consoleDim.Height;
 	}
-}
-//=========================================================================================
-//! calculate the messages rect and prompt / shell rect
-void IrrConsole::CalculatePrintRects(rect<s32>& textRect,rect<s32>& shellRect)
-{
-	u32 maxLines, lineHeight;
-	s32 fontHeight;
-	if(CalculateLimits(maxLines,lineHeight,fontHeight))	{
-		//the shell rect
-		shellRect.LowerRightCorner.X = m_ConsoleRect.LowerRightCorner.X;
-		shellRect.LowerRightCorner.Y = m_ConsoleRect.LowerRightCorner.Y;
-		shellRect.UpperLeftCorner.X = m_ConsoleRect.UpperLeftCorner.X;
-		shellRect.UpperLeftCorner.Y = m_ConsoleRect.LowerRightCorner.Y - lineHeight;
-
-		//calculate text rect
-		textRect.UpperLeftCorner.X = m_ConsoleRect.UpperLeftCorner.X;
-		textRect.UpperLeftCorner.Y = m_ConsoleRect.UpperLeftCorner.Y;
-		shellRect.LowerRightCorner.X = m_ConsoleRect.LowerRightCorner.X;
-		shellRect.LowerRightCorner.Y = shellRect.UpperLeftCorner.Y;
-	} else {
-		textRect = rect<s32>(0,0,0,0);
-		shellRect = rect<s32>(0,0,0,0);
-	}
-}
-//=========================================================================================
-bool IrrConsole::CalculateLimits(u32& maxLines, u32& lineHeight,s32& fontHeight)
-{
-	u32 consoleHeight = m_ConsoleRect.getHeight();
-	if(m_pGuiFont != 0 && consoleHeight > 0) {
-		fontHeight = m_pGuiFont->getDimension(L"X").Height;
-		lineHeight = fontHeight + m_ConsoleConfig.lineSpacing;
-		maxLines = consoleHeight / lineHeight;
-		if(maxLines > 2) {
-			maxLines -= 2;
-		}
-		return true;
-	} else {
-		return false;
-	}
-	return false;
 }
 
 bool ConsoleEventReceiver::OnEvent(const irr::SEvent& event) 
@@ -1511,74 +1404,18 @@ bool ConsoleEventReceiver::OnEvent(const irr::SEvent& event)
 	return g_console->OnEvent(event);
 }
 
-void drawConsoleCaptions(irr::IrrlichtDevice *device)
-{
-	auto font = device->getGUIEnvironment()->getBuiltInFont();
-	//initialize the caption line height
-	static int captionHeight = -1;
-	if(captionHeight < 0) {
-		captionHeight = font->getDimension(L"X").Height + 2;
-	}
-
-	static array<irr::core::stringw> captionText;
-	if(captionText.size() == 0) {
-		//initialize the caption array
-		captionText.push_back(L"IrrConsole : Quake Style Drop Down Console Demo For Irrlicht");
-		captionText.push_back(L"Author : Saurav Mohapatra (mohaps@gmail.com)");
-		captionText.push_back(L"");
-		captionText.push_back(L"HELP TEXT:");
-		captionText.push_back(L"============================================================");
-		captionText.push_back(L"     Press the tilde (~) key to toggle console");
-		captionText.push_back(L"     Use the UP/DN arrow keys to access command history");
-		captionText.push_back(L"     Type commands at the prompt");
-		captionText.push_back(L"     To execute a command put \\ in front");
-		captionText.push_back(L"     e.g. \\list");
-		captionText.push_back(L"     use the \"list\" or \"help\" commands to find out more");
-		captionText.push_back(L"     to start try the command \"\\help show_node\");");
-		captionText.push_back(L"============================================================");
-		captionText.push_back(L" ");
-		captionText.push_back(L"TO QUIT THIS DEMO PRESS ESCAPE KEY");
-	}
-
-	static const irr::video::SColor fontColor(200, 200, 200, 200);
-	dimension2d<u32> screenDim = device->getVideoDriver()->getScreenSize();
-	rect<s32> lineRect(10,10,screenDim.Width, screenDim.Height);
-	for(u32 i = 0; i < captionText.size(); i++)
-	{
-		font->draw(captionText[i].c_str(),lineRect,fontColor);
-		lineRect.UpperLeftCorner.Y += captionHeight;
-		lineRect.LowerRightCorner.Y += captionHeight;
-	}
-}
-
 void setUpConsole(irr::IrrlichtDevice *device)
 {
 	//this is how you alter some of the config params
 	ConsoleConfig config;
 	config.fontName = "res/font_14.xml";
+	config.dimensionRatios.X = 1.0f;
 	config.dimensionRatios.Y = 0.8f;
 
 	//now initialize
 	g_console->Init(device, config);
-}
 
-irr::core::stringw ToWideString(const irr::core::stringc &str)
-{
-	int len = str.size() + 1;
-	wchar_t* buf = new wchar_t[len];
+	//add function
+	CVarUtils::CreateCVar( "driver_info", ConsoleDriverInfo, "Display Irrlicht Driver Info" );
 	
-	::mbstowcs(buf,str.c_str(),len);
-	stringw wstr = buf;
-	delete[] buf;
-	return wstr;
-}
-
-irr::core::stringc ToString(const irr::core::stringw &str)
-{
-	int len = str.size() + 1;
-	c8* buf = new c8[len];
-	::wcstombs(buf,str.c_str(),len);
-	stringc wstr = buf;
-	delete[] buf;
-	return wstr;
 }

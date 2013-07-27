@@ -88,3 +88,5 @@ bool ConsoleSettingsSave( const std::vector<std::string> &vArgs );
 ////////////////////////////////////////////////////////////////////////////////
 /// Load console settings.
 bool ConsoleSettingsLoad( const std::vector<std::string> &vArgs );
+
+bool ConsoleDriverInfo(const std::vector<std::string> &args);

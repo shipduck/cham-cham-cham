@@ -24,40 +24,15 @@ enum LineProperty {
 	NUM_LINEPROP,
 };
 
-//=====================================================================================
-//! an alignment enumeration for vertical alignment
-enum VerticalAlignment {
-	//! top
-	VAL_TOP = 0,
-	//! middle
-	VAL_MIDDLE = 1,
-	//! bottom
-	VAL_BOTTOM = 2
-};
-//=====================================================================================
-//! an alignment enumeration for horizontal alignment
-enum HorizontalAlignment {
-	//! left
-	HAL_LEFT = 0,
-	//! center
-	HAL_CENTER = 1,
-	//! right
-	HAL_RIGHT = 2
-};
-
 class ConsoleEventReceiver : public ICustomEventReceiver {
 public:
 	virtual bool OnEvent(const irr::SEvent& event);
 	virtual bool OnEvent(const SHeadTrackingEvent &evt) { return false; }
 };
 
-void drawConsoleCaptions(irr::IrrlichtDevice *device);
 bool onConsoleEvent(const irr::SEvent &event);
 void setUpConsole(irr::IrrlichtDevice *device);
 
-
-//=====================================================================================
-//! the console config structure
 struct ConsoleConfig {
 public:
 	typedef irr::core::stringw WideString;
@@ -70,40 +45,15 @@ public:
 	void setDefaults()
 	{
 		dimensionRatios.X = 1.0f;
-		dimensionRatios.Y = 0.6f;
-		lineSpacing = 2;
-		indent = 1;
-		valign= VAL_TOP;
-		halign= HAL_LEFT;
-		bShowBG = true;
+		dimensionRatios.Y = 0.8f;
 		fontName = "data/font/console.bmp";
-		commandHistorySize = 10;
 	}
 
 	//! this contains the Width and Height ratios to the main view port (0 - 1)
 	irr::core::vector2df dimensionRatios;
 
-	//! this is the spacing between two lines in pixels (Default / Min : 2)
-	irr::u32 lineSpacing;
-
-	//! this is the indentation for each line in pixels (Default / Min : 1)
-	irr::u32 indent;
-
-	//! this is the alignment flag for the vertical placement of the console
-	VerticalAlignment valign;
-
-	//! this is the alignment flag for the horizontal alignment of the console
-	HorizontalAlignment halign;
-
-	//! this is the flag indicating if the console BG should be drawn
-	bool bShowBG;
-
 	//! this is the font name
 	String fontName;
-
-	//! this is the command history length (defaults to 10)
-	irr::u32 commandHistorySize;
-
 };
 
 
@@ -129,6 +79,7 @@ public:
 	//render 관련
 public:
 	void RenderConsole(irr::gui::IGUIEnvironment* guienv, irr::video::IVideoDriver *videoDriver, const irr::u32 deltaMillis);
+	void RenderText(const std::string &text, int x, int y, const irr::video::SColor &color);
 	
 	//commands to the console...
 	void ToggleConsole();
@@ -139,14 +90,11 @@ public:
 
 	//! calculate the whole console rect
 	void CalculateConsoleRect(const irr::core::dimension2d<irr::s32>& screenSize);
-	//! calculate the messages rect and prompt / shell rect
-	void CalculatePrintRects(irr::core::rect<irr::s32> &textRect, irr::core::rect<irr::s32> &shellRect);
-	//! calculate the various limits of the console
-	bool CalculateLimits(irr::u32& maxLines, irr::u32& lineHeight, irr::s32& fontHeight);
-
 	//! get the console config reference
 	ConsoleConfig& getConfig() { return m_ConsoleConfig; }
 	const ConsoleConfig& getConfig() const { return m_ConsoleConfig; }
+
+	irr::IrrlichtDevice *getDevice() { return m_pDevice; }
 
 public:
 	// call this after OpenGL is up 
@@ -188,6 +136,9 @@ public:
 	bool OnEvent(const irr::SEvent &evt);
 	int ProcessKey(wchar_t keyChar, irr::EKEY_CODE keyCode, bool bShiftDown, bool bControlDown);
 
+	/// enter a full line of text to the log text.
+	void EnterLogLine( const std::string &line, LineProperty prop = LINEPROP_LOG, bool display = true );
+
 private:
 	//scrolling text up and down in the console
 	void ScrollUp(int pixels);
@@ -204,9 +155,6 @@ private:
 
 	/// Clear the current command.
 	void ClearCurrentCommand();
-
-	/// enter a full line of text to the log text.
-	void EnterLogLine( const char *line, LineProperty prop = LINEPROP_LOG, bool display = true );
 
 	/// display previous command in history on command line.
 	void HistoryBack();
@@ -253,10 +201,9 @@ private:
 	int           m_nViewportWidth;
 	int           m_nViewportHeight;
 	int           m_nTextHeight;
+	int           m_nTextWidth;
 	int           m_nScrollPixels;  //the number of pixels the text has been scrolled "up"
-	int           m_nCharWidth;
-	int           m_nCharHeight;
-
+	
 	int           m_nCommandNum;
 
 	//history variables
@@ -275,9 +222,12 @@ private:
 
 	//! the console rectangle
 	irr::core::rect<irr::s32> m_ConsoleRect;
+	irr::core::dimension2d<irr::s32> m_ScreenSize;
 
 	//! the font of the console
 	irr::gui::IGUIFont* m_pGuiFont;
+
+	irr::IrrlichtDevice *m_pDevice;
 };
 
 
