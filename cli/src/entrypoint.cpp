@@ -13,6 +13,7 @@
 
 #include "util/event_receiver_manager.h"
 #include "console/irr_console.h"
+#include "console/console_event_receiver.h"
 
 using namespace irr;
 using namespace core;

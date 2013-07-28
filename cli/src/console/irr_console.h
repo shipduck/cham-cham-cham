@@ -11,7 +11,6 @@ $Id: IrrConsole.h 175 2010-03-28 18:47:29Z gsibley $
 
 #include "cvars/Cvar.h"
 #include "cvars/Timestamp.h"
-#include "util/event_receiver_manager.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 /// The type of line entered. Used to determine how each line is treated.
@@ -25,12 +24,6 @@ enum LineProperty {
 	LINEPROP_INFO,
 	LINEPROP_WARNING,
 	NUM_LINEPROP,
-};
-
-class ConsoleEventReceiver : public ICustomEventReceiver {
-public:
-	virtual bool OnEvent(const irr::SEvent& event);
-	virtual bool OnEvent(const SHeadTrackingEvent &evt) { return false; }
 };
 
 bool onConsoleEvent(const irr::SEvent &event);
@@ -74,7 +67,7 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////
 ///  The IrrConsole class, of which there will only ever be one instance.
-class IrrConsole {
+class IrrConsole : public irr::IEventReceiver {
 public:
 	IrrConsole();
 	~IrrConsole();
@@ -136,11 +129,13 @@ public:
 	void HistoryClear();
 
 	/// Add a character to the command line.
-	bool OnEvent(const irr::SEvent &evt);
+	virtual bool OnEvent(const irr::SEvent &evt);
 	int ProcessKey(wchar_t keyChar, irr::EKEY_CODE keyCode, bool bShiftDown, bool bControlDown);
 
 	/// enter a full line of text to the log text.
 	void EnterLogLine( const std::string &line, LineProperty prop = LINEPROP_LOG, bool display = true );
+
+	irr::core::rect<irr::s32> GetBackgroundRect() const;
 
 private:
 	//scrolling text up and down in the console
