@@ -61,3 +61,15 @@ int getArraySize(T (&arr)[N])
 {
 	return N;
 }
+
+template<typename T>
+void callConstructor(T *ptr) 
+{
+	new(ptr) T;
+}
+
+template<typename T>
+void callDestructor(T *ptr) 
+{
+	ptr->~T();
+}
