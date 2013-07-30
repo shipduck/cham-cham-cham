@@ -6,12 +6,27 @@
 
 class LineBatchSceneNode;
 
+template<typename T>
+void swapVectorElement(T &vec, int a, int b)
+{
+	SR_ASSERT(a >= 0 && a < static_cast<int>(vec.size()));
+	SR_ASSERT(b >= 0 && b < static_cast<int>(vec.size()));
+	T::value_type tmp = vec[a];
+	vec[a] = vec[b];
+	vec[b] = tmp;
+}
+
 class DebugDrawListMixin_Color {
 public:
 	std::vector<irr::video::SColor> colorList;	
 	void clear() { colorList.clear(); }
 	void pop_back() { colorList.pop_back(); }
 	size_t size() const { return colorList.size(); }
+	void swap(int a, int b) { swapVectorElement(colorList, a, b); }
+	void copy_elem(DebugDrawListMixin_Color *target, int idx)
+	{
+		target->colorList.push_back(colorList[idx]);
+	}
 };
 
 class DebugDrawListMixin_Node {
@@ -21,6 +36,11 @@ public:
 	void clear();
 	void pop_back();
 	size_t size() const { return nodeList.size(); }
+	void swap(int a, int b) { swapVectorElement(nodeList, a, b); }
+	void copy_elem(DebugDrawListMixin_Node *target, int idx)
+	{
+		target->nodeList.push_back(nodeList[idx]);
+	}
 };
 
 class DebugDrawListMixin_3D {
@@ -29,6 +49,11 @@ public:
 	void clear() { depthEnableList.clear(); }
 	void pop_back() { depthEnableList.pop_back(); }
 	size_t size() const { return depthEnableList.size(); }
+	void swap(int a, int b) { swapVectorElement(depthEnableList, a, b); }
+	void copy_elem(DebugDrawListMixin_3D *target, int idx)
+	{
+		target->depthEnableList.push_back(depthEnableList[idx]);
+	}
 };
 
 template<typename T>
@@ -38,6 +63,11 @@ public:
 	void clear() { scaleList.clear(); }
 	void pop_back() { scaleList.pop_back(); }
 	size_t size() const { return scaleList.size(); }
+	void swap(int a, int b) { swapVectorElement(scaleList, a, b); }
+	void copy_elem(DebugDrawListMixin_Scale *target, int idx)
+	{
+		target->scaleList.push_back(scaleList[idx]);
+	}
 };
 
 class DebugDrawListMixin_Transform {
@@ -46,6 +76,11 @@ public:
 	void clear() { xfList.clear(); }
 	void pop_back() { xfList.pop_back(); }
 	size_t size() const { return xfList.size(); }
+	void swap(int a, int b) { swapVectorElement(xfList, a, b); }
+	void copy_elem(DebugDrawListMixin_Transform *target, int idx)
+	{
+		target->xfList.push_back(xfList[idx]);
+	}
 };
 
 template<typename T>
@@ -69,6 +104,16 @@ public:
 		SR_ASSERT(p1List.size() == p2List.size());
 		return p1List.size();
 	}
+	void swap(int a, int b)
+	{
+		swapVectorElement(p1List, a, b);
+		swapVectorElement(p2List, a, b);
+	}
+	void copy_elem(DebugDrawListMixin_Line *target, int idx)
+	{
+		target->p1List.push_back(p1List[idx]);
+		target->p2List.push_back(p2List[idx]);
+	}
 };
 
 template<typename T>
@@ -78,6 +123,11 @@ public:
 	void clear() { posList.clear(); }
 	void pop_back() { posList.pop_back(); }
 	size_t size() const { return posList.size(); }
+	void swap(int a, int b) { swapVectorElement(posList, a, b); }
+	void copy_elem(DebugDrawListMixin_Pos *target, int idx)
+	{
+		target->posList.push_back(posList[idx]);
+	}
 };
 
 class DebugDrawListMixin_String {
@@ -90,6 +140,12 @@ public:
 	void clear() { msgList.clear(); }
 	void pop_back() { msgList.pop_back(); }
 	size_t size() const { return msgList.size(); }
+	void swap(int a, int b) { swapVectorElement(msgList, a, b); }
+
+	void copy_elem(DebugDrawListMixin_String *target, int idx)
+	{
+		target->msgList.push_back(msgList[idx]);
+	}
 };
 
 template<typename TList> class DebugDrawListPolicy;
@@ -102,6 +158,9 @@ public:
 	static void pop_back(GenSimpleHierarchy<Loki::NullType> &obj) {}
 	static size_t size(const GenSimpleHierarchy<Loki::NullType> &obj) { return 0; }
 	static bool validate(const GenSimpleHierarchy<Loki::NullType> &obj) { return true; }
+	static void swap(GenSimpleHierarchy<Loki::NullType> &obj, int a, int b) {}
+	static void copy_elem(GenSimpleHierarchy<Loki::NullType> &obj,
+		GenSimpleHierarchy<Loki::NullType> *target, int idx) {}
 };
 
 template<typename T, typename U>
@@ -132,6 +191,17 @@ public:
 		}
 		return Next::validate(obj);
 	}
+	static void swap(GenSimpleHierarchy< Loki::Typelist<T, U> > &obj, int a, int b)
+	{
+		static_cast<T&>(obj).swap(a, b);
+		Next::swap(obj, a, b);
+	}
+	static void copy_elem(GenSimpleHierarchy< Loki::Typelist<T, U> > &obj, 
+		GenSimpleHierarchy< Loki::Typelist<T, U> > *target, int idx) 
+	{
+		static_cast<T&>(obj).copy_elem(target, idx);
+		Next::copy_elem(obj, target, idx);
+	}
 };
 
 template<typename TList>
@@ -142,6 +212,8 @@ public:
 	void pop_back() { Policy::pop_back(*this); }
 	size_t size() const { return ((typename TList::Head*)this)->size(); }
 	bool validate() const { return Policy::validate(*this); }
+	void swap(int a, int b) { Policy::swap(*this, a, b); }
+	void copy_elem(DebugDrawListT *target, int idx) { Policy::copy_elem(*this, target, idx); }
 };
 
 typedef TYPELIST_3(

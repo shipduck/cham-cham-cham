@@ -9,16 +9,16 @@ using namespace core;
 LineBatchSceneNode::LineBatchSceneNode(irr::scene::ISceneNode *parent, irr::scene::ISceneManager *smgr, s32 id)
 	: scene::ISceneNode(parent, smgr, id)
 {
-	this->setIsDebugObject(true);
+	//this->setIsDebugObject(true);
 	Material.Wireframe = false;
 	Material.Lighting = false;
 
 	Box.reset(vector3df(0, 0, 0));
 
-	Vertex3DList.reserve(1 << 8);
-	Index3DList.reserve(1 << 8);
-	Vertex2DList.reserve(1 << 8);
-	Index2DList.reserve(1 << 8);
+	//Vertex3DList.reserve(1 << 8);
+	//Index3DList.reserve(1 << 8);
+	//Vertex2DList.reserve(1 << 8);
+	//Index2DList.reserve(1 << 8);
 }
 
 void LineBatchSceneNode::OnRegisterSceneNode()

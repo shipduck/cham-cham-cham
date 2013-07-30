@@ -18,7 +18,6 @@ DebugDrawManager *g_debugDrawMgr = &debugDrawMgrLocal;
 irr::gui::IGUIFont *g_normalFont12 = nullptr;
 irr::gui::IGUIFont *g_normalFont14 = nullptr;
 
-
 DebugDrawListMixin_Node::~DebugDrawListMixin_Node()
 {
 	clear();
@@ -130,11 +129,9 @@ struct DebugDrawListFunctor< Typelist<T, U> > {
 		
 		auto &durationList = Field<T>(mgr).durationList;
 		auto &durationDrawList = Field<T>(mgr).durationDrawList;
+		SR_ASSERT(durationList.size() == durationDrawList.size());
 
-		//TODO durationDrawList-durationList 시간 내림차순으로 정렬
-		SR_ASSERT(durationList.size() == 0 && "duration based is not implemented yet");
-
-		//시간지난거 삭제
+		//경과 시간 처리
 		for(size_t i = 0 ; i < durationList.size() ; ++i) {
 			durationList[i] -= ms;
 		}
@@ -143,11 +140,39 @@ struct DebugDrawListFunctor< Typelist<T, U> > {
 			if(duration > 0) {
 				break;
 			}
-
 			durationList.pop_back();
-			durationDrawList.pop_back();
 		}
 
+		typedef std::tuple<float, int> DurationIndexTuple;
+		std::vector<DurationIndexTuple> durationIndexList(durationList.size());
+		for(size_t i = 0 ; i < durationList.size() ; ++i) {
+			DurationIndexTuple &dataTuple = durationIndexList[i];
+			std::get<0>(dataTuple) = durationList[i];
+			std::get<1>(dataTuple) = i;
+		}
+		//durationDrawList-durationList 시간 내림차순으로 정렬
+		std::sort(durationIndexList.begin(),
+			durationIndexList.end(),
+			[](const DurationIndexTuple &a, const DurationIndexTuple &b) {
+				return std::get<0>(a) > std::get<0>(b);
+		});
+		std::sort(durationList.begin(), 
+			durationList.end(),
+			[](float a, float b) { return a > b; });
+
+		//index 순서대로 복사, 경과시간 고려해서 지나친항목은 무시
+		typedef std::remove_reference<decltype(durationDrawList)>::type DurationDrawList;
+		DurationDrawList nextDurationDrawList;
+		for(const auto &dataTuple : durationIndexList) {
+			int idx = std::get<1>(dataTuple);
+			int duration = std::get<0>(dataTuple);
+			if(duration > 0) {
+				durationDrawList.copy_elem(&nextDurationDrawList, idx);
+			}
+		}
+		durationDrawList = std::move(nextDurationDrawList);
+
+		SR_ASSERT(durationList.size() == durationDrawList.size());
 		DebugDrawListFunctor<U>::update(ms, mgr);
 	}
 };
@@ -443,7 +468,7 @@ void DebugDrawManager::drawList(const DebugDrawList_Circle2D &cmd)
 		for(auto &vert : vertexList) {
 			vert.Color = color;
 			vert.Pos *= radius;
-			vert.Pos += vector3df(pos.X, pos.Y, 0.0f);
+			vert.Pos += vector3df(static_cast<float>(pos.X), static_cast<float>(pos.Y), 0.0f);
 		}
 
 		auto sceneNode = getBatchSceneNode(1.0f);

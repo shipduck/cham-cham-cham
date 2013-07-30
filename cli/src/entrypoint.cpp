@@ -85,8 +85,8 @@ int entrypoint(int argc, char* argv[])
 	ISceneManager* smgr = device->getSceneManager();
 
 	//simple scene framework
-	//std::unique_ptr<Scene> scene(new DebugDrawScene(device));
-	std::unique_ptr<Scene> scene(new GameScene(device));
+	std::unique_ptr<Scene> scene(new DebugDrawScene(device));
+	//std::unique_ptr<Scene> scene(new GameScene(device));
 	scene->startUp();
 
 	

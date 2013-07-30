@@ -36,8 +36,9 @@ void DebugDrawScene::startUp()
 	smgr->addCameraSceneNodeFPS();
 	Device->getCursorControl()->setVisible(false);
 
-	//duration based는 아직
-	//g_debugDrawMgr->addSphere(core::vector3df(30,0,30), 5, green, 5000);
+	g_debugDrawMgr->addSphere(core::vector3df(30,0,30), 5, green, 5000);
+	g_debugDrawMgr->addSphere(core::vector3df(30,0,30), 2, red, 2000);
+	g_debugDrawMgr->addSphere(core::vector3df(30,0,30), 2, blue, 2000);
 }
 
 void DebugDrawScene::shutDown()
