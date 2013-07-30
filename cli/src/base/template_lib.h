@@ -21,3 +21,43 @@ class GenSimpleHierarchy : public T { };
 
 template<>
 class GenSimpleHierarchy<Loki::NullType> { };
+
+template<typename T>
+void safeDelete(T* &ptr) 
+{
+	if(ptr != nullptr) {
+		delete(ptr);
+		ptr = nullptr;
+	}
+}
+
+template<typename T>
+void safeDeleteArray(T* &ptr) 
+{
+	if(ptr != nullptr) {
+		delete[](ptr);
+		ptr = nullptr;     
+	}
+}
+
+template<typename T>
+void safeDeleteWithNullCheck(T* &ptr) 
+{
+	SR_ASSERT(ptr != nullptr && "null지우기는 언어상은 지원하나 아마도 잘못 짜여져있을 가능성이 있다");
+	delete(ptr);
+	ptr = nullptr;
+}
+
+template<typename T>
+void safeDeleteArrayWithNullCheck(T* &ptr) 
+{
+	SR_ASSERT(ptr != nullptr && "null지우기는 언어상은 지원하나 아마도 잘못 짜여져있을 가능성이 있다");
+	delete[](ptr);
+	ptr = nullptr;
+}
+
+template<typename T, int N>
+int getArraySize(T (&arr)[N]) 
+{
+	return N;
+}
