@@ -160,12 +160,12 @@ typedef TYPELIST_9(
 
 class DebugDrawManager : public Loki::GenScatterHierarchy<DrawAttributeElemList, DrawAttributeListHolder> {
 public:
-	DebugDrawManager() : device_(nullptr), batchSceneNode_(nullptr) {}
-	~DebugDrawManager() {}
-
+	DebugDrawManager();
+	~DebugDrawManager();
+public:
 	void startUp(irr::IrrlichtDevice *dev);
 	void shutDown();
-	void drawAll();
+
 	void updateAll(int ms);
 	void clear();
 	size_t size() const;
@@ -224,27 +224,8 @@ public:
 		const irr::video::SColor &color,
 		int duration = 0);
 
-	//draw
-public:
-	void drawList(const DrawAttributeList_Line2D &cmd);
-	void drawList(const DrawAttributeList_Cross2D &cmd);
-	void drawList(const DrawAttributeList_Circle2D &cmd);
-	void drawList(const DrawAttributeList_String2D &cmd);
-	void drawList(const DrawAttributeList_Line3D &cmd);
-	void drawList(const DrawAttributeList_Cross3D &cmd);
-	void drawList(const DrawAttributeList_Sphere3D &cmd);
-	void drawList(const DrawAttributeList_Axis3D &cmd);
-	void drawList(const DrawAttributeList_String3D &cmd);
-
 private:
 	irr::IrrlichtDevice *device_;
-
-private:
-	LineBatchSceneNode *batchSceneNode_;
-	// thickness != 1 인 경우도 렌더링 로직은 동일하게 처리하기 위해서 도입
-	std::map<float, LineBatchSceneNode *> batchSceneNodeMap_;
-
-	LineBatchSceneNode *getBatchSceneNode(float thickness);
 };
 
 // 주력으로 사용할것을 전역변수로 걸어놔야 속편하다

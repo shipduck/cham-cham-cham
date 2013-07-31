@@ -1,9 +1,8 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
 #include "entrypoint.h"
-#include "util/debug_draw_manager.h"
 #include "util/audio_manager.h"
-
+#include "irr/debug_draw_manager.h"
 #include "irr/head_tracker.h"
 #include "irr/hmd_event_receiver.h"
 
@@ -132,7 +131,8 @@ int entrypoint(int argc, char* argv[])
 			scene->draw();
 
 			// debug render
-			g_debugDrawMgr->drawAll();
+			//TODO
+			//g_debugDrawMgr->drawAll();
 			guienv->drawAll();	
 
 			//g_oldConsole.renderConsole(guienv, driver, frameDeltaTime);
@@ -143,7 +143,8 @@ int entrypoint(int argc, char* argv[])
 
 		//debug draw mgr의 업데이트를 나중에 처리해야 1프레임만 렌더링되는 객체도
 		//제대로 렌더링된다
-		g_debugDrawMgr->updateAll(frameDeltaTime);
+		//TODO
+		//g_debugDrawMgr->updateAll(frameDeltaTime);
 		
 		int fps = driver->getFPS();
 		if (lastFPS != fps) {
