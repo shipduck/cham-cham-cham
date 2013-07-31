@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "game_scene.h"
 #include "scene_helper.h"
-#include "util/debug_draw_manager.h"
+#include "irr/debug_draw_manager.h"
 #include "util/event_receiver_manager.h"
 #include "input_event.h"
 

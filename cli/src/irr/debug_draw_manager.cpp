@@ -18,32 +18,7 @@ DebugDrawManager *g_debugDrawMgr = &debugDrawMgrLocal;
 irr::gui::IGUIFont *g_normalFont12 = nullptr;
 irr::gui::IGUIFont *g_normalFont14 = nullptr;
 
-DebugDrawListMixin_Node::~DebugDrawListMixin_Node()
-{
-	clear();
-}
-void DebugDrawListMixin_Node::pop_back() 
-{
-	auto node = nodeList.back();
-	if(node) {
-		node->remove();
-		node->drop();
-	}
-	nodeList.pop_back();
-}
-void DebugDrawListMixin_Node::clear() 
-{
-	auto it = nodeList.begin();
-	auto endit = nodeList.end();
-	for( ; it != endit ; ++it) {
-		auto node = *it;
-		if(node) {
-			node->remove();
-			node->drop();
-		}
-	}
-	nodeList.clear(); 
-}
+
 
 void DebugDrawManager::startUp(irr::IrrlichtDevice *dev)
 {
@@ -179,7 +154,7 @@ struct DebugDrawListFunctor< Typelist<T, U> > {
 
 size_t DebugDrawManager::size() const
 {
-	int sum = DebugDrawListFunctor<DebugDrawCmdTypeList>::size(*this);	
+	int sum = DebugDrawListFunctor<DrawAttributeElemList>::size(*this);	
 	return sum;
 }
 
@@ -195,7 +170,7 @@ void DebugDrawManager::drawAll()
 		it->second->clear();
 	}
 	
-	DebugDrawListFunctor<DebugDrawCmdTypeList>::draw(*this);
+	DebugDrawListFunctor<DrawAttributeElemList>::draw(*this);
 	
 	if(batchSceneNode_) {
 		batchSceneNode_->render();
@@ -208,12 +183,12 @@ void DebugDrawManager::drawAll()
 
 void DebugDrawManager::clear() 
 {
-	DebugDrawListFunctor<DebugDrawCmdTypeList>::clear(*this);
+	DebugDrawListFunctor<DrawAttributeElemList>::clear(*this);
 }
 
 void DebugDrawManager::updateAll(int ms)
 {
-	DebugDrawListFunctor<DebugDrawCmdTypeList>::update(ms, *this);
+	DebugDrawListFunctor<DrawAttributeElemList>::update(ms, *this);
 }
 
 void DebugDrawManager::addLine(const irr::core::vector3df &p1, const irr::core::vector3df &p2,
@@ -222,7 +197,7 @@ void DebugDrawManager::addLine(const irr::core::vector3df &p1, const irr::core::
 		int duration,
 		bool depthEnable)
 {
-	typedef DebugDrawList_Line3D ListType;
+	typedef DrawAttributeList_Line3D ListType;
 	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 
 	drawList.p1List.push_back(p1);
@@ -240,7 +215,7 @@ void DebugDrawManager::addCross(const irr::core::vector3df &pos,
 		int duration,
 		bool depthEnable)
 {
-	typedef DebugDrawList_Cross3D ListType;
+	typedef DrawAttributeList_Cross3D ListType;
 	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
 	drawList.posList.push_back(pos);
@@ -257,7 +232,7 @@ void DebugDrawManager::addSphere(const irr::core::vector3df &pos,
 		int duration,
 		bool depthEnable)
 {
-	typedef DebugDrawList_Sphere3D ListType;
+	typedef DrawAttributeList_Sphere3D ListType;
 	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
 	drawList.posList.push_back(pos);
@@ -273,7 +248,7 @@ void DebugDrawManager::addAxis(const irr::core::matrix4 &xf,
 		int duration,
 		bool depthEnable)
 {
-	typedef DebugDrawList_Axis3D ListType;
+	typedef DrawAttributeList_Axis3D ListType;
 	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
 	drawList.xfList.push_back(xf);
@@ -284,13 +259,13 @@ void DebugDrawManager::addAxis(const irr::core::matrix4 &xf,
 }
 
 void DebugDrawManager::addString(const irr::core::vector3df &pos, 
-		const DebugDrawListMixin_String::string_type &msg,
+		const DrawAttributeListMixin_String::string_type &msg,
 		const irr::video::SColor &color,
 		float scale,
 		int duration,
 		bool depthEnable)
 {
-	typedef DebugDrawList_String3D ListType;
+	typedef DrawAttributeList_String3D ListType;
 	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
 	drawList.posList.push_back(pos);
@@ -323,7 +298,7 @@ void DebugDrawManager::addLine(const irr::core::vector2di &p1, const irr::core::
 		float lineWidth,
 		int duration)
 {
-	typedef DebugDrawList_Line2D ListType;
+	typedef DrawAttributeList_Line2D ListType;
 	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
 	drawList.p1List.push_back(p1);
@@ -339,7 +314,7 @@ void DebugDrawManager::addCross(const irr::core::vector2di &pos,
 		float size,
 		int duration)
 {
-	typedef DebugDrawList_Cross2D ListType;
+	typedef DrawAttributeList_Cross2D ListType;
 	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 
 	drawList.posList.push_back(pos);
@@ -350,12 +325,12 @@ void DebugDrawManager::addCross(const irr::core::vector2di &pos,
 }
 
 void DebugDrawManager::addString(const irr::core::vector2di &pos, 
-								   const DebugDrawListMixin_String::string_type &msg,
+								   const DrawAttributeListMixin_String::string_type &msg,
 								   const irr::video::SColor &color,
 								   float scale,
 								   int duration)
 {
-	typedef DebugDrawList_String2D ListType;
+	typedef DrawAttributeList_String2D ListType;
 	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
 	drawList.posList.push_back(pos);
@@ -370,7 +345,7 @@ void DebugDrawManager::addCircle(const irr::core::vector2di &pos, float radius,
 		const irr::video::SColor &color,
 		int duration)
 {
-	typedef DebugDrawList_Circle2D ListType;
+	typedef DrawAttributeList_Circle2D ListType;
 	ListType &drawList = Field<ListType>(*this).getListAndPushDuration(duration);
 	
 	drawList.posList.push_back(pos);
@@ -380,7 +355,7 @@ void DebugDrawManager::addCircle(const irr::core::vector2di &pos, float radius,
 	Field<ListType>(*this).runValidateOnce(duration);
 }
 
-void DebugDrawManager::drawList(const DebugDrawList_Line2D &cmd)
+void DebugDrawManager::drawList(const DrawAttributeList_Line2D &cmd)
 {
 	int loopCount = cmd.size();
 	for(int i = 0 ; i < loopCount ; ++i) {
@@ -390,7 +365,7 @@ void DebugDrawManager::drawList(const DebugDrawList_Line2D &cmd)
 	}
 }
 
-void DebugDrawManager::drawList(const DebugDrawList_Cross2D &cmd)
+void DebugDrawManager::drawList(const DrawAttributeList_Cross2D &cmd)
 {
 	int loopCount = cmd.size();
 	for(int i = 0 ; i < loopCount ; ++i) {
@@ -408,7 +383,7 @@ void DebugDrawManager::drawList(const DebugDrawList_Cross2D &cmd)
 		sceneNode->addLine(left, right, color);
 	}
 }
-void DebugDrawManager::drawList(const DebugDrawList_String2D &cmd)
+void DebugDrawManager::drawList(const DrawAttributeList_String2D &cmd)
 {
 	if(!g_normalFont14) {
 		return;
@@ -430,7 +405,7 @@ void DebugDrawManager::drawList(const DebugDrawList_String2D &cmd)
 	}
 }
 
-void DebugDrawManager::drawList(const DebugDrawList_Circle2D &cmd)
+void DebugDrawManager::drawList(const DrawAttributeList_Circle2D &cmd)
 {
 	const int numSegment = 16;
 	static std::array<S3DVertex, numSegment> baseVertexList;
@@ -476,7 +451,7 @@ void DebugDrawManager::drawList(const DebugDrawList_Circle2D &cmd)
 	}
 }
 
-void DebugDrawManager::drawList(const DebugDrawList_Line3D &cmd)
+void DebugDrawManager::drawList(const DrawAttributeList_Line3D &cmd)
 {
 	int loopCount = cmd.size();
 	for(int i = 0 ; i < loopCount ; ++i) {
@@ -486,12 +461,12 @@ void DebugDrawManager::drawList(const DebugDrawList_Line3D &cmd)
 	}
 }
 
-void DebugDrawManager::drawList(const DebugDrawList_Cross3D &cmd)
+void DebugDrawManager::drawList(const DrawAttributeList_Cross3D &cmd)
 {
 	//항상 동일한 크기로 보이게 적절히 렌더링하기
 }
 
-void DebugDrawManager::drawList(const DebugDrawList_Sphere3D &cmd)
+void DebugDrawManager::drawList(const DrawAttributeList_Sphere3D &cmd)
 {
 	typedef WireSphereFactory<8, 8> SphereFactoryType;
 	static SphereFactoryType::vertex_list_type baseVertexList;
@@ -519,12 +494,12 @@ void DebugDrawManager::drawList(const DebugDrawList_Sphere3D &cmd)
 		sceneNode->addIndexedVertices(vertexList, baseIndexList);
 	}
 }
-void DebugDrawManager::drawList(const DebugDrawList_String3D &cmd)
+void DebugDrawManager::drawList(const DrawAttributeList_String3D &cmd)
 {
 	//use scene node based
 }
 
-void DebugDrawManager::drawList(const DebugDrawList_Axis3D &cmd)
+void DebugDrawManager::drawList(const DrawAttributeList_Axis3D &cmd)
 {
 	SColor red(255, 255, 0, 0);
 	SColor green(255, 0, 255, 0);

@@ -1,7 +1,7 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
 #include "scene.h"
-#include "util/debug_draw_manager.h"
+#include "irr/debug_draw_manager.h"
 
 #include "irr/HMDStereoRender.h"
 #include "irr/hmd_event_receiver.h"

@@ -1,6 +1,6 @@
 // Ŭnicode please
 #include "stdafx.h"
-#include "util/debug_draw_manager.h"
+#include "irr/debug_draw_manager.h"
 
 using namespace Loki;
 using namespace irr;
@@ -19,7 +19,7 @@ protected:
 
 TEST(swapVectorElement, test)
 {
-	DebugDrawListMixin_3D vec;
+	DrawAttributeListMixin_3D vec;
 	vec.depthEnableList.push_back(false);
 	vec.depthEnableList.push_back(true);
 
@@ -62,15 +62,15 @@ TEST_F(DebugDrawManagerTest, updateAll_complexDuration)
 	mgr.addLine(vector3df(0, 0, 0), vector3df(0, 0, 0), color, 4, 4000);
 	EXPECT_EQ(4, mgr.size());
 
-	const DebugDrawList_Line3D &durationDrawList = Loki::Field<DebugDrawList_Line3D>(mgr).durationDrawList;
-	const std::vector<int> &durationList = Loki::Field<DebugDrawList_Line3D>(mgr).durationList;
+	const DrawAttributeList_Line3D &durationDrawList = Loki::Field<DrawAttributeList_Line3D>(mgr).durationDrawList;
+	const std::vector<int> &durationList = Loki::Field<DrawAttributeList_Line3D>(mgr).durationList;
 
 	mgr.updateAll(500);
 	EXPECT_EQ(4, mgr.size());
 	EXPECT_EQ(4, durationDrawList.size());
 	EXPECT_EQ(4, durationList.size());
 	{
-		auto &vec = static_cast<DebugDrawListMixin_Scale<float>>(durationDrawList);
+		auto &vec = static_cast<DrawAttributeListMixin_Scale<float>>(durationDrawList);
 		EXPECT_EQ(4, vec.size());
 		EXPECT_EQ(4, vec.scaleList[0]);
 		EXPECT_EQ(2, vec.scaleList[1]);
@@ -83,7 +83,7 @@ TEST_F(DebugDrawManagerTest, updateAll_complexDuration)
 	EXPECT_EQ(3, durationDrawList.size());
 	EXPECT_EQ(3, durationList.size());
 	{
-		auto &vec = static_cast<DebugDrawListMixin_Scale<float>>(durationDrawList);
+		auto &vec = static_cast<DrawAttributeListMixin_Scale<float>>(durationDrawList);
 		EXPECT_EQ(3, vec.size());
 		EXPECT_EQ(4, vec.scaleList[0]);
 		EXPECT_EQ(2, vec.scaleList[1]);
@@ -95,7 +95,7 @@ TEST_F(DebugDrawManagerTest, updateAll_complexDuration)
 	EXPECT_EQ(2, durationDrawList.size());
 	EXPECT_EQ(2, durationList.size());
 	{
-		auto &vec = static_cast<DebugDrawListMixin_Scale<float>>(durationDrawList);
+		auto &vec = static_cast<DrawAttributeListMixin_Scale<float>>(durationDrawList);
 		EXPECT_EQ(2, vec.size());
 		EXPECT_EQ(4, vec.scaleList[0]);
 		EXPECT_EQ(2, vec.scaleList[1]);
@@ -106,7 +106,7 @@ TEST_F(DebugDrawManagerTest, updateAll_complexDuration)
 	EXPECT_EQ(1, durationDrawList.size());
 	EXPECT_EQ(1, durationList.size());
 	{
-		auto &vec = static_cast<DebugDrawListMixin_Scale<float>>(durationDrawList);
+		auto &vec = static_cast<DrawAttributeListMixin_Scale<float>>(durationDrawList);
 		EXPECT_EQ(1, vec.size());
 		EXPECT_EQ(4, vec.scaleList[0]);
 	}
@@ -116,7 +116,7 @@ TEST_F(DebugDrawManagerTest, updateAll_complexDuration)
 	EXPECT_EQ(0, durationDrawList.size());
 	EXPECT_EQ(0, durationList.size());
 	{
-		auto &vec = static_cast<DebugDrawListMixin_Scale<float>>(durationDrawList);
+		auto &vec = static_cast<DrawAttributeListMixin_Scale<float>>(durationDrawList);
 		EXPECT_EQ(0, vec.size());
 	}
 }
@@ -125,6 +125,6 @@ TEST_F(DebugDrawManagerTest, updateAll_complexDuration)
 TEST_F(DebugDrawManagerTest, getCmdList)
 {
 	DebugDrawManager mgr;
-	const auto &line3d = Loki::Field<DebugDrawList_Line3D>(mgr);
-	const auto &line2d = Loki::Field<DebugDrawList_Line2D>(mgr);
+	const auto &line3d = Loki::Field<DrawAttributeList_Line3D>(mgr);
+	const auto &line2d = Loki::Field<DrawAttributeList_Line2D>(mgr);
 }
