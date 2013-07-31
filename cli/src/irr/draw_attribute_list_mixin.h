@@ -1,6 +1,7 @@
 ﻿// Ŭnicode please 
 #pragma once
 
+#include "Typelist.h"
 #include <string>
 #include <vector>
 
@@ -160,3 +161,66 @@ public:
 		target->msgList.push_back(msgList[idx]);
 	}
 };
+
+//mixin으로 실제로 사용하는 mixin 조합 구성
+typedef TYPELIST_3(
+	DrawAttributeListMixin_Line<irr::core::vector2di>,
+	DrawAttributeListMixin_Scale<float>,
+	DrawAttributeListMixin_Color
+	) DrawAttributeListMixin_Line2D;
+
+typedef TYPELIST_4(
+	DrawAttributeListMixin_Line<irr::core::vector3df>,
+	DrawAttributeListMixin_Scale<float>,
+	DrawAttributeListMixin_Color,
+	DrawAttributeListMixin_3D
+	) DrawAttributeListMixin_Line3D;
+
+typedef TYPELIST_3(
+	DrawAttributeListMixin_Pos<irr::core::vector2di>,
+	DrawAttributeListMixin_Scale<float>,
+	DrawAttributeListMixin_Color
+	) DrawAttributeListMixin_Cross2D;
+
+typedef TYPELIST_4(
+	DrawAttributeListMixin_Pos<irr::core::vector3df>,
+	DrawAttributeListMixin_Scale<float>,
+	DrawAttributeListMixin_Color,
+	DrawAttributeListMixin_3D
+	) DrawAttributeListMixin_Cross3D;
+
+typedef TYPELIST_4(
+	DrawAttributeListMixin_Pos<irr::core::vector2di>,
+	DrawAttributeListMixin_Scale<float>,
+	DrawAttributeListMixin_Color,
+	DrawAttributeListMixin_String
+	) DrawAttributeListMixin_String2D;
+
+typedef TYPELIST_6(
+	DrawAttributeListMixin_Pos<irr::core::vector3df>,
+	DrawAttributeListMixin_Scale<float>,
+	DrawAttributeListMixin_Color,
+	DrawAttributeListMixin_String,
+	DrawAttributeListMixin_3D,
+	DrawAttributeListMixin_Node
+	) DrawAttributeListMixin_String3D;
+
+typedef TYPELIST_3(
+	DrawAttributeListMixin_Pos<irr::core::vector2di>,
+	DrawAttributeListMixin_Scale<float>,
+	DrawAttributeListMixin_Color
+	) DrawAttributeListMixin_Circle2D;
+
+typedef TYPELIST_4(
+	DrawAttributeListMixin_Pos<irr::core::vector3df>,
+	DrawAttributeListMixin_Scale<float>,
+	DrawAttributeListMixin_Color,
+	DrawAttributeListMixin_3D
+	) DrawAttributeListMixin_Sphere3D;
+
+typedef TYPELIST_3(
+	DrawAttributeListMixin_Transform,
+	DrawAttributeListMixin_Scale<float>,
+	DrawAttributeListMixin_3D
+	) DrawAttributeListMixin_Axis3D;
+

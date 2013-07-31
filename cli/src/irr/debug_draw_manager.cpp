@@ -118,7 +118,7 @@ struct DebugDrawListFunctor< Typelist<T, U> > {
 			durationList.pop_back();
 		}
 
-		typedef std::tuple<float, int> DurationIndexTuple;
+		typedef std::tuple<int, int> DurationIndexTuple;
 		std::vector<DurationIndexTuple> durationIndexList(durationList.size());
 		for(size_t i = 0 ; i < durationList.size() ; ++i) {
 			DurationIndexTuple &dataTuple = durationIndexList[i];
@@ -133,7 +133,7 @@ struct DebugDrawListFunctor< Typelist<T, U> > {
 		});
 		std::sort(durationList.begin(), 
 			durationList.end(),
-			[](float a, float b) { return a > b; });
+			[](int a, int b) { return a > b; });
 
 		//index 순서대로 복사, 경과시간 고려해서 지나친항목은 무시
 		typedef std::remove_reference<decltype(durationDrawList)>::type DurationDrawList;

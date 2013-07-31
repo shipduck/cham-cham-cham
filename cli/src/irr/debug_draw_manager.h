@@ -7,10 +7,10 @@
 
 class LineBatchSceneNode;
 
-template<typename TList> class DebugDrawListPolicy;
+template<typename TList> class DrawAttributeListPolicy;
 
 template<>
-class DebugDrawListPolicy<Loki::NullType> {
+class DrawAttributeListPolicy<Loki::NullType> {
 public:
 	enum { HasNext = 0 };
 	static void clear(GenSimpleHierarchy<Loki::NullType> &obj) {}
@@ -23,10 +23,10 @@ public:
 };
 
 template<typename T, typename U>
-class DebugDrawListPolicy< Loki::Typelist<T, U> > {
+class DrawAttributeListPolicy< Loki::Typelist<T, U> > {
 public:
 	enum { HasNext = 1 };
-	typedef DebugDrawListPolicy<U> Next;
+	typedef DrawAttributeListPolicy<U> Next;
 	static void clear(GenSimpleHierarchy< Loki::Typelist<T, U> > &obj)
 	{
 		static_cast<T&>(obj).clear();
@@ -64,89 +64,29 @@ public:
 };
 
 template<typename TList>
-class DebugDrawListT : public GenSimpleHierarchy<TList> {
+class DrawAttributeListT : public GenSimpleHierarchy<TList> {
 public:
-	typedef DebugDrawListPolicy<TList> Policy;
+	typedef DrawAttributeListPolicy<TList> Policy;
 	void clear() { Policy::clear(*this); }
 	void pop_back() { Policy::pop_back(*this); }
 	size_t size() const { return ((typename TList::Head*)this)->size(); }
 	bool validate() const { return Policy::validate(*this); }
 	void swap(int a, int b) { Policy::swap(*this, a, b); }
-	void copy_elem(DebugDrawListT *target, int idx) { Policy::copy_elem(*this, target, idx); }
+	void copy_elem(DrawAttributeListT *target, int idx) { Policy::copy_elem(*this, target, idx); }
 };
 
-typedef TYPELIST_3(
-	DrawAttributeListMixin_Line<irr::core::vector2di>,
-	DrawAttributeListMixin_Scale<float>,
-	DrawAttributeListMixin_Color
-	) DrawAttributeListMixin_Line2D;
-class DrawAttributeList_Line2D : public DebugDrawListT<DrawAttributeListMixin_Line2D> {};
-
-typedef TYPELIST_4(
-	DrawAttributeListMixin_Line<irr::core::vector3df>,
-	DrawAttributeListMixin_Scale<float>,
-	DrawAttributeListMixin_Color,
-	DrawAttributeListMixin_3D
-	) DrawAttributeListMixin_Line3D;
-class DrawAttributeList_Line3D : public DebugDrawListT<DrawAttributeListMixin_Line3D> {};
-
-typedef TYPELIST_3(
-	DrawAttributeListMixin_Pos<irr::core::vector2di>,
-	DrawAttributeListMixin_Scale<float>,
-	DrawAttributeListMixin_Color
-	) DrawAttributeListMixin_Cross2D;
-class DrawAttributeList_Cross2D : public DebugDrawListT<DrawAttributeListMixin_Cross2D> {};
-
-typedef TYPELIST_4(
-	DrawAttributeListMixin_Pos<irr::core::vector3df>,
-	DrawAttributeListMixin_Scale<float>,
-	DrawAttributeListMixin_Color,
-	DrawAttributeListMixin_3D
-	) DrawAttributeListMixin_Cross3D;
-class DrawAttributeList_Cross3D : public DebugDrawListT<DrawAttributeListMixin_Cross3D> {};
-
-typedef TYPELIST_4(
-	DrawAttributeListMixin_Pos<irr::core::vector2di>,
-	DrawAttributeListMixin_Scale<float>,
-	DrawAttributeListMixin_Color,
-	DrawAttributeListMixin_String
-	) DrawAttributeListMixin_String2D;
-class DrawAttributeList_String2D : public DebugDrawListT<DrawAttributeListMixin_String2D> {};
-
-typedef TYPELIST_6(
-	DrawAttributeListMixin_Pos<irr::core::vector3df>,
-	DrawAttributeListMixin_Scale<float>,
-	DrawAttributeListMixin_Color,
-	DrawAttributeListMixin_String,
-	DrawAttributeListMixin_3D,
-	DrawAttributeListMixin_Node
-	) DrawAttributeListMixin_String3D;
-class DrawAttributeList_String3D : public DebugDrawListT<DrawAttributeListMixin_String3D> {};
-
-typedef TYPELIST_3(
-	DrawAttributeListMixin_Pos<irr::core::vector2di>,
-	DrawAttributeListMixin_Scale<float>,
-	DrawAttributeListMixin_Color
-	) DrawAttributeListMixin_Circle2D;
-class DrawAttributeList_Circle2D : public DebugDrawListT<DrawAttributeListMixin_Circle2D> {};
-
-typedef TYPELIST_4(
-	DrawAttributeListMixin_Pos<irr::core::vector3df>,
-	DrawAttributeListMixin_Scale<float>,
-	DrawAttributeListMixin_Color,
-	DrawAttributeListMixin_3D
-	) DrawAttributeListMixin_Sphere3D;
-class DrawAttributeList_Sphere3D : public DebugDrawListT<DrawAttributeListMixin_Sphere3D> {};
-
-typedef TYPELIST_3(
-	DrawAttributeListMixin_Transform,
-	DrawAttributeListMixin_Scale<float>,
-	DrawAttributeListMixin_3D
-	) DrawAttributeListMixin_Axis3D;
-class DrawAttributeList_Axis3D : public DebugDrawListT<DrawAttributeListMixin_Axis3D> {};
+class DrawAttributeList_Line2D : public DrawAttributeListT<DrawAttributeListMixin_Line2D> {};
+class DrawAttributeList_Line3D : public DrawAttributeListT<DrawAttributeListMixin_Line3D> {};
+class DrawAttributeList_Cross2D : public DrawAttributeListT<DrawAttributeListMixin_Cross2D> {};
+class DrawAttributeList_Cross3D : public DrawAttributeListT<DrawAttributeListMixin_Cross3D> {};
+class DrawAttributeList_String2D : public DrawAttributeListT<DrawAttributeListMixin_String2D> {};
+class DrawAttributeList_String3D : public DrawAttributeListT<DrawAttributeListMixin_String3D> {};
+class DrawAttributeList_Circle2D : public DrawAttributeListT<DrawAttributeListMixin_Circle2D> {};
+class DrawAttributeList_Sphere3D : public DrawAttributeListT<DrawAttributeListMixin_Sphere3D> {};
+class DrawAttributeList_Axis3D : public DrawAttributeListT<DrawAttributeListMixin_Axis3D> {};
 
 template<class T>
-class DebugDrawListHolder {
+class DrawAttributeListHolder {
 public:
 	typedef T value_type;
 
@@ -218,7 +158,7 @@ typedef TYPELIST_9(
 	DrawAttributeList_Circle2D
 	) DrawAttributeElemList;
 
-class DebugDrawManager : public Loki::GenScatterHierarchy<DrawAttributeElemList, DebugDrawListHolder> {
+class DebugDrawManager : public Loki::GenScatterHierarchy<DrawAttributeElemList, DrawAttributeListHolder> {
 public:
 	DebugDrawManager() : device_(nullptr), batchSceneNode_(nullptr) {}
 	~DebugDrawManager() {}
