@@ -5,12 +5,11 @@
 
 class DebugDrawer {
 public:
-	DebugDrawer() : device_(nullptr), batchSceneNode_(nullptr) {}
-	~DebugDrawer() {}
+	DebugDrawer(irr::IrrlichtDevice *dev);
+	~DebugDrawer();
 
-	void startUp(irr::IrrlichtDevice *dev);
 	void shutDown();
-	void drawAll();
+	void drawAll(const DebugDrawManager &mgr);
 
 public:
 	void drawList(const DrawAttributeList_Line2D &cmd);
@@ -26,9 +25,14 @@ public:
 private:
 	irr::IrrlichtDevice *device_;
 
+	irr::gui::IGUIFont *getDebugFont();
+
 private:
 	LineBatchSceneNode *batchSceneNode_;
 	// thickness != 1 인 경우도 렌더링 로직은 동일하게 처리하기 위해서 도입
 	std::map<float, LineBatchSceneNode *> batchSceneNodeMap_;
 	LineBatchSceneNode *getBatchSceneNode(float thickness);
 };
+
+extern irr::gui::IGUIFont *g_normalFont12;
+extern irr::gui::IGUIFont *g_normalFont14;

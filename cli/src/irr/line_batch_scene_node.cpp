@@ -9,16 +9,17 @@ using namespace core;
 LineBatchSceneNode::LineBatchSceneNode(irr::scene::ISceneNode *parent, irr::scene::ISceneManager *smgr, s32 id)
 	: scene::ISceneNode(parent, smgr, id)
 {
-	//this->setIsDebugObject(true);
+	setAutomaticCulling(irr::scene::EAC_OFF);
+	this->setIsDebugObject(true);
 	Material.Wireframe = false;
 	Material.Lighting = false;
 
 	Box.reset(vector3df(0, 0, 0));
 
-	//Vertex3DList.reserve(1 << 8);
-	//Index3DList.reserve(1 << 8);
-	//Vertex2DList.reserve(1 << 8);
-	//Index2DList.reserve(1 << 8);
+	Vertex3DList.reserve(1 << 8);
+	Index3DList.reserve(1 << 8);
+	Vertex2DList.reserve(1 << 8);
+	Index2DList.reserve(1 << 8);
 }
 
 void LineBatchSceneNode::OnRegisterSceneNode()
@@ -31,11 +32,24 @@ void LineBatchSceneNode::OnRegisterSceneNode()
 
 void LineBatchSceneNode::render()
 {
-	IVideoDriver *driver = SceneManager->getVideoDriver();
+	video::IVideoDriver* driver = SceneManager->getVideoDriver();
+
 	driver->setMaterial(Material);
 	driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
-	driver->drawVertexPrimitiveList(Vertex3DList.data(), Vertex3DList.size(), Index3DList.data(), Index3DList.size(), video::EVT_STANDARD, scene::EPT_LINES, video::EIT_16BIT);
-	driver->draw2DVertexPrimitiveList(Vertex2DList.data(), Vertex2DList.size(), Index2DList.data(), Index2DList.size(), video::EVT_STANDARD, scene::EPT_LINES, video::EIT_16BIT);
+	
+	driver->drawVertexPrimitiveList(
+		Vertex3DList.data(), 
+		Vertex3DList.size(), 
+		Index3DList.data(), 
+		Index3DList.size() * 0.5, 
+		video::EVT_STANDARD, scene::EPT_LINES, video::EIT_16BIT);
+
+	driver->draw2DVertexPrimitiveList(
+		Vertex2DList.data(), 
+		Vertex2DList.size(), 
+		Index2DList.data(), 
+		Index2DList.size() * 0.5, 
+		video::EVT_STANDARD, scene::EPT_LINES, video::EIT_16BIT);
 }
 
 void LineBatchSceneNode::addLine(const vector_3d_type &p1, const vector_3d_type &p2, const color_type &color)

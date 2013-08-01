@@ -30,21 +30,6 @@ public:
 	}
 };
 
-class DrawAttributeListMixin_Node {
-public:
-	typedef DrawAttributeListMixin_Node mixin_type;
-public:
-	std::vector<irr::scene::ISceneNode*> nodeList;
-	void clear();
-	void pop_back();
-	size_t size() const { return nodeList.size(); }
-	void swap(int a, int b) { swapVectorElement(nodeList, a, b); }
-	void copy_elem(mixin_type *target, int idx)
-	{
-		target->nodeList.push_back(nodeList[idx]);
-	}
-};
-
 class DrawAttributeListMixin_3D {
 public:
 	typedef DrawAttributeListMixin_3D mixin_type;
@@ -149,16 +134,16 @@ public:
 	typedef std::wstring string_type;
 	typedef std::wstring::value_type value_type;
 
-	std::vector<string_type> msgList;
+	std::vector<string_type> textList;
 
-	void clear() { msgList.clear(); }
-	void pop_back() { msgList.pop_back(); }
-	size_t size() const { return msgList.size(); }
-	void swap(int a, int b) { swapVectorElement(msgList, a, b); }
+	void clear() { textList.clear(); }
+	void pop_back() { textList.pop_back(); }
+	size_t size() const { return textList.size(); }
+	void swap(int a, int b) { swapVectorElement(textList, a, b); }
 
 	void copy_elem(mixin_type *target, int idx)
 	{
-		target->msgList.push_back(msgList[idx]);
+		target->textList.push_back(textList[idx]);
 	}
 };
 
@@ -196,13 +181,12 @@ typedef TYPELIST_4(
 	DrawAttributeListMixin_String
 	) DrawAttributeListMixin_String2D;
 
-typedef TYPELIST_6(
+typedef TYPELIST_5(
 	DrawAttributeListMixin_Pos<irr::core::vector3df>,
 	DrawAttributeListMixin_Scale<float>,
 	DrawAttributeListMixin_Color,
 	DrawAttributeListMixin_String,
-	DrawAttributeListMixin_3D,
-	DrawAttributeListMixin_Node
+	DrawAttributeListMixin_3D
 	) DrawAttributeListMixin_String3D;
 
 typedef TYPELIST_3(

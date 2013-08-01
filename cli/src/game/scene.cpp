@@ -1,6 +1,7 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
 #include "scene.h"
+#include "irr/debug_drawer.h"
 #include "irr/debug_draw_manager.h"
 
 #include "irr/HMDStereoRender.h"
@@ -12,19 +13,12 @@ using namespace scene;
 using namespace gui;
 
 Scene::Scene(irr::IrrlichtDevice *dev)
-	: Device(dev)
+	: device_(dev), 
+	rootScene_(nullptr),
+	debugDrawer_(new DebugDrawer(dev))
 {
-}
-Scene::~Scene()
-{
-}
-
-void Scene::startUp()
-{
-	auto guienv = Device->getGUIEnvironment();
-	auto smgr = Device->getSceneManager();
-	smgr->clear();
-	guienv->clear();
+	auto smgr = device_->getSceneManager();
+	rootScene_ = smgr->addEmptySceneNode();
 
 	//hmd 렌더링 지원
 	HMDDescriptor HMD;
@@ -41,22 +35,22 @@ void Scene::startUp()
 	HMD.distortionK[2] = 0.24f;
 	HMD.distortionK[3] = 0.0f;
 
-	Renderer.reset(new HMDStereoRender(Device, HMD, 10));
+	renderer_.reset(new HMDStereoRender(device_, HMD, 10));
 }
-
-void Scene::shutDown()
+Scene::~Scene()
 {
-	Renderer.reset(nullptr);
+	renderer_.reset(nullptr);
+	SR_ASSERT(rootScene_ != nullptr);
+	rootScene_->remove();
+	rootScene_ = nullptr;
 
-	auto guienv = Device->getGUIEnvironment();
-	auto smgr = Device->getSceneManager();
-	smgr->clear();
+	auto guienv = device_->getGUIEnvironment();
 	guienv->clear();
 }
 
 void Scene::drawAllNormal(irr::scene::ISceneManager *smgr)
 {
-	IVideoDriver* driver = Device->getVideoDriver();
+	IVideoDriver* driver = device_->getVideoDriver();
 	int w = driver->getScreenSize().Width;
 	int h = driver->getScreenSize().Height;
 	driver->setViewPort(core::recti(0, 0, w, h));
@@ -65,14 +59,14 @@ void Scene::drawAllNormal(irr::scene::ISceneManager *smgr)
 
 void Scene::drawAllStereo(irr::scene::ISceneManager *smgr)
 {
-	Renderer->drawAll(smgr);
+	renderer_->drawAll(smgr);
 }
 
 void Scene::draw()
 {
-	IVideoDriver* driver = Device->getVideoDriver();
-	IGUIEnvironment* guienv = Device->getGUIEnvironment();
-	ISceneManager* smgr = Device->getSceneManager();
+	IVideoDriver* driver = device_->getVideoDriver();
+	IGUIEnvironment* guienv = device_->getGUIEnvironment();
+	ISceneManager* smgr = device_->getSceneManager();
 	
 	// draw the 3d scene
 	if(g_hmdEventReceiver->isSupportHMD()) {
@@ -81,4 +75,7 @@ void Scene::draw()
 		drawAllNormal(smgr);
 	}
 	//smgr->drawAll();
+
+	// debug render. 실제 렌더링 이후에 그려야됨
+	debugDrawer_->drawAll(*g_debugDrawMgr);
 }

@@ -27,21 +27,11 @@ GameScene::GameScene(irr::IrrlichtDevice *dev)
 	RotateSpeed(100),
 	JumpSpeed(300)
 {
-}
+	dev->setWindowCaption(L"Game Scene");
 
-GameScene::~GameScene()
-{
-}
-
-void GameScene::startUp()
-{
-	Scene::startUp();
-
-	Device->setWindowCaption(L"Game Scene");
-
-	IVideoDriver* driver = Device->getVideoDriver();
-	ISceneManager* smgr = Device->getSceneManager();
-	IGUIEnvironment* guienv = Device->getGUIEnvironment();
+	IVideoDriver* driver = dev->getVideoDriver();
+	ISceneManager* smgr = dev->getSceneManager();
+	IGUIEnvironment* guienv = dev->getGUIEnvironment();
 
 	initSky();
 	initCam();
@@ -83,9 +73,13 @@ void GameScene::startUp()
 	eventReceiver_ = static_cast<GameEventReceiver*>(g_eventReceiverMgr->addReceiver(new GameEventReceiver(), 0));
 }
 
+GameScene::~GameScene()
+{
+}
+
 void GameScene::initCam()
 {
-	ISceneManager* smgr = Device->getSceneManager();
+	ISceneManager* smgr = device_->getSceneManager();
 	
 	camNode = smgr->addCameraSceneNode();
 	float height = 100;
@@ -97,7 +91,7 @@ void GameScene::initCam()
 void GameScene::initTargetableObject()
 {
 	//선택 테스트용 객체 배치
-	ISceneManager* smgr = Device->getSceneManager();
+	ISceneManager* smgr = device_->getSceneManager();
 	
 	SMaterial material;
 	material.AmbientColor = SColor(255, 255, 0, 0);
@@ -120,8 +114,8 @@ void GameScene::initTargetableObject()
 
 irr::scene::ISceneNode *GameScene::initColosseum()
 {
-	ISceneManager* smgr = Device->getSceneManager();
-	IVideoDriver* driver = Device->getVideoDriver();
+	ISceneManager* smgr = device_->getSceneManager();
+	IVideoDriver* driver = device_->getVideoDriver();
 
 	float radius = 500;
 	const int numSegment = 32;
@@ -200,8 +194,8 @@ irr::scene::ISceneNode *GameScene::initColosseum()
 */
 void GameScene::initObstacleList()
 {
-	ISceneManager* smgr = Device->getSceneManager();
-	IVideoDriver* driver = Device->getVideoDriver();
+	ISceneManager* smgr = device_->getSceneManager();
+	IVideoDriver* driver = device_->getVideoDriver();
 
 	SMaterial material;
 	material.Lighting = false;
@@ -237,8 +231,8 @@ void GameScene::initObstacleList()
 
 irr::scene::ITerrainSceneNode* GameScene::initTerrain()
 {
-	IVideoDriver* driver = Device->getVideoDriver();
-	ISceneManager* smgr = Device->getSceneManager();
+	IVideoDriver* driver = device_->getVideoDriver();
+	ISceneManager* smgr = device_->getSceneManager();
 
 	// 하이트맵의 가운데 == 0,0,0이 되도록 만든다. 게임로직을 시작할떄
 	// 중심에 모아놔야 디버깅하기 쉬우니까
@@ -283,19 +277,13 @@ irr::scene::ITerrainSceneNode* GameScene::initTerrain()
 }
 void GameScene::initSky()
 {
-	IVideoDriver* driver = Device->getVideoDriver();
-	ISceneManager* smgr = Device->getSceneManager();
+	IVideoDriver* driver = device_->getVideoDriver();
+	ISceneManager* smgr = device_->getSceneManager();
 
 	// create skybox and skydome
 	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
 	scene::ISceneNode* skydome = smgr->addSkyDomeSceneNode(driver->getTexture("ext/irrlicht/media/skydome.jpg"),16,8,0.95f,2.0f);
 	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, true);
-}
-
-
-void GameScene::shutDown()
-{
-	Scene::shutDown();
 }
 
 void GameScene::updateMoveEvent(int ms, const MoveEvent &evt)
@@ -366,9 +354,9 @@ void GameScene::updateLookEvent(int ms, const LookEvent &evt)
 
 void GameScene::update(int ms)
 {
-	IVideoDriver* driver = Device->getVideoDriver();
-	ISceneManager* smgr = Device->getSceneManager();
-	IGUIEnvironment* guienv = Device->getGUIEnvironment();
+	IVideoDriver* driver = device_->getVideoDriver();
+	ISceneManager* smgr = device_->getSceneManager();
+	IGUIEnvironment* guienv = device_->getGUIEnvironment();
 	scene::ISceneCollisionManager* collMan = smgr->getSceneCollisionManager();
 
 	//방향처리의 우선순위가 이동처리보다 높다

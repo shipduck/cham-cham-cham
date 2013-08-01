@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "entrypoint.h"
 #include "util/audio_manager.h"
+#include "irr/debug_drawer.h"
 #include "irr/debug_draw_manager.h"
 #include "irr/head_tracker.h"
 #include "irr/hmd_event_receiver.h"
@@ -35,9 +36,6 @@ int mainStartUp(irr::IrrlichtDevice *device)
 
 	auto joystickDev = g_eventReceiverMgr->getJoystickDev();
 	joystickDev.showInfo();
-
-	//set debug tool
-	g_debugDrawMgr->startUp(device);
 	
 	//initialize the console
 	//g_normalFont12 = guienv->getFont("res/font_12.xml");
@@ -54,7 +52,6 @@ int mainStartUp(irr::IrrlichtDevice *device)
 
 int mainShutDown()
 {
-	g_debugDrawMgr->shutDown();
 	g_eventReceiverMgr->shutDown();
 	g_audioMgr->shutDown();
 	g_headTracker->shutDown();
@@ -84,11 +81,8 @@ int entrypoint(int argc, char* argv[])
 	ISceneManager* smgr = device->getSceneManager();
 
 	//simple scene framework
-	//std::unique_ptr<Scene> scene(new DebugDrawScene(device));
-	std::unique_ptr<Scene> scene(new GameScene(device));
-	scene->startUp();
-
-	
+	std::unique_ptr<Scene> scene(new DebugDrawScene(device));
+	//std::unique_ptr<Scene> scene(new GameScene(device));
 
 	if(g_audioMgr->isSupport()) {
 		const std::string bg("res/sound/bg.wav");
@@ -130,12 +124,7 @@ int entrypoint(int argc, char* argv[])
 			driver->beginScene(true, true, video::SColor(255, 10, 10, 10));
 			scene->draw();
 
-			// debug render
-			//TODO
-			//g_debugDrawMgr->drawAll();
 			guienv->drawAll();	
-
-			//g_oldConsole.renderConsole(guienv, driver, frameDeltaTime);
 			g_console->RenderConsole(guienv, driver, frameDeltaTime);
 
 			driver->endScene();	//render end
@@ -143,8 +132,7 @@ int entrypoint(int argc, char* argv[])
 
 		//debug draw mgr의 업데이트를 나중에 처리해야 1프레임만 렌더링되는 객체도
 		//제대로 렌더링된다
-		//TODO
-		//g_debugDrawMgr->updateAll(frameDeltaTime);
+		g_debugDrawMgr->updateAll(frameDeltaTime);
 		
 		int fps = driver->getFPS();
 		if (lastFPS != fps) {
@@ -158,7 +146,7 @@ int entrypoint(int argc, char* argv[])
 		}
 	}
 	//shut down scene before device drop!
-	scene->shutDown();
+	scene.reset(nullptr);
 
 	mainShutDown();
 	

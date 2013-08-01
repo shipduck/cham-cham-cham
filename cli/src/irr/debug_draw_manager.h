@@ -163,9 +163,6 @@ public:
 	DebugDrawManager();
 	~DebugDrawManager();
 public:
-	void startUp(irr::IrrlichtDevice *dev);
-	void shutDown();
-
 	void updateAll(int ms);
 	void clear();
 	size_t size() const;
@@ -223,14 +220,8 @@ public:
 	void addCircle(const irr::core::vector2di &pos, float radius,
 		const irr::video::SColor &color,
 		int duration = 0);
-
-private:
-	irr::IrrlichtDevice *device_;
 };
 
 // 주력으로 사용할것을 전역변수로 걸어놔야 속편하다
 extern DebugDrawManager *g_debugDrawMgr;
-
-extern irr::gui::IGUIFont *g_normalFont12;
-extern irr::gui::IGUIFont *g_normalFont14;
 

@@ -10,37 +10,43 @@ using namespace core;
 using namespace video;
 using namespace scene;
 using namespace Loki;
+using namespace gui;
 
 template<typename TList> struct DrawFunctor;
 template<>
 struct DrawFunctor<NullType> {
-	static void draw(DebugDrawManager &mgr) { return; }
+	static void draw(DebugDrawer *drawer, const DebugDrawManager &mgr) { return; }
 };
 template<typename T, typename U>
 struct DrawFunctor< Typelist<T, U> > {
-	static void draw(DebugDrawManager &mgr)
+	static void draw(DebugDrawer *drawer, const DebugDrawManager &mgr)
 	{
 		const auto &immediateList = Field<T>(mgr).immediateDrawList;
 		const auto &durationList = Field<T>(mgr).durationDrawList;
 		if(immediateList.size() > 0) {
-			mgr.drawList(immediateList);
+			drawer->drawList(immediateList);
 		}
 		if(durationList.size() > 0) {
-			mgr.drawList(durationList);
+			drawer->drawList(durationList);
 		}
-		DrawFunctor<U>::draw(mgr);
+		DrawFunctor<U>::draw(drawer, mgr);
 	}
 };
 
-void DebugDrawer::startUp(irr::IrrlichtDevice *dev)
+DebugDrawer::DebugDrawer(irr::IrrlichtDevice *dev)
+	: device_(dev), batchSceneNode_(nullptr)
 {
-	this->device_ = dev;
-
 	if(dev != nullptr) {
 		ISceneManager* smgr = dev->getSceneManager();
 		batchSceneNode_ = new LineBatchSceneNode(smgr->getRootSceneNode(), smgr, 0);
 	}
 }
+
+DebugDrawer::~DebugDrawer()
+{
+	shutDown();
+}
+
 void DebugDrawer::shutDown()
 {
 	if(batchSceneNode_) {
@@ -72,7 +78,7 @@ LineBatchSceneNode *DebugDrawer::getBatchSceneNode(float thickness)
 	return sceneNode;
 }
 
-void DebugDrawer::drawAll()
+void DebugDrawer::drawAll(const DebugDrawManager &mgr)
 {
 	if(batchSceneNode_) {
 		batchSceneNode_->clear();
@@ -83,8 +89,7 @@ void DebugDrawer::drawAll()
 		it->second->clear();
 	}
 	
-	//TODO
-	//DebugDrawListFunctor<DrawAttributeElemList>::draw(*this);
+	DrawFunctor<DrawAttributeElemList>::draw(this, mgr);
 	
 	if(batchSceneNode_) {
 		batchSceneNode_->render();
@@ -126,9 +131,7 @@ void DebugDrawer::drawList(const DrawAttributeList_Cross2D &cmd)
 }
 void DebugDrawer::drawList(const DrawAttributeList_String2D &cmd)
 {
-	if(!g_normalFont14) {
-		return;
-	}
+	IGUIFont *font = getDebugFont();
 
 	auto driver = device_->getVideoDriver();
 	const irr::core::dimension2du& screenSize = driver->getScreenSize();
@@ -139,10 +142,10 @@ void DebugDrawer::drawList(const DrawAttributeList_String2D &cmd)
 	for(int i = 0 ; i < loopCount ; ++i) {
 		const auto &pos = cmd.posList[i];
 		const auto &color = cmd.colorList[i];
-		auto msg = cmd.msgList[i];
+		const auto &text = cmd.textList[i];
 		int x = pos.X;
 		int y = pos.Y;
-		g_normalFont14->draw(msg.data(), rect<s32>(x, y, w, h), color);
+		font->draw(text.data(), rect<s32>(x, y, w, h), color);
 	}
 }
 
@@ -237,7 +240,24 @@ void DebugDrawer::drawList(const DrawAttributeList_Sphere3D &cmd)
 }
 void DebugDrawer::drawList(const DrawAttributeList_String3D &cmd)
 {
-	//use scene node based
+	ISceneManager *smgr = device_->getSceneManager();
+	ICameraSceneNode *cam = smgr->getActiveCamera();
+	ISceneCollisionManager *coll = device_->getSceneManager()->getSceneCollisionManager();
+	IGUIFont *font = getDebugFont();
+
+	for(size_t i = 0 ; i < cmd.size() ; ++i) {
+		const auto &color = cmd.colorList[i];
+		const auto &pos = cmd.posList[i];
+		const float scale = cmd.scaleList[i];
+		const auto &text = cmd.textList[i];		
+
+		//text scene node의 렌더링을 적절히 재탕
+		//scene node를 쓰면 메모리 관리를 신경써야되는데
+		//low-level에서 렌더링하게 하면 좀 편하다
+		core::position2d<s32> p = coll->getScreenCoordinatesFrom3DPosition(pos, cam);
+		core::rect<s32> r(p, core::dimension2d<s32>(1,1));
+		font->draw(text.c_str(), r, color, true, true);
+	}
 }
 
 void DebugDrawer::drawList(const DrawAttributeList_Axis3D &cmd)
@@ -267,3 +287,15 @@ void DebugDrawer::drawList(const DrawAttributeList_Axis3D &cmd)
 		sceneNode->addLine(zero, z, blue);
 	}
 }
+
+irr::gui::IGUIFont *DebugDrawer::getDebugFont()
+{
+	IGUIFont *font = g_normalFont14;
+	if(font == nullptr) {
+		font = device_->getGUIEnvironment()->getBuiltInFont();
+	}
+	return font;
+}
+
+irr::gui::IGUIFont *g_normalFont12 = nullptr;
+irr::gui::IGUIFont *g_normalFont14 = nullptr;

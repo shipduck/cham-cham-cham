@@ -13,9 +13,6 @@ using namespace gui;
 DebugDrawManager debugDrawMgrLocal;
 DebugDrawManager *g_debugDrawMgr = &debugDrawMgrLocal;
 
-irr::gui::IGUIFont *g_normalFont12 = nullptr;
-irr::gui::IGUIFont *g_normalFont14 = nullptr;
-
 template<typename TList> struct DebugDrawListFunctor;
 template<>
 struct DebugDrawListFunctor<NullType> {
@@ -101,19 +98,9 @@ size_t DebugDrawManager::size() const
 }
 
 DebugDrawManager::DebugDrawManager()
-	: device_(nullptr)
 {
 }
 DebugDrawManager::~DebugDrawManager()
-{
-	clear();
-}
-
-void DebugDrawManager::startUp(irr::IrrlichtDevice *dev)
-{
-	device_ = dev;
-}
-void DebugDrawManager::shutDown()
 {
 	clear();
 }
@@ -208,25 +195,8 @@ void DebugDrawManager::addString(const irr::core::vector3df &pos,
 	drawList.posList.push_back(pos);
 	drawList.colorList.push_back(color);
 	drawList.scaleList.push_back(scale);
-	drawList.msgList.push_back(msg);
+	drawList.textList.push_back(msg);
 	drawList.depthEnableList.push_back(depthEnable);
-
-	//create scene node
-	ISceneManager* smgr = device_->getSceneManager();
-	ITextSceneNode *node = smgr->addTextSceneNode(g_normalFont14, msg.data(), color);
-	if(node) {
-		SMaterial material;
-		material.Wireframe = true;
-		material.Lighting = false;
-		material.BackfaceCulling = false;
-		material.FrontfaceCulling = false;
-		node->getMaterial(0) = material;
-	}
-	node->setScale(vector3df(scale, scale, scale));
-	node->setPosition(pos);
-	node->grab();
-	drawList.nodeList.push_back(node);
-
 	Field<ListType>(*this).runValidateOnce(duration);
 }
 
@@ -273,7 +243,7 @@ void DebugDrawManager::addString(const irr::core::vector2di &pos,
 	drawList.posList.push_back(pos);
 	drawList.colorList.push_back(color);
 	drawList.scaleList.push_back(scale);
-	drawList.msgList.push_back(msg);
+	drawList.textList.push_back(msg);
 
 	Field<ListType>(*this).runValidateOnce(duration);
 }

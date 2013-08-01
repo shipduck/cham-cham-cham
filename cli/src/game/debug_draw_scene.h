@@ -11,9 +11,6 @@ public:
 	DebugDrawScene(irr::IrrlichtDevice *dev);
 	virtual ~DebugDrawScene();
 
-	virtual void startUp();
-	virtual void shutDown();
-
 	virtual void update(int ms);
 };
 
