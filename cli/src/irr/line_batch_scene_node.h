@@ -1,6 +1,8 @@
 ﻿// Ŭnicode please 
 #pragma once
 
+#include "line_batch.h"
+
 class LineBatchSceneNode : public irr::scene::ISceneNode {
 public:
 	typedef irr::video::SColor color_type;
@@ -13,59 +15,32 @@ public:
 
 	virtual void OnRegisterSceneNode();
 	virtual void render();
-	virtual const irr::core::aabbox3d<irr::f32> &getBoundingBox() const { return Box; }
+	virtual const irr::core::aabbox3d<irr::f32> &getBoundingBox() const { return box_; }
 	virtual irr::u32 getMaterialCount() const { return 1; }
-	virtual irr::video::SMaterial &getMaterial(irr::u32 i) { return Material; }
+	virtual irr::video::SMaterial &getMaterial(irr::u32 i) { return material_; }
 
 	void addLine(const vector_3d_type &p1, const vector_3d_type &p2, const color_type &color);
 	void addLine(const vector_2d_type &p1, const vector_2d_type &p2, const color_type &color);
 
-	void setThickness(float val) { Material.Thickness = val; }
-	float getThickness() { return Material.Thickness; }
+	void setThickness(float val);
 
 	template<typename VertexListType, typename IndexListType>
 	void addIndexedVertices(const VertexListType &vertexList, const IndexListType &indexList)
 	{
-		static_assert(std::is_same<vertex_type, VertexListType::value_type>::value == 1, "");
-		static_assert(std::is_same<unsigned short, IndexListType::value_type>::value == 1, "");
-		addIndexedVertices(vertexList, indexList, &Vertex3DList, &Index3DList);
+		batch3D_.addIndexedVertices(vertexList, indexList);
 	}
 	template<typename VertexListType, typename IndexListType>
 	void addIndexedVertices2D(const VertexListType &vertexList, const IndexListType &indexList)
 	{
-		static_assert(std::is_same<vertex_type, VertexListType::value_type>::value == 1, "");
-		static_assert(std::is_same<unsigned short, IndexListType::value_type>::value == 1, "");
-		addIndexedVertices(vertexList, indexList, &Vertex2DList, &Index2DList);
+		batch2D_.addIndexedVertices(vertexList, indexList);
 	}
 	
 	void clear();
 
 private:
-	irr::core::aabbox3d<irr::f32> Box;
-	irr::video::SMaterial Material;
-
-	std::vector<vertex_type> Vertex3DList;
-	std::vector<unsigned short> Index3DList;
-
-	std::vector<vertex_type> Vertex2DList;
-	std::vector<unsigned short> Index2DList;
-
-private:
-	template<typename InputVertexListType, typename InputIndexListType>
-	void addIndexedVertices(const InputVertexListType &vertexList, 
-		const InputIndexListType &indexList,
-		std::vector<vertex_type> *targetVertexList,
-		std::vector<unsigned short> *targetIndexList)
-	{
-		static_assert(std::is_same<vertex_type, InputVertexListType::value_type>::value == 1, "");
-		static_assert(std::is_same<unsigned short, InputIndexListType::value_type>::value == 1, "");
-
-		int currVertexSize = targetVertexList->size();
-		std::copy(vertexList.begin(), vertexList.end(), std::back_inserter(*targetVertexList));
-		for(auto idx : indexList) {
-			auto nextIdx = idx + currVertexSize;
-			targetIndexList->push_back(nextIdx);
-		}
-	}
+	irr::core::aabbox3d<irr::f32> box_;
+	irr::video::SMaterial material_;
+	LineBatch batch3D_;
+	LineBatch batch2D_;
 };
 

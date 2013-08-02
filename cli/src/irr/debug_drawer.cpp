@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "debug_drawer.h"
 #include "wire_sphere_factory.h"
-#include "irr/line_batch_scene_node.h"
+#include "line_batch.h"
 
 using namespace std;
 using namespace irr;
@@ -33,70 +33,94 @@ struct DrawFunctor< Typelist<T, U> > {
 	}
 };
 
-DebugDrawer::DebugDrawer(irr::IrrlichtDevice *dev)
-	: device_(dev), batchSceneNode_(nullptr)
+DebugDrawer::DebugDrawer()
+	: defaultBatch3DWithoutDepth_(nullptr),
+	defaultBatch3DWithDepth_(nullptr),
+	defaultBatch2D_(nullptr),
+	device_(nullptr)
 {
-	if(dev != nullptr) {
-		ISceneManager* smgr = dev->getSceneManager();
-		batchSceneNode_ = new LineBatchSceneNode(smgr->getRootSceneNode(), smgr, 0);
-	}
+	batch3DMap_[1.0f] = new LineBatch(1.0f);
+	batch3DMap_[-1.0f] = new LineBatch(1.0f);
+	batch2DMap_[1.0f] = new LineBatch(1.0f);
+	
+	defaultBatch3DWithDepth_ = batch3DMap_[1.0f];
+	defaultBatch3DWithoutDepth_ = batch3DMap_[-1.0f];
+	defaultBatch2D_ = batch2DMap_[1.0f];	
 }
-
 DebugDrawer::~DebugDrawer()
 {
-	shutDown();
-}
-
-void DebugDrawer::shutDown()
-{
-	if(batchSceneNode_) {
-		batchSceneNode_->remove();
-		batchSceneNode_->drop();
-		batchSceneNode_ = nullptr;
+	for(auto x : batch3DMap_) {
+		delete(x.second);
 	}
-	auto it = batchSceneNodeMap_.begin();
-	auto endit = batchSceneNodeMap_.end();
-	for( ; it != endit ; ++it) {
-		it->second->remove();
-		it->second->drop();
+	for(auto x : batch2DMap_) {
+		delete(x.second);
 	}
 }
 
-LineBatchSceneNode *DebugDrawer::getBatchSceneNode(float thickness)
+LineBatch *DebugDrawer::getLineBatch3D(float thickness, bool depthEnable)
 {
 	if(thickness == 1.0f || abs(thickness - 1.0f) < FLT_EPSILON) {
-		return batchSceneNode_;
+		if(depthEnable) {
+			return defaultBatch3DWithDepth_;
+		} else {
+			return defaultBatch3DWithoutDepth_;
+		}
 	}
-	auto found = batchSceneNodeMap_.find(thickness);
-	if(found != batchSceneNodeMap_.end()) {
+
+	float key = thickness;
+	if(depthEnable == false) {
+		key = -key;
+	}
+
+	auto found = batch3DMap_.find(key);
+	if(found != batch3DMap_.end()) {
 		return found->second;
 	}
-	ISceneManager* smgr = device_->getSceneManager();
-	auto sceneNode = new LineBatchSceneNode(smgr->getRootSceneNode(), smgr, 0);
-	sceneNode->setThickness(thickness);
-	batchSceneNodeMap_[thickness] = sceneNode;
-	return sceneNode;
+	LineBatch *batch = new LineBatch(thickness);
+	batch3DMap_[key] = batch;
+	return batch;
 }
 
-void DebugDrawer::drawAll(const DebugDrawManager &mgr)
+LineBatch *DebugDrawer::getLineBatch2D(float thickness)
 {
-	if(batchSceneNode_) {
-		batchSceneNode_->clear();
+	if(thickness == 1.0f || abs(thickness - 1.0f) < FLT_EPSILON) {
+		return defaultBatch2D_;
 	}
-	auto it = batchSceneNodeMap_.begin();
-	const auto endit = batchSceneNodeMap_.end();
-	for( ; it != endit ; ++it) {
-		it->second->clear();
+
+	float key = thickness;
+
+	auto found = batch2DMap_.find(key);
+	if(found != batch2DMap_.end()) {
+		return found->second;
+	}
+	LineBatch *batch = new LineBatch(thickness);
+	batch2DMap_[key] = batch;
+	return batch;
+}
+
+void DebugDrawer::drawAll(irr::IrrlichtDevice *dev, const DebugDrawManager &mgr)
+{
+	device_ = dev;
+
+	for(auto it : batch3DMap_) {
+		it.second->clear();
+	}
+	for(auto it : batch2DMap_) {
+		it.second->clear();
 	}
 	
 	DrawFunctor<DrawAttributeElemList>::draw(this, mgr);
-	
-	if(batchSceneNode_) {
-		batchSceneNode_->render();
+
+	IVideoDriver *driver = dev->getVideoDriver();
+	for(auto it : batch3DMap_) {
+		if(it.first > 0) {
+			it.second->draw(driver, true);
+		} else {
+			it.second->draw(driver, false);
+		}
 	}
-	it = batchSceneNodeMap_.begin();
-	for( ; it != endit ; ++it) {
-		it->second->render();
+	for(auto it : batch2DMap_) {
+		it.second->draw2D(driver);
 	}
 }
 
@@ -106,8 +130,8 @@ void DebugDrawer::drawList(const DrawAttributeList_Line2D &cmd)
 	int loopCount = cmd.size();
 	for(int i = 0 ; i < loopCount ; ++i) {
 		float scale = cmd.scaleList[i];
-		auto sceneNode = getBatchSceneNode(scale);
-		sceneNode->addLine(cmd.p1List[i], cmd.p2List[i], cmd.colorList[i]);
+		auto batch = getLineBatch2D(scale);
+		batch->add(cmd.p1List[i], cmd.p2List[i], cmd.colorList[i]);
 	}
 }
 
@@ -124,14 +148,14 @@ void DebugDrawer::drawList(const DrawAttributeList_Cross2D &cmd)
 		vector2di right = pos + vector2di(size, 0);
 		vector2di left = pos - vector2di(size, 0);
 
-		auto sceneNode = getBatchSceneNode(1.0f);
-		sceneNode->addLine(top, bottom, color);
-		sceneNode->addLine(left, right, color);
+		auto batch = getLineBatch2D(1.0f);
+		batch->add(top, bottom, color);
+		batch->add(left, right, color);
 	}
 }
 void DebugDrawer::drawList(const DrawAttributeList_String2D &cmd)
 {
-	IGUIFont *font = getDebugFont();
+	IGUIFont *font = getDebugFont(device_);
 
 	auto driver = device_->getVideoDriver();
 	const irr::core::dimension2du& screenSize = driver->getScreenSize();
@@ -190,8 +214,8 @@ void DebugDrawer::drawList(const DrawAttributeList_Circle2D &cmd)
 			vert.Pos += vector3df(static_cast<float>(pos.X), static_cast<float>(pos.Y), 0.0f);
 		}
 
-		auto sceneNode = getBatchSceneNode(1.0f);
-		sceneNode->addIndexedVertices2D(vertexList, baseIndexList);
+		auto batch = getLineBatch2D(1.0f);
+		batch->addIndexedVertices(vertexList, baseIndexList);
 	}
 }
 
@@ -200,8 +224,9 @@ void DebugDrawer::drawList(const DrawAttributeList_Line3D &cmd)
 	int loopCount = cmd.size();
 	for(int i = 0 ; i < loopCount ; ++i) {
 		float scale = cmd.scaleList[i];
-		auto sceneNode = getBatchSceneNode(scale);
-		sceneNode->addLine(cmd.p1List[i], cmd.p2List[i], cmd.colorList[i]);
+		bool depthEnable = cmd.depthEnableList[i];
+		auto batch = getLineBatch3D(scale, depthEnable);
+		batch->add(cmd.p1List[i], cmd.p2List[i], cmd.colorList[i]);
 	}
 }
 
@@ -226,6 +251,7 @@ void DebugDrawer::drawList(const DrawAttributeList_Sphere3D &cmd)
 		const auto &color = cmd.colorList[i];
 		const auto &pos = cmd.posList[i];
 		auto scale = cmd.scaleList[i];
+		bool depthEnable = cmd.depthEnableList[i];
 
 		std::copy(baseVertexList.begin(), baseVertexList.end(), vertexList.begin());
 		for(auto &vert : vertexList) {
@@ -234,8 +260,8 @@ void DebugDrawer::drawList(const DrawAttributeList_Sphere3D &cmd)
 			vert.Pos += pos;
 		}
 
-		auto sceneNode = getBatchSceneNode(1.0f);
-		sceneNode->addIndexedVertices(vertexList, baseIndexList);
+		auto batch = getLineBatch3D(1.0f, depthEnable);
+		batch->addIndexedVertices(vertexList, baseIndexList);
 	}
 }
 void DebugDrawer::drawList(const DrawAttributeList_String3D &cmd)
@@ -243,7 +269,7 @@ void DebugDrawer::drawList(const DrawAttributeList_String3D &cmd)
 	ISceneManager *smgr = device_->getSceneManager();
 	ICameraSceneNode *cam = smgr->getActiveCamera();
 	ISceneCollisionManager *coll = device_->getSceneManager()->getSceneCollisionManager();
-	IGUIFont *font = getDebugFont();
+	IGUIFont *font = getDebugFont(device_);
 
 	for(size_t i = 0 ; i < cmd.size() ; ++i) {
 		const auto &color = cmd.colorList[i];
@@ -270,6 +296,7 @@ void DebugDrawer::drawList(const DrawAttributeList_Axis3D &cmd)
 	for(int i = 0 ; i < loopCount ; ++i) {
 		auto size = cmd.scaleList[i];
 		auto xf = cmd.xfList[i];
+		bool depthEnable = cmd.depthEnableList[i];
 
 		vector3df zero(0, 0, 0);
 		vector3df x(size, 0, 0);
@@ -281,18 +308,18 @@ void DebugDrawer::drawList(const DrawAttributeList_Axis3D &cmd)
 		xf.transformVect(y);
 		xf.transformVect(z);
 
-		auto sceneNode = getBatchSceneNode(1.0f);
-		sceneNode->addLine(zero, x, red);
-		sceneNode->addLine(zero, y, green);
-		sceneNode->addLine(zero, z, blue);
+		auto batch = getLineBatch3D(1.0f, depthEnable);
+		batch->add(zero, x, red);
+		batch->add(zero, y, green);
+		batch->add(zero, z, blue);
 	}
 }
 
-irr::gui::IGUIFont *DebugDrawer::getDebugFont()
+irr::gui::IGUIFont *DebugDrawer::getDebugFont(irr::IrrlichtDevice *dev)
 {
 	IGUIFont *font = g_normalFont14;
 	if(font == nullptr) {
-		font = device_->getGUIEnvironment()->getBuiltInFont();
+		font = dev->getGUIEnvironment()->getBuiltInFont();
 	}
 	return font;
 }

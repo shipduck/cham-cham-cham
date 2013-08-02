@@ -2,7 +2,6 @@
 #pragma once
 
 class HMDStereoRender;
-class DebugDrawer;
 
 class Scene {
 public:
@@ -25,5 +24,4 @@ private:
 
 private:
 	std::unique_ptr<HMDStereoRender> renderer_;
-	std::unique_ptr<DebugDrawer> debugDrawer_;
 };

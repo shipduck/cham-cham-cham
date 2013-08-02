@@ -93,6 +93,8 @@ int entrypoint(int argc, char* argv[])
 		g_audioMgr->addBGM("bg", bgm);
 	}
 
+	DebugDrawer debugDrawer;
+
 	int lastFPS = -1;
 	// 첫번째 프레임 가동에서 시간이 오래 걸릴수 있으니까
 	// 씬 변환이후 첫번쨰 프레임은 dt=0으로 생각하고 돌린다
@@ -123,8 +125,10 @@ int entrypoint(int argc, char* argv[])
 		{
 			driver->beginScene(true, true, video::SColor(255, 10, 10, 10));
 			scene->draw();
-
-			guienv->drawAll();	
+			
+			// debug render. 실제 렌더링 이후에 그려야됨
+			debugDrawer.drawAll(device, *g_debugDrawMgr);
+			guienv->drawAll();
 			g_console->RenderConsole(guienv, driver, frameDeltaTime);
 
 			driver->endScene();	//render end

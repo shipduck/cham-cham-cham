@@ -1,7 +1,6 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
 #include "scene.h"
-#include "irr/debug_drawer.h"
 #include "irr/debug_draw_manager.h"
 
 #include "irr/HMDStereoRender.h"
@@ -14,8 +13,7 @@ using namespace gui;
 
 Scene::Scene(irr::IrrlichtDevice *dev)
 	: device_(dev), 
-	rootScene_(nullptr),
-	debugDrawer_(new DebugDrawer(dev))
+	rootScene_(nullptr)
 {
 	auto smgr = device_->getSceneManager();
 	rootScene_ = smgr->addEmptySceneNode();
@@ -75,7 +73,4 @@ void Scene::draw()
 		drawAllNormal(smgr);
 	}
 	//smgr->drawAll();
-
-	// debug render. 실제 렌더링 이후에 그려야됨
-	debugDrawer_->drawAll(*g_debugDrawMgr);
 }
