@@ -32,8 +32,6 @@ struct HMDDescriptor {
 
 	bool operator==(const HMDDescriptor &o) const;
 	bool operator!=(const HMDDescriptor &o) const { return !(*this == o); }
-
-	static const HMDDescriptor &invalid();
 };
 
 struct HMDDescriptorBind {

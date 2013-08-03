@@ -44,7 +44,7 @@ void Lib::startUp(irr::IrrlichtDevice *dev)
 
 	//preload font
 	const char *fontList[] = {
-		"res/font_14.xml",
+		//"res/font_14.xml",
 		//"res/font_12.xml",	//12는 작아서 안씀
 		"res/console-14.xml",
 	};
@@ -53,11 +53,6 @@ void Lib::startUp(irr::IrrlichtDevice *dev)
 		const char *fontName = fontList[i];
 		guienv->getFont(fontName);
 	}
-
-	//디버깅 렌더링등의 용도로 주로 사용할 폰트
-	//한글까지 지원해서 좀 크다
-	g_normalFont14 = guienv->getFont("res/font_14.xml");
-	//g_normalFont12 = guienv->getFont("res/font_12.xml");
 
 	console = g_console;
 	setUpConsole(device);

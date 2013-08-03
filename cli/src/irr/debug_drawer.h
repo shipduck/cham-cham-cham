@@ -46,6 +46,8 @@ private:
 	irr::IrrlichtDevice *device_;
 };
 
-extern irr::gui::IGUIFont *g_normalFont12;
-extern irr::gui::IGUIFont *g_normalFont14;
+//한글까지 지원하는 폰트
+//로딩+return이 결합되어있어서 폰트 사용하기전 로딩단계에서 미리 로딩하는게 좋을거다
+irr::gui::IGUIFont *getNormalFont12();
+irr::gui::IGUIFont *getNormalFont14();
 

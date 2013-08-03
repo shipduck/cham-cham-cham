@@ -3,6 +3,7 @@
 #include "debug_drawer.h"
 #include "wire_sphere_factory.h"
 #include "line_batch.h"
+#include "base/lib.h"
 
 using namespace std;
 using namespace irr;
@@ -317,12 +318,29 @@ void DebugDrawer::drawList(const DrawAttributeList_Axis3D &cmd)
 
 irr::gui::IGUIFont *DebugDrawer::getDebugFont(irr::IrrlichtDevice *dev)
 {
-	IGUIFont *font = g_normalFont14;
+	IGUIFont *font = dev->getGUIEnvironment()->getFont("res/console-14.xml");
 	if(font == nullptr) {
 		font = dev->getGUIEnvironment()->getBuiltInFont();
 	}
 	return font;
 }
 
-irr::gui::IGUIFont *g_normalFont12 = nullptr;
-irr::gui::IGUIFont *g_normalFont14 = nullptr;
+irr::gui::IGUIFont *normalFont12 = nullptr;
+irr::gui::IGUIFont *normalFont14 = nullptr;
+
+irr::gui::IGUIFont *getNormalFont12()
+{
+	if(normalFont12 == nullptr) {
+		SR_ASSERT(Lib::guienv != nullptr);
+		normalFont12 = Lib::guienv->getFont("res/font_12.xml");
+	}
+	return normalFont12;
+}
+irr::gui::IGUIFont *getNormalFont14()
+{
+	if(normalFont14 == nullptr) {
+		SR_ASSERT(Lib::guienv != nullptr);
+		normalFont14 = Lib::guienv->getFont("res/font_14.xml");
+	}
+	return normalFont14;
+}

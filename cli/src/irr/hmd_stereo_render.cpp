@@ -86,7 +86,7 @@ HMDDescriptor HMDDescriptorBind::convert() const
 	return retval;
 }
 
-const HMDDescriptor &HMDDescriptor::invalid()
+const HMDDescriptor &getInvalidDescriptor()
 {
 	static bool init = false;
 	static HMDDescriptor ctx;
@@ -96,35 +96,10 @@ const HMDDescriptor &HMDDescriptor::invalid()
 	}
 	return ctx;
 }
+
 bool HMDDescriptor::operator==(const HMDDescriptor &o) const
 {
-	if(hResolution != o.hResolution) {
-		return false;
-	}
-	if(vResolution != o.vResolution) {
-		return false;
-	}
-	if(hScreenSize != o.hScreenSize) {
-		return false;
-	}
-	if(vScreenSize != o.vScreenSize) {
-		return false;
-	}
-	if(interpupillaryDistance != o.interpupillaryDistance) {
-		return false;
-	}
-	if(lensSeparationDistance != o.lensSeparationDistance) {
-		return false;
-	}
-	if(eyeToScreenDistance != o.eyeToScreenDistance) {
-		return false;
-	}
-	for(int i = 0 ; i < 4 ; ++i) {
-		if(distortionK[i] != o.distortionK[i]) {
-			return false;
-		}
-	}
-	return true;
+	return (memcmp(this, &o, sizeof(this)) == 0);
 }
 
 //OculusDistorsionCallback as singleton
@@ -143,7 +118,7 @@ E_MATERIAL_TYPE getOculusDistorsionCallbackMaterial(irr::video::IVideoDriver *dr
 HMDStereoRender::HMDStereoRender(irr::IrrlichtDevice *device, const HMDDescriptor &HMD, f32 worldScale)
 	: _worldScale(worldScale),
 	_renderTexture(nullptr),
-	_hmd(HMDDescriptor::invalid())
+	_hmd(getInvalidDescriptor())
 {
 	_smgr = device->getSceneManager();
 	_driver = device->getVideoDriver();
