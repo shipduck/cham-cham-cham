@@ -4,7 +4,7 @@
 #include "base/lib.h"
 #include "irr/debug_draw_manager.h"
 
-#include "irr/HMDStereoRender.h"
+#include "irr/hmd_stereo_render.h"
 #include "irr/hmd_event_receiver.h"
 
 using namespace irr;

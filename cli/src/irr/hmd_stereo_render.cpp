@@ -15,7 +15,7 @@ BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CON
 OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #include "stdafx.h"
-#include "HMDStereoRender.h"
+#include "hmd_stereo_render.h"
 
 #include <iostream>
 #include <cassert>
