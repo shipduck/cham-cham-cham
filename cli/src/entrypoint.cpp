@@ -49,7 +49,7 @@ int entrypoint(int argc, char* argv[])
 
 	//simple scene framework
 	SequenceFactory seqFactory;
-	std::unique_ptr<Sequence> sequence = seqFactory.create(kSequenceGame);
+	std::unique_ptr<Sequence> sequence = seqFactory.create(kSequenceTitle);
 
 	DebugDrawer debugDrawer;
 

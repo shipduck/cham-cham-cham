@@ -44,6 +44,10 @@ void LineBatch::add(const vector_2d_type &p1, const vector_2d_type &p2, const co
 
 void LineBatch::draw(irr::video::IVideoDriver *driver, bool depthEnable)
 {
+	if(indexList.size() == 0) {
+		return;
+	}
+
 	SMaterial material;
 	material.Wireframe = false;
 	material.Lighting = false;
@@ -67,6 +71,10 @@ void LineBatch::draw(irr::video::IVideoDriver *driver, bool depthEnable)
 
 void LineBatch::draw2D(irr::video::IVideoDriver *driver)
 {
+	if(indexList.size() == 0) {
+		return;
+	}
+
 	SMaterial material;
 	material.Wireframe = false;
 	material.Lighting = false;
