@@ -6,6 +6,7 @@
 #include "console/console_event_receiver.h"
 #include "irr/debug_drawer.h"
 #include "irr/head_tracker.h"
+#include "irr/hmd_stereo_render.h"
 #include "irr/hmd_event_receiver.h"
 #include "util/audio_manager.h"
 #include "util/event_receiver_manager.h"
@@ -35,6 +36,17 @@ IrrConsole *Lib::console = nullptr;
 // hmd 이벤트는 포인터만 갖고있으면 된다
 HMDEventReceiver *Lib::hmdEventReceiver = nullptr;
 
+std::unique_ptr<HMDDescriptorBind> hmdDescriptorBind;
+HMDStereoRender *Lib::stereoRenderer = nullptr;
+
+void initConsoleFunction()
+{
+	CVarUtils::CreateCVar( "driver_info", console::driverInfo, "Display Irrlicht Driver Info" );	
+}
+void initConsoleVar()
+{
+}
+
 void Lib::startUp(irr::IrrlichtDevice *dev)
 {
 	device = dev;
@@ -56,8 +68,8 @@ void Lib::startUp(irr::IrrlichtDevice *dev)
 
 	console = g_console;
 	setUpConsole(device);
-	//add console function
-	CVarUtils::CreateCVar( "driver_info", console::driverInfo, "Display Irrlicht Driver Info" );	
+	initConsoleVar();
+	initConsoleFunction();
 	
 	audio->startUp();
 
@@ -76,13 +88,25 @@ void Lib::startUp(irr::IrrlichtDevice *dev)
 
 	hmdEventReceiver = new HMDEventReceiver();
 	eventReceiver->addReceiver(hmdEventReceiver, 0);
+
+	//set oculus renderer
+	hmdDescriptorBind.reset(new HMDDescriptorBind());
+	HMDDescriptor descriptor = hmdDescriptorBind->convert();
+	stereoRenderer = new HMDStereoRender(device, descriptor, 10);
 }
 
 void Lib::shutDown()
 {
+	delete(stereoRenderer);
 	audio->shutDown();
 	headTracker->shutDown();
 	eventReceiver->shutDown();
+}
+
+void Lib::updateStereoRenderer()
+{
+	HMDDescriptor descriptor = hmdDescriptorBind->convert();
+	stereoRenderer->setHMD(descriptor);
 }
 
 void Lib::printf(const char *fmt, ...)

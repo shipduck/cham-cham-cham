@@ -6,6 +6,7 @@ class AudioManager;
 class HeadTracker;
 class EventReceiverManager;
 class HMDEventReceiver;
+class HMDStereoRender;
 
 /*
 전역변수로 존재하는 대부분의 항목에 직접 접근하는것 괜찮겟지만
@@ -40,4 +41,8 @@ public:
 	//엔진에 붙여놓고 사용하는거
 	static EventReceiverManager *eventReceiver;
 	static HMDEventReceiver *hmdEventReceiver;
+
+	// oculus stereo renderer는 시스템상에 단 1개만 존재해야한다
+	static HMDStereoRender *stereoRenderer;
+	static void updateStereoRenderer();
 };

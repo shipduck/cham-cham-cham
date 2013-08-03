@@ -1,8 +1,6 @@
 ﻿// Ŭnicode please 
 #pragma once
 
-class HMDStereoRender;
-
 class Sequence {
 public:
 	Sequence();
@@ -13,8 +11,5 @@ public:
 
 private:
 	void drawAllNormal(irr::scene::ISceneManager *smgr);
-	void drawAllStereo(irr::scene::ISceneManager *smgr);
-
-private:
-	std::unique_ptr<HMDStereoRender> renderer_;
+	void drawAllStereo(irr::scene::ISceneManager *smgr);	
 };

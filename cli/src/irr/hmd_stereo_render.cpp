@@ -99,7 +99,34 @@ const HMDDescriptor &getInvalidDescriptor()
 
 bool HMDDescriptor::operator==(const HMDDescriptor &o) const
 {
-	return (memcmp(this, &o, sizeof(this)) == 0);
+	if(hResolution != o.hResolution) {
+		return false;
+	}
+	if(vResolution != o.vResolution) {
+		return false;
+	}
+	if(hScreenSize != o.hScreenSize) {
+		return false;
+	}
+	if(vScreenSize != o.vScreenSize) {
+		return false;
+	}
+	if(interpupillaryDistance != o.interpupillaryDistance) {
+		return false;
+	}
+	if(lensSeparationDistance != o.lensSeparationDistance) {
+		return false;
+	}
+	if(eyeToScreenDistance != o.eyeToScreenDistance) {
+		return false;
+	}
+	for(int i = 0 ; i < 4 ; ++i) {
+		if(distortionK[i] != o.distortionK[i]) {
+			return false;
+		}
+	}
+	return true;
+	//return (memcmp(this, &o, sizeof(this)) == 0);
 }
 
 //OculusDistorsionCallback as singleton
