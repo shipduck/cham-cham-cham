@@ -51,3 +51,6 @@ cli/ext/CVars/CVarVersion.h
 .cvar_history
 .console_settings
 cvars.xml
+
+# resource
+cli/res
