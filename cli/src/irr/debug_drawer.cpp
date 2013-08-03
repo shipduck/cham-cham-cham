@@ -37,8 +37,7 @@ struct DrawFunctor< Typelist<T, U> > {
 DebugDrawer::DebugDrawer()
 	: defaultBatch3DWithoutDepth_(nullptr),
 	defaultBatch3DWithDepth_(nullptr),
-	defaultBatch2D_(nullptr),
-	device_(nullptr)
+	defaultBatch2D_(nullptr)
 {
 	batch3DMap_[1.0f] = new LineBatch(1.0f);
 	batch3DMap_[-1.0f] = new LineBatch(1.0f);
@@ -99,10 +98,8 @@ LineBatch *DebugDrawer::getLineBatch2D(float thickness)
 	return batch;
 }
 
-void DebugDrawer::drawAll(irr::IrrlichtDevice *dev, const DebugDrawManager &mgr)
+void DebugDrawer::drawAll(const DebugDrawManager &mgr)
 {
-	device_ = dev;
-
 	for(auto it : batch3DMap_) {
 		it.second->clear();
 	}
@@ -112,7 +109,7 @@ void DebugDrawer::drawAll(irr::IrrlichtDevice *dev, const DebugDrawManager &mgr)
 	
 	DrawFunctor<DrawAttributeElemList>::draw(this, mgr);
 
-	IVideoDriver *driver = dev->getVideoDriver();
+	IVideoDriver *driver = Lib::driver;
 	for(auto it : batch3DMap_) {
 		if(it.first > 0) {
 			it.second->draw(driver, true);
@@ -156,10 +153,8 @@ void DebugDrawer::drawList(const DrawAttributeList_Cross2D &cmd)
 }
 void DebugDrawer::drawList(const DrawAttributeList_String2D &cmd)
 {
-	IGUIFont *font = getDebugFont(device_);
-
-	auto driver = device_->getVideoDriver();
-	const irr::core::dimension2du& screenSize = driver->getScreenSize();
+	IGUIFont *font = getDebugFont();
+	const irr::core::dimension2du& screenSize = Lib::driver->getScreenSize();
 	int w = screenSize.Width;
 	int h = screenSize.Height;
 
@@ -267,10 +262,10 @@ void DebugDrawer::drawList(const DrawAttributeList_Sphere3D &cmd)
 }
 void DebugDrawer::drawList(const DrawAttributeList_String3D &cmd)
 {
-	ISceneManager *smgr = device_->getSceneManager();
+	ISceneManager *smgr = Lib::device->getSceneManager();
 	ICameraSceneNode *cam = smgr->getActiveCamera();
-	ISceneCollisionManager *coll = device_->getSceneManager()->getSceneCollisionManager();
-	IGUIFont *font = getDebugFont(device_);
+	ISceneCollisionManager *coll = smgr->getSceneCollisionManager();
+	IGUIFont *font = getDebugFont();
 
 	for(size_t i = 0 ; i < cmd.size() ; ++i) {
 		const auto &color = cmd.colorList[i];
@@ -316,31 +311,45 @@ void DebugDrawer::drawList(const DrawAttributeList_Axis3D &cmd)
 	}
 }
 
-irr::gui::IGUIFont *DebugDrawer::getDebugFont(irr::IrrlichtDevice *dev)
+irr::gui::IGUIFont *normalFont12 = nullptr;
+irr::gui::IGUIFont *normalFont14 = nullptr;
+irr::gui::IGUIFont *debugFont = nullptr;
+
+irr::gui::IGUIFont *getFont(const char *fontName)
 {
-	IGUIFont *font = dev->getGUIEnvironment()->getFont("res/console-14.xml");
+	SR_ASSERT(Lib::guienv != nullptr);
+	IGUIFont *font = Lib::guienv->getFont(fontName);
 	if(font == nullptr) {
-		font = dev->getGUIEnvironment()->getBuiltInFont();
+		Lib::warning("Cannot find Font : %s, use Built-in font", fontName);
+		font = Lib::guienv->getBuiltInFont();
 	}
 	return font;
 }
 
-irr::gui::IGUIFont *normalFont12 = nullptr;
-irr::gui::IGUIFont *normalFont14 = nullptr;
+
+irr::gui::IGUIFont *DebugDrawer::getDebugFont()
+{
+	if(debugFont == nullptr) {
+		const char *fontName = "res/font/console-14.xml";
+		debugFont = getFont(fontName);
+	}
+	return debugFont;
+}
 
 irr::gui::IGUIFont *getNormalFont12()
 {
 	if(normalFont12 == nullptr) {
-		SR_ASSERT(Lib::guienv != nullptr);
-		normalFont12 = Lib::guienv->getFont("res/font_12.xml");
+		const char *fontName = "res/font/font_12.xml";
+		normalFont12 = getFont(fontName);
 	}
 	return normalFont12;
 }
+
 irr::gui::IGUIFont *getNormalFont14()
 {
 	if(normalFont14 == nullptr) {
-		SR_ASSERT(Lib::guienv != nullptr);
-		normalFont14 = Lib::guienv->getFont("res/font_14.xml");
+		const char *fontName = "res/font/font_14.xml";
+		normalFont14 = getFont(fontName);
 	}
 	return normalFont14;
 }

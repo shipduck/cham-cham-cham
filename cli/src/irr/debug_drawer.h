@@ -11,7 +11,7 @@ public:
 	~DebugDrawer();
 
 	void shutDown();
-	void drawAll(irr::IrrlichtDevice *dev, const DebugDrawManager &mgr);
+	void drawAll(const DebugDrawManager &mgr);
 
 public:
 	void drawList(const DrawAttributeList_Line2D &cmd);
@@ -25,7 +25,7 @@ public:
 	void drawList(const DrawAttributeList_String3D &cmd);
 
 private:
-	irr::gui::IGUIFont *getDebugFont(irr::IrrlichtDevice *dev);
+	irr::gui::IGUIFont *getDebugFont();
 
 private:
 	// thickness != 1 인 경우도 렌더링 로직은 동일하게 처리하기 위해서 도입
@@ -42,8 +42,6 @@ private:
 	LineBatch *defaultBatch3DWithDepth_;
 	LineBatch *defaultBatch3DWithoutDepth_;
 	LineBatch *defaultBatch2D_;
-
-	irr::IrrlichtDevice *device_;
 };
 
 //한글까지 지원하는 폰트

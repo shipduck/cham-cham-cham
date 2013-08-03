@@ -55,22 +55,15 @@ void Lib::startUp(irr::IrrlichtDevice *dev)
 	guienv = device->getGUIEnvironment();
 	smgr = device->getSceneManager();
 
-	//preload font
-	const char *fontList[] = {
-		//"res/font_14.xml",
-		//"res/font_12.xml",	//12는 작아서 안씀
-		"res/console-14.xml",
-	};
-	const int fontListSize = getArraySize(fontList);
-	for(int i = 0 ; i < fontListSize ; ++i) {
-		const char *fontName = fontList[i];
-		guienv->getFont(fontName);
-	}
-
+	//모든 초기화 중에서 콘솔이 가장 우선
 	console = g_console;
 	setUpConsole(device);
 	initConsoleVar();
 	initConsoleFunction();
+
+	// 12/14 폰트는 얻는 함수를 따로 만들어놧었다. 그거 쓰면 코드 중복을 제거 가능
+	getNormalFont12();
+	getNormalFont14();
 	
 	audio->startUp();
 

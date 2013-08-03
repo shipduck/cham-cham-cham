@@ -49,7 +49,8 @@ int entrypoint(int argc, char* argv[])
 
 	//simple scene framework
 	SequenceFactory seqFactory;
-	std::unique_ptr<Sequence> sequence = seqFactory.create(kSequenceTitle);
+	//std::unique_ptr<Sequence> sequence = seqFactory.create(kSequenceTitle);
+	std::unique_ptr<Sequence> sequence = seqFactory.create(kSequenceDebugDraw);
 
 	DebugDrawer debugDrawer;
 
@@ -85,7 +86,7 @@ int entrypoint(int argc, char* argv[])
 			sequence->draw();
 			
 			// debug render. 실제 렌더링 이후에 그려야됨
-			debugDrawer.drawAll(device, *g_debugDrawMgr);
+			debugDrawer.drawAll(*g_debugDrawMgr);
 			guienv->drawAll();
 			g_console->RenderConsole(guienv, driver, frameDeltaTime);
 

@@ -1428,7 +1428,7 @@ void setUpConsole(irr::IrrlichtDevice *device)
 {
 	//this is how you alter some of the config params
 	ConsoleConfig config;
-	config.fontName = "res/console-14.xml";
+	config.fontName = "res/font/console-14.xml";
 	config.dimensionRatios.X = 1.0f;
 	config.dimensionRatios.Y = 0.8f;
 
