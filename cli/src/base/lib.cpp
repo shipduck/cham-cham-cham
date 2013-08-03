@@ -61,15 +61,8 @@ void Lib::startUp(irr::IrrlichtDevice *dev)
 	initConsoleVar();
 	initConsoleFunction();
 
-	// 12/14 폰트는 얻는 함수를 따로 만들어놧었다. 그거 쓰면 코드 중복을 제거 가능
-	getNormalFont12();
-	getNormalFont14();
-	
-	audio->startUp();
-
-	//Oculus Rift Head Tracking
-	headTracker->startUp();
-
+	//이벤트 시스템을 엔진에 장착
+	//이것이 제대로 달라붙어야 일리히트에서 발생한 로그 이벤트가 콘솔에 뜬다
 	eventReceiver->startUp(device);
 	auto joystickDev = eventReceiver->getJoystickDev();
 	joystickDev.showInfo();
@@ -80,13 +73,25 @@ void Lib::startUp(irr::IrrlichtDevice *dev)
 	// 이벤트 잡는게 콘솔 이벤트 잡는거는 필수요소
 	eventReceiver->addReceiver(new ConsoleEventReceiver(), 0);
 
+	// f2로 hmd모드 전환하는거. 나중에 분리 가능
 	hmdEventReceiver = new HMDEventReceiver();
 	eventReceiver->addReceiver(hmdEventReceiver, 0);
+
+	//Oculus Rift Head Tracking
+	headTracker->startUp();
 
 	//set oculus renderer
 	hmdDescriptorBind.reset(new HMDDescriptorBind());
 	HMDDescriptor descriptor = hmdDescriptorBind->convert();
 	stereoRenderer = new HMDStereoRender(device, descriptor, 10);
+
+	// 12/14 폰트는 얻는 함수를 따로 만들어놧었다. 그거 쓰면 코드 중복을 제거 가능
+	// 로딩이 느리니까 일단 꺼놓고 필요해지면 살리기
+	//getNormalFont12();
+	//getNormalFont14();
+
+	//사운든는 우선순위 가장 낮음
+	audio->startUp();
 }
 
 void Lib::shutDown()
