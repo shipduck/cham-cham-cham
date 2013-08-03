@@ -2,9 +2,6 @@
 #include "stdafx.h"
 #include "audio_manager.h"
 
-AudioManager audioManagerLocal;
-AudioManager *g_audioMgr = &audioManagerLocal;
-
 AudioManager::AudioManager()
 	: supportAL_(false)
 {

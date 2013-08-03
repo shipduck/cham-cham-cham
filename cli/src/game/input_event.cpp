@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "input_event.h"
 #include "key_mapping.h"
+#include "base/lib.h"
 
 using namespace irr;
 
@@ -84,7 +85,7 @@ void GameEventReceiver::onEvent(const irr::SEvent::SJoystickEvent &evt)
 	MoveEvent &moveEvent = joystickMoveEvent_;
 	LookEvent &lookEvent = joystickLookEvent_;
 
-	const JoystickDevice &joystickDev = g_eventReceiverMgr->getJoystickDev();
+	const JoystickDevice &joystickDev = Lib::eventReceiver->getJoystickDev();
 	const SJoystickInfo &joystickInfo = joystickDev.getJoystickInfo()[0];
 
 	float XMovement = joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_X>();

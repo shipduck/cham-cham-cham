@@ -37,5 +37,3 @@ private:
 
 	SHeadTrackingEvent lastEvt_;
 };
-
-extern HeadTracker *g_headTracker;

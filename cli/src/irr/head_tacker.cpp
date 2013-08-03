@@ -4,9 +4,6 @@
 
 using namespace OVR;
 
-HeadTracker headTrackerLocal;
-HeadTracker *g_headTracker = &headTrackerLocal;
-
 const SHeadTrackingEvent &SHeadTrackingEvent::FailEvent()
 {
 	static bool init = false;

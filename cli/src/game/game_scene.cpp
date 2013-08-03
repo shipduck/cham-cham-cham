@@ -5,6 +5,7 @@
 #include "irr/debug_draw_manager.h"
 #include "util/event_receiver_manager.h"
 #include "input_event.h"
+#include "base/lib.h"
 
 using namespace irr;
 using namespace video;
@@ -70,7 +71,7 @@ GameScene::GameScene(irr::IrrlichtDevice *dev)
 	
 	// event receiver 등록
 	// TODO 이벤트 리시버 제거기능이 없으면 씬 교체시에 문제 발생함
-	eventReceiver_ = static_cast<GameEventReceiver*>(g_eventReceiverMgr->addReceiver(new GameEventReceiver(), 0));
+	eventReceiver_ = static_cast<GameEventReceiver*>(Lib::eventReceiver->addReceiver(new GameEventReceiver(), 0));
 }
 
 GameScene::~GameScene()

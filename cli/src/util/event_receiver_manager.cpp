@@ -5,9 +5,6 @@
 using namespace irr;
 using namespace scene;
 
-EventReceiverManager g_eventReceiverMgrLocal;
-EventReceiverManager *g_eventReceiverMgr = &g_eventReceiverMgrLocal;
-
 EventReceiverManager::EventReceiverManager()
 {
 }

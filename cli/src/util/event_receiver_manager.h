@@ -5,8 +5,6 @@ class JoystickDevice;
 class EventReceiverManager;
 struct SHeadTrackingEvent;
 
-extern EventReceiverManager *g_eventReceiverMgr;
-
 // 게임 내부에서 사용하는 Event receiver이다
 // HMD로 얻은 값까지 동일한 구조로 처리하기 위해서 도입함
 class ICustomEventReceiver : public irr::IEventReceiver {

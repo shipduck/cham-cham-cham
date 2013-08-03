@@ -6,6 +6,7 @@
 #include "irr/debug_draw_manager.h"
 #include "irr/head_tracker.h"
 #include "irr/hmd_event_receiver.h"
+#include "base/lib.h"
 
 // scene
 #include "game/debug_draw_scene.h"
@@ -26,38 +27,6 @@ using namespace gui;
 int SCREEN_WIDTH = 1280;
 int SCREEN_HEIGHT = 800;
 
-int mainStartUp(irr::IrrlichtDevice *device)
-{
-	IVideoDriver* driver = device->getVideoDriver();
-	IGUIEnvironment* guienv = device->getGUIEnvironment();
-	ISceneManager* smgr = device->getSceneManager();
-
-	g_eventReceiverMgr->startUp(device);
-
-	auto joystickDev = g_eventReceiverMgr->getJoystickDev();
-	joystickDev.showInfo();
-	
-	//initialize the console
-	//g_normalFont12 = guienv->getFont("res/font_12.xml");
-	g_normalFont14 = guienv->getFont("res/font_14.xml");
-	setUpConsole(device);
-
-	g_audioMgr->startUp();
-
-	//Oculus Rift Head Tracking
-	g_headTracker->startUp();
-
-	return 0;
-}
-
-int mainShutDown()
-{
-	g_eventReceiverMgr->shutDown();
-	g_audioMgr->shutDown();
-	g_headTracker->shutDown();
-	return 0;
-}
-
 int entrypoint(int argc, char* argv[])
 {
 	bool fullscreen = false;
@@ -67,14 +36,12 @@ int entrypoint(int argc, char* argv[])
 	// Check fullscreen
 	for (int i=1;i<argc;i++) fullscreen |= !strcmp("-f", argv[i]);
 	//fullscreen = true;
-	
-	g_eventReceiverMgr->addReceiver(new ConsoleEventReceiver(), 0);
-	g_hmdEventReceiver = static_cast<HMDEventReceiver*>(g_eventReceiverMgr->addReceiver(new HMDEventReceiver(), 0));
-	IrrlichtDevice *device = createDevice(EDT_OPENGL, dimension2d<u32>(SCREEN_WIDTH, SCREEN_HEIGHT), 32, fullscreen, stencil, vsync, g_eventReceiverMgr);
+		
+	IrrlichtDevice *device = createDevice(EDT_OPENGL, dimension2d<u32>(SCREEN_WIDTH, SCREEN_HEIGHT), 32, fullscreen, stencil, vsync, nullptr);
 	if (!device){
 		return 1;
 	}
-	mainStartUp(device);
+	Lib::startUp(device);
 	
 	IVideoDriver* driver = device->getVideoDriver();
 	IGUIEnvironment* guienv = device->getGUIEnvironment();
@@ -84,13 +51,13 @@ int entrypoint(int argc, char* argv[])
 	std::unique_ptr<Scene> scene(new DebugDrawScene(device));
 	//std::unique_ptr<Scene> scene(new GameScene(device));
 
-	if(g_audioMgr->isSupport()) {
+	if(Lib::audio->isSupport()) {
 		const std::string bg("res/sound/bg.wav");
 		BGM bgm;
 		bgm.startUp(bg);
 		bgm.open();
 		bgm.play();
-		g_audioMgr->addBGM("bg", bgm);
+		Lib::audio->addBGM("bg", bgm);
 	}
 
 	DebugDrawer debugDrawer;
@@ -115,10 +82,10 @@ int entrypoint(int argc, char* argv[])
 		}
 
 		// Read-Write Head Tracking Sensor Value to Camera
-		g_headTracker->update();
-		if(g_headTracker->isConnected()) {
-			SHeadTrackingEvent evt = g_headTracker->getValue();
-			g_eventReceiverMgr->OnEvent(evt);
+		Lib::headTracker->update();
+		if(Lib::headTracker->isConnected()) {
+			SHeadTrackingEvent evt = Lib::headTracker->getValue();
+			Lib::eventReceiver->OnEvent(evt);
 		}
 
 		scene->update(frameDeltaTime);
@@ -152,7 +119,7 @@ int entrypoint(int argc, char* argv[])
 	//shut down scene before device drop!
 	scene.reset(nullptr);
 
-	mainShutDown();
+	Lib::shutDown();
 	
 	device->drop();	
 

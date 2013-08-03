@@ -42,5 +42,3 @@ private:
 	ALuint bgmBuf_;
 	ALuint bgmSrc_;
 };
-
-extern AudioManager *g_audioMgr;

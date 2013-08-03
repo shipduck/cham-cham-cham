@@ -4,9 +4,6 @@
 
 using namespace irr;
 
-HMDEventReceiver hmdEventReceiverLocal;
-HMDEventReceiver *g_hmdEventReceiver = &hmdEventReceiverLocal;
-
 bool HMDEventReceiver::OnEvent(const irr::SEvent &evt)
 {
 	if(evt.EventType == EET_KEY_INPUT_EVENT) {

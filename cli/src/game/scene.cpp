@@ -1,6 +1,7 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
 #include "scene.h"
+#include "base/lib.h"
 #include "irr/debug_draw_manager.h"
 
 #include "irr/HMDStereoRender.h"
@@ -67,7 +68,7 @@ void Scene::draw()
 	ISceneManager* smgr = device_->getSceneManager();
 	
 	// draw the 3d scene
-	if(g_hmdEventReceiver->isSupportHMD()) {
+	if(Lib::hmdEventReceiver->isSupportHMD()) {
 		drawAllStereo(smgr);
 	} else {
 		drawAllNormal(smgr);
