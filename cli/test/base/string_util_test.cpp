@@ -146,3 +146,12 @@ TEST(StringUtil, join)
 		EXPECT_TRUE(result == L"a-b-c");
 	}
 }
+
+TEST(StringUtil, string2wstring)
+{
+	EXPECT_EQ(wstring(L"abc"), StringUtil::string2wstring(string("abc")));
+}
+TEST(StringUtil, wstring2string)
+{
+	EXPECT_EQ(string("abc"), StringUtil::wstring2string(wstring(L"abc")));
+}
