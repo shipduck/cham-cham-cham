@@ -20,16 +20,20 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 
 #include <irrlicht.h>
 
-struct HMDDescriptor 
-{
-	int hResolution;
-	int vResolution;
-	float hScreenSize;
-	float vScreenSize;
-	float interpupillaryDistance;
-	float lensSeparationDistance;
-	float eyeToScreenDistance;
-	float distortionK[4];
+struct HMDDescriptor {
+	HMDDescriptor();
+
+	int &hResolution;
+	int &vResolution;
+	float &hScreenSize;
+	float &vScreenSize;
+	float &interpupillaryDistance;
+	float &lensSeparationDistance;
+	float &eyeToScreenDistance;
+	float &distortionK_1;
+	float &distortionK_2;
+	float &distortionK_3;
+	float &distortionK_4;
 };
 
 class OculusDistorsionCallback: public irr::video::IShaderConstantSetCallBack 
@@ -57,23 +61,22 @@ extern OculusDistorsionCallback g_distortionCB;
 class HMDStereoRender
 {
 public:
-	HMDStereoRender(irr::IrrlichtDevice *device, HMDDescriptor HMD, irr::f32 worldScale = 1.0);
+	HMDStereoRender(irr::IrrlichtDevice *device, const HMDDescriptor &HMD, irr::f32 worldScale = 1.0);
 	~HMDStereoRender();
 
 	HMDDescriptor getHMD(); 
-	void setHMD(HMDDescriptor HMD);
+	void setHMD(const HMDDescriptor &HMD);
 
 	irr::f32 getWorldScale(); 
 	void setWorldScale(irr::f32 worldScale);
 
 	void drawAll(irr::scene::ISceneManager* smgr);
 
-private:  
+private: 
 	irr::video::IVideoDriver* _driver;
 	irr::video::ITexture* _renderTexture;
 	irr::scene::ISceneManager* _smgr;
 
-	HMDDescriptor _HMD;
 	irr::f32 _worldScale;
 	irr::core::matrix4 _projectionLeft;
 	irr::core::matrix4 _projectionRight;

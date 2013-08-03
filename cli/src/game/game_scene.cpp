@@ -20,19 +20,14 @@ enum {
 };
 
 
-GameScene::GameScene(irr::IrrlichtDevice *dev)
-	: Scene(dev), 
-	camNode(nullptr), 
+GameScene::GameScene()
+	: camNode(nullptr), 
 	bill(nullptr),
 	MoveSpeed(300),
 	RotateSpeed(100),
 	JumpSpeed(300)
 {
-	dev->setWindowCaption(L"Game Scene");
-
-	IVideoDriver* driver = dev->getVideoDriver();
-	ISceneManager* smgr = dev->getSceneManager();
-	IGUIEnvironment* guienv = dev->getGUIEnvironment();
+	Lib::device->setWindowCaption(L"Game Scene");
 
 	initSky();
 	initCam();
@@ -44,11 +39,11 @@ GameScene::GameScene(irr::IrrlichtDevice *dev)
 		auto terrain = initTerrain();
 	
 		// create triangle selector for the terrain	
-		auto selector = smgr->createTerrainTriangleSelector(terrain, 0);
+		auto selector = Lib::smgr->createTerrainTriangleSelector(terrain, 0);
 		terrain->setTriangleSelector(selector);
 
 		// create collision response animator and attach it to the camera
-		scene::ISceneNodeAnimator* anim = smgr->createCollisionResponseAnimator(
+		scene::ISceneNodeAnimator* anim = Lib::smgr->createCollisionResponseAnimator(
 			selector, camNode, core::vector3df(10, 10, 10),
 			core::vector3df(0, -10, 0),
 			core::vector3df(0, 10, 0));
@@ -60,9 +55,9 @@ GameScene::GameScene(irr::IrrlichtDevice *dev)
 
 	//선택한거 표시용 billboard
 	{
-		bill = smgr->addBillboardSceneNode();
+		bill = Lib::smgr->addBillboardSceneNode();
 		bill->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR );
-		bill->setMaterialTexture(0, driver->getTexture("ext/irrlicht/media/particle.bmp"));
+		bill->setMaterialTexture(0, Lib::driver->getTexture("ext/irrlicht/media/particle.bmp"));
 		bill->setMaterialFlag(video::EMF_LIGHTING, false);
 		bill->setMaterialFlag(video::EMF_ZBUFFER, false);
 		bill->setSize(core::dimension2d<f32>(20.0f, 20.0f));
@@ -79,10 +74,8 @@ GameScene::~GameScene()
 }
 
 void GameScene::initCam()
-{
-	ISceneManager* smgr = device_->getSceneManager();
-	
-	camNode = smgr->addCameraSceneNode();
+{	
+	camNode = Lib::smgr->addCameraSceneNode();
 	float height = 100;
 	camNode->setPosition(core::vector3df(0, height, 0));
 	camNode->setTarget(core::vector3df(0, height, 1));
@@ -92,21 +85,19 @@ void GameScene::initCam()
 void GameScene::initTargetableObject()
 {
 	//선택 테스트용 객체 배치
-	ISceneManager* smgr = device_->getSceneManager();
-	
 	SMaterial material;
 	material.AmbientColor = SColor(255, 255, 0, 0);
 
 	for(float x = 50 ; x <= 1000 ; x += 200) {
 		for(float z = 50 ; z <= 1000 ; z += 200) {
-			auto node = smgr->addCubeSceneNode();
+			auto node = Lib::smgr->addCubeSceneNode();
 
 			// id이용해서 특정 노드가 선택가능/불가능을 확인하도록 임시코딩
 			node->setID(IDFlag_IsPickable);
 			node->setPosition(vector3df(x, 0, z));
 			node->getMaterial(0) = material;
 
-			auto selector = smgr->createTriangleSelector(node->getMesh(), node);
+			auto selector = Lib::smgr->createTriangleSelector(node->getMesh(), node);
 			node->setTriangleSelector(selector);
 			selector->drop();
 		}
@@ -115,9 +106,6 @@ void GameScene::initTargetableObject()
 
 irr::scene::ISceneNode *GameScene::initColosseum()
 {
-	ISceneManager* smgr = device_->getSceneManager();
-	IVideoDriver* driver = device_->getVideoDriver();
-
 	float radius = 500;
 	const int numSegment = 32;
 	float rad = 2 * PI / numSegment;
@@ -144,10 +132,10 @@ irr::scene::ISceneNode *GameScene::initColosseum()
 	}
 
 	//create scene node
-	auto root = smgr->addEmptySceneNode();
+	auto root = Lib::smgr->addEmptySceneNode();
 
 	SMaterial material;
-	material.setTexture(0, driver->getTexture("ext/irrlicht/media/wall.bmp"));
+	material.setTexture(0, Lib::driver->getTexture("ext/irrlicht/media/wall.bmp"));
 	material.Lighting = false;
 
 	for(int i = 0 ; i < numSegment ; ++i) {
@@ -156,7 +144,7 @@ irr::scene::ISceneNode *GameScene::initColosseum()
 		float x = (seg.P1[0] + seg.P2[0]) * 0.5f;
 		float z = (seg.P1[1] + seg.P2[1]) * 0.5f;
 
-		auto node = smgr->addCubeSceneNode(10.0f, root);
+		auto node = Lib::smgr->addCubeSceneNode(10.0f, root);
 		node->setPosition(vector3df(x, 0, z));
 		float deg = irr::core::radToDeg(seg.rot);
 		node->setRotation(vector3df(0, -deg, 0));
@@ -172,11 +160,11 @@ irr::scene::ISceneNode *GameScene::initColosseum()
 		node->setScale(vector3df(0.1f, height, wallWidth));
 
 		//벽은 못지나간다
-		auto selector = smgr->createTriangleSelector(node->getMesh(), node);
+		auto selector = Lib::smgr->createTriangleSelector(node->getMesh(), node);
 		node->setTriangleSelector(selector);
 				
 		// create collision response animator and attach it to the camera
-		scene::ISceneNodeAnimator* anim = smgr->createCollisionResponseAnimator(
+		scene::ISceneNodeAnimator* anim = Lib::smgr->createCollisionResponseAnimator(
 			selector, camNode, core::vector3df(10, 10, 10),
 			core::vector3df(0, 0, 0),
 			core::vector3df(0, 0, 0));
@@ -195,13 +183,10 @@ irr::scene::ISceneNode *GameScene::initColosseum()
 */
 void GameScene::initObstacleList()
 {
-	ISceneManager* smgr = device_->getSceneManager();
-	IVideoDriver* driver = device_->getVideoDriver();
-
 	SMaterial material;
 	material.Lighting = false;
 	material.AmbientColor = SColor(255, 255, 0, 0);
-	material.setTexture(0, driver->getTexture("ext/irrlicht/media/wall.jpg"));
+	material.setTexture(0, Lib::driver->getTexture("ext/irrlicht/media/wall.jpg"));
 
 	std::vector<vector3df> posList;
 	posList.push_back(vector3df(-100, 0, 100));
@@ -210,16 +195,16 @@ void GameScene::initObstacleList()
 	posList.push_back(vector3df(-100, 0, -100));
 
 	for(auto pos : posList) {
-		auto node = smgr->addCubeSceneNode();
+		auto node = Lib::smgr->addCubeSceneNode();
 		node->setPosition(pos);
 		node->getMaterial(0) = material;
 
 		node->setScale(vector3df(2, 5, 2));
 
-		auto selector = smgr->createTriangleSelector(node->getMesh(), node);
+		auto selector = Lib::smgr->createTriangleSelector(node->getMesh(), node);
 		node->setTriangleSelector(selector);
 				
-		scene::ISceneNodeAnimator* anim = smgr->createCollisionResponseAnimator(
+		scene::ISceneNodeAnimator* anim = Lib::smgr->createCollisionResponseAnimator(
 			selector, camNode, core::vector3df(10, 10, 10),
 			core::vector3df(0, 0, 0),
 			core::vector3df(0, 0, 0));
@@ -232,9 +217,6 @@ void GameScene::initObstacleList()
 
 irr::scene::ITerrainSceneNode* GameScene::initTerrain()
 {
-	IVideoDriver* driver = device_->getVideoDriver();
-	ISceneManager* smgr = device_->getSceneManager();
-
 	// 하이트맵의 가운데 == 0,0,0이 되도록 만든다. 게임로직을 시작할떄
 	// 중심에 모아놔야 디버깅하기 쉬우니까
 	float scaleVal = 20.0f;
@@ -249,7 +231,7 @@ irr::scene::ITerrainSceneNode* GameScene::initTerrain()
 
 	//지형으로 필요한건 완전평면 하나이다
 	//그래서 검정색=0 으로 구성된 height map를 사용했다
-	scene::ITerrainSceneNode* terrain = smgr->addTerrainSceneNode(
+	scene::ITerrainSceneNode* terrain = Lib::smgr->addTerrainSceneNode(
 		"res/terrain-heightmap.png",
 		0,
 		nodeId,
@@ -268,9 +250,9 @@ irr::scene::ITerrainSceneNode* GameScene::initTerrain()
 
 	terrain->setMaterialFlag(video::EMF_LIGHTING, false);
 	terrain->setMaterialTexture(0,
-			driver->getTexture("ext/irrlicht/media/terrain-texture.jpg"));
+			Lib::driver->getTexture("ext/irrlicht/media/terrain-texture.jpg"));
 	terrain->setMaterialTexture(1,
-			driver->getTexture("ext/irrlicht/media/detailmap3.jpg"));
+			Lib::driver->getTexture("ext/irrlicht/media/detailmap3.jpg"));
 	terrain->setMaterialType(video::EMT_DETAIL_MAP);
 	terrain->scaleTexture(100.0f, 100.0f);
 
@@ -278,13 +260,10 @@ irr::scene::ITerrainSceneNode* GameScene::initTerrain()
 }
 void GameScene::initSky()
 {
-	IVideoDriver* driver = device_->getVideoDriver();
-	ISceneManager* smgr = device_->getSceneManager();
-
 	// create skybox and skydome
-	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
-	scene::ISceneNode* skydome = smgr->addSkyDomeSceneNode(driver->getTexture("ext/irrlicht/media/skydome.jpg"),16,8,0.95f,2.0f);
-	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, true);
+	Lib::driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
+	scene::ISceneNode* skydome = Lib::smgr->addSkyDomeSceneNode(Lib::driver->getTexture("ext/irrlicht/media/skydome.jpg"),16,8,0.95f,2.0f);
+	Lib::driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, true);
 }
 
 void GameScene::updateMoveEvent(int ms, const MoveEvent &evt)
@@ -355,10 +334,7 @@ void GameScene::updateLookEvent(int ms, const LookEvent &evt)
 
 void GameScene::update(int ms)
 {
-	IVideoDriver* driver = device_->getVideoDriver();
-	ISceneManager* smgr = device_->getSceneManager();
-	IGUIEnvironment* guienv = device_->getGUIEnvironment();
-	scene::ISceneCollisionManager* collMan = smgr->getSceneCollisionManager();
+	scene::ISceneCollisionManager* collMan = Lib::smgr->getSceneCollisionManager();
 
 	//방향처리의 우선순위가 이동처리보다 높다
 	LookEvent lookEvent = eventReceiver_->getLookEvent();

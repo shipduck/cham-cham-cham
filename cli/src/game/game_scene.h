@@ -9,7 +9,7 @@ class GameEventReceiver;
 
 class GameScene : public Scene {
 public:
-	GameScene(irr::IrrlichtDevice *dev);
+	GameScene();
 	virtual ~GameScene();
 
 	virtual void update(int ms);

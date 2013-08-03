@@ -1,5 +1,6 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
+#include "base/lib.h"
 #include "game/debug_draw_scene.h"
 #include "irr/debug_draw_manager.h"
 
@@ -15,17 +16,12 @@ SColor green(255, 0, 255, 0);
 SColor blue(255, 0, 0, 255);
 SColor white(255, 255, 255, 255);
 
-DebugDrawScene::DebugDrawScene(irr::IrrlichtDevice *dev)
-	: Scene(dev)
+DebugDrawScene::DebugDrawScene()
 {
-	device_->setWindowCaption(L"Irrlicht Engine Debug Draw");
+	Lib::device->setWindowCaption(L"Irrlicht Engine Debug Draw");
 
-	IVideoDriver* driver = dev->getVideoDriver();
-	ISceneManager* smgr = dev->getSceneManager();
-	IGUIEnvironment* guienv = dev->getGUIEnvironment();
-
-	smgr->addCameraSceneNodeFPS();
-	dev->getCursorControl()->setVisible(false);
+	Lib::smgr->addCameraSceneNodeFPS();
+	Lib::device->getCursorControl()->setVisible(false);
 
 	g_debugDrawMgr->addSphere(core::vector3df(30,0,30), 5, green, 5000);
 	g_debugDrawMgr->addSphere(core::vector3df(30,0,30), 2, red, 2000);

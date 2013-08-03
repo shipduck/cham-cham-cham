@@ -16,6 +16,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 #include "stdafx.h"
 #include "hmd_stereo_render.h"
+#include "cvars/CVar.h"
 
 #include <iostream>
 #include <cassert>
@@ -52,6 +53,22 @@ static const char *fragShader =
 	"    gl_FragColor = texture2D(texid, tc);"
 	"}";
 
+// Parameters from the Oculus Rift DK1
+HMDDescriptor::HMDDescriptor()
+	: hResolution(CVarUtils::CreateCVar<int>("hmd.hResolution", 1280)),
+	vResolution(CVarUtils::CreateCVar<int>("hmd.vResolution", 800)),
+	hScreenSize(CVarUtils::CreateCVar<float>("hmd.hScreenSize", 0.14976f)),
+	vScreenSize(CVarUtils::CreateCVar<float>("hmd.vScreenSize", 0.0936f)),
+	interpupillaryDistance(CVarUtils::CreateCVar<float>("hmd.interpupillaryDistance", 0.064f)),
+	lensSeparationDistance(CVarUtils::CreateCVar<float>("hmd.lensSeparationDistance", 0.064f)),
+	eyeToScreenDistance(CVarUtils::CreateCVar<float>("hmd.eyeToScreenDistance", 0.041f)),
+	distortionK_1(CVarUtils::CreateCVar<float>("hmd.distortionK_1", 1.0f)),
+	distortionK_2(CVarUtils::CreateCVar<float>("hmd.distortionK_2", 0.22f)),
+	distortionK_3(CVarUtils::CreateCVar<float>("hmd.distortionK_3", 0.24f)),
+	distortionK_4(CVarUtils::CreateCVar<float>("hmd.distortionK_4", 0.0f))
+{
+}
+
 //OculusDistorsionCallback as singleton
 OculusDistorsionCallback g_distortionCB;
 E_MATERIAL_TYPE getOculusDistorsionCallbackMaterial(irr::video::IVideoDriver *driver)
@@ -65,7 +82,7 @@ E_MATERIAL_TYPE getOculusDistorsionCallbackMaterial(irr::video::IVideoDriver *dr
 	return (E_MATERIAL_TYPE)material;
 }
 
-HMDStereoRender::HMDStereoRender(irr::IrrlichtDevice *device, HMDDescriptor HMD, f32 worldScale)
+HMDStereoRender::HMDStereoRender(irr::IrrlichtDevice *device, const HMDDescriptor &HMD, f32 worldScale)
 	: _worldScale(worldScale),
 	_renderTexture(NULL)
 {
@@ -103,9 +120,7 @@ HMDStereoRender::HMDStereoRender(irr::IrrlichtDevice *device, HMDDescriptor HMD,
 HMDStereoRender::~HMDStereoRender() {
 }
 
-void HMDStereoRender::setHMD(HMDDescriptor HMD) {
-	_HMD = HMD;
-
+void HMDStereoRender::setHMD(const HMDDescriptor &HMD) {
 	// Compute aspect ratio and FOV
 	float aspect = HMD.hResolution / (2.0f*HMD.vResolution);
 
@@ -113,7 +128,7 @@ void HMDStereoRender::setHMD(HMDDescriptor HMD) {
 	//   2*atan2(HMD.vScreenSize,2*HMD.eyeToScreenDistance)
 	// But with lens distortion it is increased (see Oculus SDK Documentation)
 	float r = -1.0f - (4.0f * (HMD.hScreenSize/4.0f - HMD.lensSeparationDistance/2.0f) / HMD.hScreenSize);
-	float distScale = (HMD.distortionK[0] + HMD.distortionK[1] * pow(r,2) + HMD.distortionK[2] * pow(r,4) + HMD.distortionK[3] * pow(r,6));
+	float distScale = (HMD.distortionK_1 + HMD.distortionK_2 * pow(r,2) + HMD.distortionK_3 * pow(r,4) + HMD.distortionK_4 * pow(r,6));
 	float fov = 2.0f*atan2(HMD.vScreenSize*distScale, 2.0f*HMD.eyeToScreenDistance);
 
 	// Compute camera projection matrices
@@ -138,15 +153,17 @@ void HMDStereoRender::setHMD(HMDDescriptor HMD) {
 	g_distortionCB.scaleIn[0] = 1.0f;
 	g_distortionCB.scaleIn[1] = 1.0f/aspect;
 
-	g_distortionCB.hmdWarpParam[0] = HMD.distortionK[0];
-	g_distortionCB.hmdWarpParam[1] = HMD.distortionK[1];
-	g_distortionCB.hmdWarpParam[2] = HMD.distortionK[2];
-	g_distortionCB.hmdWarpParam[3] = HMD.distortionK[3];
+	g_distortionCB.hmdWarpParam[0] = HMD.distortionK_1;
+	g_distortionCB.hmdWarpParam[1] = HMD.distortionK_2;
+	g_distortionCB.hmdWarpParam[2] = HMD.distortionK_3;
+	g_distortionCB.hmdWarpParam[3] = HMD.distortionK_4;
 
 	// Create render target
 	if (_driver->queryFeature(video::EVDF_RENDER_TO_TARGET))
 	{
-		if (_renderTexture != NULL) _renderTexture->drop();
+		if (_renderTexture != NULL) {
+			_renderTexture->drop();
+		}
 		_renderTexture = _driver->addRenderTargetTexture(dimension2d<u32>(HMD.hResolution*distScale/2.0f, HMD.vResolution*distScale));
 		_renderMaterial.setTexture(0, _renderTexture);
 	}

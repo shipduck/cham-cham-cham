@@ -8,7 +8,7 @@ class DebugDrawManager3D;
 
 class DebugDrawScene : public Scene {
 public:
-	DebugDrawScene(irr::IrrlichtDevice *dev);
+	DebugDrawScene();
 	virtual ~DebugDrawScene();
 
 	virtual void update(int ms);
