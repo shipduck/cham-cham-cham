@@ -18,9 +18,13 @@ class Lib {
 public:
 	static IrrConsole *console;
 
+	//console function
 	static void printf(const char *fmt, ...);
+	static void printf(const std::string &text);
 	static void error(const char *fmt, ...);
+	static void error(const std::string &text);
 	static void warning(const char *fmt, ...);
+	static void warning(const std::string &text);
 
 	static void startUp(irr::IrrlichtDevice *dev);
 	static void shutDown();

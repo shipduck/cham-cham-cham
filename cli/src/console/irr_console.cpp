@@ -30,12 +30,12 @@ IrrConsole *g_console = &consoleLocal;
 const irr::video::SColor logColor(255, 255, 255, 64);
 const irr::video::SColor commandColor(255, 255, 255, 255);
 const irr::video::SColor functionColor(255, 64, 255, 64);
-const irr::video::SColor errorColor(255, 255, 128, 64);
+const irr::video::SColor errorColor(255, 255, 20, 20);
 const irr::video::SColor helpColor(255,  110, 130, 200);
-const irr::video::SColor consoleColor(120, 25, 60, 130);
-const irr::video::SColor debugColor(255, 255, 128, 64);
+const irr::video::SColor consoleColor(120, 30, 30, 30);
+const irr::video::SColor debugColor(255, 255, 255, 255);
 const irr::video::SColor infoColor(255, 255, 128, 64);
-const irr::video::SColor warningColor(255, 255, 128, 64);
+const irr::video::SColor warningColor(255, 255, 255, 0);
 
 const std::array<SColor, NUM_LINEPROP> &getLineColorTable()
 {

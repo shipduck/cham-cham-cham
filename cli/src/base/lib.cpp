@@ -143,3 +143,18 @@ void Lib::warning(const char *fmt, ...)
 
 	console->EnterLogLine(text, LINEPROP_WARNING);
 }
+
+void Lib::printf(const std::string &text)
+{
+	console->EnterLogLine(text, LINEPROP_DEBUG);
+}
+
+void Lib::error(const std::string &text)
+{
+	console->EnterLogLine(text, LINEPROP_ERROR);
+}
+
+void Lib::warning(const std::string &text)
+{
+	console->EnterLogLine(text, LINEPROP_WARNING);
+}
