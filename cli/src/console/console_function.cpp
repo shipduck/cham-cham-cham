@@ -225,28 +225,3 @@ bool ConsoleSettingsLoad( const std::vector<std::string> &vArgs )
 	}
 	return false;
 }
-
-bool ConsoleDriverInfo(const std::vector<std::string> &args)
-{
-	IrrlichtDevice *device = g_console->getDevice();
-	if(device) {
-		irr::video::IVideoDriver* driver = device->getVideoDriver();
-		std::string msg = " Irrlicht Version : ";
-		msg += device->getVersion();
-		g_console->EnterLogLine(msg.c_str());
-
-		msg = " OS Version : ";
-		auto osInfo = device->getOSOperator()->getOperatingSystemVersion();
-		msg += osInfo.c_str();
-		g_console->EnterLogLine(msg.c_str());
-
-		msg = " Display Driver : ";
-		msg += StringUtil::wstring2string(device->getVideoDriver()->getName());
-		g_console->EnterLogLine(msg.c_str());
-
-		return true;
-	} else {
-		g_console->EnterLogLine("No valid irrlicht device detected!!");
-		return false;
-	}
-}

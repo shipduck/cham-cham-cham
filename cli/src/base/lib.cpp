@@ -9,6 +9,7 @@
 #include "irr/hmd_event_receiver.h"
 #include "util/audio_manager.h"
 #include "util/event_receiver_manager.h"
+#include "util/console_func.h"
 
 using namespace std;
 
@@ -58,9 +59,11 @@ void Lib::startUp(irr::IrrlichtDevice *dev)
 	g_normalFont14 = guienv->getFont("res/font_14.xml");
 	//g_normalFont12 = guienv->getFont("res/font_12.xml");
 
-	setUpConsole(device);
 	console = g_console;
-
+	setUpConsole(device);
+	//add console function
+	CVarUtils::CreateCVar( "driver_info", console::driverInfo, "Display Irrlicht Driver Info" );	
+	
 	audio->startUp();
 
 	//Oculus Rift Head Tracking

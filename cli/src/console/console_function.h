@@ -12,7 +12,6 @@
 
 #include <vector>
 #include <cstdlib>
-#include "irr_console.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Print the current CVars version.
@@ -88,5 +87,3 @@ bool ConsoleSettingsSave( const std::vector<std::string> &vArgs );
 ////////////////////////////////////////////////////////////////////////////////
 /// Load console settings.
 bool ConsoleSettingsLoad( const std::vector<std::string> &vArgs );
-
-bool ConsoleDriverInfo(const std::vector<std::string> &args);

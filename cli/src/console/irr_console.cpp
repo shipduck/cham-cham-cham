@@ -1434,7 +1434,4 @@ void setUpConsole(irr::IrrlichtDevice *device)
 
 	//now initialize
 	g_console->Init(device, config);
-
-	//add function
-	CVarUtils::CreateCVar( "driver_info", ConsoleDriverInfo, "Display Irrlicht Driver Info" );	
 }
