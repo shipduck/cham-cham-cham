@@ -3,10 +3,10 @@
 
 class HMDStereoRender;
 
-class Scene {
+class Sequence {
 public:
-	Scene();
-	virtual ~Scene();
+	Sequence();
+	virtual ~Sequence();
 
 	virtual void update(int ms) = 0;
 	virtual void draw();

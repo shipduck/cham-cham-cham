@@ -1,6 +1,6 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
-#include "game_scene.h"
+#include "game_sequence.h"
 #include "scene_helper.h"
 #include "irr/debug_draw_manager.h"
 #include "util/event_receiver_manager.h"
@@ -20,7 +20,7 @@ enum {
 };
 
 
-GameScene::GameScene()
+GameSequence::GameSequence()
 	: camNode(nullptr), 
 	bill(nullptr),
 	MoveSpeed(300),
@@ -69,11 +69,11 @@ GameScene::GameScene()
 	eventReceiver_ = static_cast<GameEventReceiver*>(Lib::eventReceiver->addReceiver(new GameEventReceiver(), 0));
 }
 
-GameScene::~GameScene()
+GameSequence::~GameSequence()
 {
 }
 
-void GameScene::initCam()
+void GameSequence::initCam()
 {	
 	camNode = Lib::smgr->addCameraSceneNode();
 	float height = 100;
@@ -82,7 +82,7 @@ void GameScene::initCam()
 	camNode->setFarValue(1000.0f);
 }
 
-void GameScene::initTargetableObject()
+void GameSequence::initTargetableObject()
 {
 	//선택 테스트용 객체 배치
 	SMaterial material;
@@ -104,7 +104,7 @@ void GameScene::initTargetableObject()
 	}
 }
 
-irr::scene::ISceneNode *GameScene::initColosseum()
+irr::scene::ISceneNode *GameSequence::initColosseum()
 {
 	float radius = 500;
 	const int numSegment = 32;
@@ -181,7 +181,7 @@ irr::scene::ISceneNode *GameScene::initColosseum()
 이런것도 지원한다 라는걸 보여주는것이 목표니까 간단하게 구현
 진짜 객체로 감싸는건 나중에
 */
-void GameScene::initObstacleList()
+void GameSequence::initObstacleList()
 {
 	SMaterial material;
 	material.Lighting = false;
@@ -215,7 +215,7 @@ void GameScene::initObstacleList()
 	}
 }
 
-irr::scene::ITerrainSceneNode* GameScene::initTerrain()
+irr::scene::ITerrainSceneNode* GameSequence::initTerrain()
 {
 	// 하이트맵의 가운데 == 0,0,0이 되도록 만든다. 게임로직을 시작할떄
 	// 중심에 모아놔야 디버깅하기 쉬우니까
@@ -258,7 +258,7 @@ irr::scene::ITerrainSceneNode* GameScene::initTerrain()
 
 	return terrain;
 }
-void GameScene::initSky()
+void GameSequence::initSky()
 {
 	// create skybox and skydome
 	Lib::driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
@@ -266,7 +266,7 @@ void GameScene::initSky()
 	Lib::driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, true);
 }
 
-void GameScene::updateMoveEvent(int ms, const MoveEvent &evt)
+void GameSequence::updateMoveEvent(int ms, const MoveEvent &evt)
 {
 	core::vector3df pos = camNode->getPosition();
 	core::vector3df target = camNode->getTarget();
@@ -312,7 +312,7 @@ void GameScene::updateMoveEvent(int ms, const MoveEvent &evt)
 	target += posDelta;
 	camNode->setTarget(target);
 }
-void GameScene::updateLookEvent(int ms, const LookEvent &evt)
+void GameSequence::updateLookEvent(int ms, const LookEvent &evt)
 {
 	f32 rotateHoriziontal = evt.horizontalRotation;
 	f32 rotateVertical = evt.verticalRotation;
@@ -332,7 +332,7 @@ void GameScene::updateLookEvent(int ms, const LookEvent &evt)
 	camNode->setTarget(target);
 }
 
-void GameScene::update(int ms)
+void GameSequence::update(int ms)
 {
 	scene::ISceneCollisionManager* collMan = Lib::smgr->getSceneCollisionManager();
 

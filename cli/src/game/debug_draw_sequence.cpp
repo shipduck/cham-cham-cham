@@ -1,7 +1,7 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
 #include "base/lib.h"
-#include "game/debug_draw_scene.h"
+#include "game/debug_draw_sequence.h"
 #include "irr/debug_draw_manager.h"
 
 using namespace std;
@@ -16,7 +16,7 @@ SColor green(255, 0, 255, 0);
 SColor blue(255, 0, 0, 255);
 SColor white(255, 255, 255, 255);
 
-DebugDrawScene::DebugDrawScene()
+DebugDrawSequence::DebugDrawSequence()
 {
 	Lib::device->setWindowCaption(L"Irrlicht Engine Debug Draw");
 
@@ -27,11 +27,11 @@ DebugDrawScene::DebugDrawScene()
 	g_debugDrawMgr->addSphere(core::vector3df(30,0,30), 2, red, 2000);
 	g_debugDrawMgr->addSphere(core::vector3df(30,0,30), 2, blue, 2000);
 }
-DebugDrawScene::~DebugDrawScene()
+DebugDrawSequence::~DebugDrawSequence()
 {
 }
 
-void DebugDrawScene::update(int ms)
+void DebugDrawSequence::update(int ms)
 {
 	std::wstring msg(L"hello world");
 	

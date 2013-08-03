@@ -8,9 +8,9 @@
 #include "irr/hmd_event_receiver.h"
 #include "base/lib.h"
 
-// scene
-#include "game/debug_draw_scene.h"
-#include "game/game_scene.h"
+// sequence
+#include "game/debug_draw_sequence.h"
+#include "game/game_sequence.h"
 
 #include "util/event_receiver_manager.h"
 #include "console/irr_console.h"
@@ -48,8 +48,8 @@ int entrypoint(int argc, char* argv[])
 	ISceneManager* smgr = device->getSceneManager();
 
 	//simple scene framework
-	//std::unique_ptr<Scene> scene(new DebugDrawScene());
-	std::unique_ptr<Scene> scene(new GameScene());
+	//std::unique_ptr<Sequence> sequence(new DebugDrawSequence());
+	std::unique_ptr<Sequence> sequence(new GameSequence());
 
 	if(Lib::audio->isSupport()) {
 		const std::string bg("res/sound/bg.wav");
@@ -88,10 +88,10 @@ int entrypoint(int argc, char* argv[])
 			Lib::eventReceiver->OnEvent(evt);
 		}
 
-		scene->update(frameDeltaTime);
+		sequence->update(frameDeltaTime);
 		{
 			driver->beginScene(true, true, video::SColor(255, 10, 10, 10));
-			scene->draw();
+			sequence->draw();
 			
 			// debug render. 실제 렌더링 이후에 그려야됨
 			debugDrawer.drawAll(device, *g_debugDrawMgr);
@@ -117,7 +117,7 @@ int entrypoint(int argc, char* argv[])
 		}
 	}
 	//shut down scene before device drop!
-	scene.reset(nullptr);
+	sequence.reset(nullptr);
 
 	Lib::shutDown();
 	

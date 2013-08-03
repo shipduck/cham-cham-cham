@@ -1,16 +1,16 @@
 ﻿// Ŭnicode please 
 #pragma once
 
-#include "scene.h"
+#include "sequence.h"
 
 struct MoveEvent;
 struct LookEvent;
 class GameEventReceiver;
 
-class GameScene : public Scene {
+class GameSequence : public Sequence {
 public:
-	GameScene();
-	virtual ~GameScene();
+	GameSequence();
+	virtual ~GameSequence();
 
 	virtual void update(int ms);
 
