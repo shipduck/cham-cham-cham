@@ -55,5 +55,33 @@ public:
 	TestComp();
 	virtual ~TestComp();
 };
-	
+
+
+class CylinderMappingNode : public irr::scene::ISceneNode {
+public:
+	typedef irr::video::S3DVertex vertex_type;
+
+public:
+	CylinderMappingNode(irr::scene::ISceneNode *parent, irr::scene::ISceneManager *smgr, irr::s32 id);
+
+	virtual void OnRegisterSceneNode();
+	virtual void render();
+	virtual const irr::core::aabbox3d<irr::f32> &getBoundingBox() const { return box_; }
+	virtual irr::u32 getMaterialCount() const { return 1; }
+	virtual irr::video::SMaterial &getMaterial(irr::u32 i) { return material_; }
+
+public:
+	void setTexture(irr::video::ITexture *tex);
+public:
+	float radius;
+	float scale;
+
+private:
+	irr::core::aabbox3df box_;
+	irr::video::SMaterial material_;
+
+	std::vector<vertex_type> vertexList_;
+	std::vector<unsigned short> indexList_;
+};
+
 }	// namespace hmd_ui

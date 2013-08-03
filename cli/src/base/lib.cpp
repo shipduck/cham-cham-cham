@@ -13,6 +13,7 @@
 #include "util/console_func.h"
 
 using namespace std;
+using namespace irr;
 
 const int MAX_STRING_CHARS = 4096;
 
@@ -44,10 +45,20 @@ HMDStereoRender *Lib::stereoRenderer = nullptr;
 bool checkDeviceSupport(irr::IrrlichtDevice *device)
 {
 	auto driver = device->getVideoDriver();
+
 	//렌더타켓이 없으면 오큘러스 지원은 하늘로
-	if(driver->queryFeature(irr::video::EVDF_RENDER_TO_TARGET) == false) {
-		return false;
+	map<video::E_VIDEO_DRIVER_FEATURE, string> featureMap;
+	featureMap[video::EVDF_RENDER_TO_TARGET] = "Render to Target not support";
+	featureMap[video::EVDF_ARB_GLSL] = "GLSL not support";
+	featureMap[video::EVDF_TEXTURE_NPOT] = "Texture npot not support";
+	featureMap[video::EVDF_TEXTURE_NSQUARE] = "non-square textures supported";
+	for(auto x : featureMap) {
+		if(driver->queryFeature(x.first) == false) {
+			fprintf(stderr, "%s\n", x.second.c_str());
+			return false;
+		}
 	}
+
 	return true;
 }
 
