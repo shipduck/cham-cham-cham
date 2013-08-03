@@ -35,6 +35,7 @@ void Sequence::drawAllStereo(irr::scene::ISceneManager *smgr)
 
 void Sequence::draw()
 {	
+	preDraw();
 	// draw the 3d scene
 	if(Lib::hmdEventReceiver->isSupportHMD()) {
 		drawAllStereo(Lib::smgr);
@@ -42,4 +43,8 @@ void Sequence::draw()
 		drawAllNormal(Lib::smgr);
 	}
 	//smgr->drawAll();
+}
+
+void Sequence::preDraw()
+{
 }

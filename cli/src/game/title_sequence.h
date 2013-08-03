@@ -9,4 +9,7 @@ public:
 	~TitleSequence();
 
 	virtual void update(int ms);
+	virtual void preDraw();
+
+private:
 };

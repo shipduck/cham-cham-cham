@@ -39,6 +39,18 @@ HMDEventReceiver *Lib::hmdEventReceiver = nullptr;
 std::unique_ptr<HMDDescriptorBind> hmdDescriptorBind;
 HMDStereoRender *Lib::stereoRenderer = nullptr;
 
+// 게임에서 사용할 특수 기능을 그래픽카드에서 지원하는지 미리 검증하는 함수
+// 최초에 미리 검증하면 실제 게임작동중에는 기능을 지원하는지 신경쓰지 않고 막써도 된다
+bool checkDeviceSupport(irr::IrrlichtDevice *device)
+{
+	auto driver = device->getVideoDriver();
+	//렌더타켓이 없으면 오큘러스 지원은 하늘로
+	if(driver->queryFeature(irr::video::EVDF_RENDER_TO_TARGET) == false) {
+		return false;
+	}
+	return true;
+}
+
 void initConsoleFunction()
 {
 	CVarUtils::CreateCVar("driver_info", console::driverInfo, "Display Irrlicht Driver Info");	
@@ -54,6 +66,9 @@ void Lib::startUp(irr::IrrlichtDevice *dev)
 	driver = device->getVideoDriver();
 	guienv = device->getGUIEnvironment();
 	smgr = device->getSceneManager();
+
+	bool deviceSupport = checkDeviceSupport(dev);
+	SR_ASSERT(deviceSupport == true);
 
 	//모든 초기화 중에서 콘솔이 가장 우선
 	console = g_console;
