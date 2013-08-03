@@ -109,12 +109,13 @@ CylinderMappingNode::CylinderMappingNode(irr::scene::ISceneNode *parent, irr::sc
 	radius(10.0f),
 	scale(1.0f)
 {
+	setAutomaticCulling(false);
 	box_.reset(core::vector3df(0, 0, 0));
 
 	material_.Wireframe = false;
 	material_.Lighting = false;
 	//디버깅 삽질 줄일라고 일단 해제
-	material_.BackfaceCulling = false;
+	//material_.BackfaceCulling = false;
 
 	//원점에 해당하는곳에 적절히 뭐 하나 찍기. 이거조차 없으면 디버깅하다 망할듯
 	auto cube = smgr->addCubeSceneNode(1, this);
