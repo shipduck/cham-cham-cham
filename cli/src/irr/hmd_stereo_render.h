@@ -21,7 +21,23 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include <irrlicht.h>
 
 struct HMDDescriptor {
-	HMDDescriptor();
+	int hResolution;
+	int vResolution;
+	float hScreenSize;
+	float vScreenSize;
+	float interpupillaryDistance;
+	float lensSeparationDistance;
+	float eyeToScreenDistance;
+	float distortionK[4];
+
+	bool operator==(const HMDDescriptor &o) const;
+	bool operator!=(const HMDDescriptor &o) const { return !(*this == o); }
+
+	static const HMDDescriptor &invalid();
+};
+
+struct HMDDescriptorBind {
+	HMDDescriptorBind();
 
 	int &hResolution;
 	int &vResolution;
@@ -34,6 +50,9 @@ struct HMDDescriptor {
 	float &distortionK_2;
 	float &distortionK_3;
 	float &distortionK_4;
+
+	operator HMDDescriptor() const { return convert(); }
+	HMDDescriptor convert() const;
 };
 
 class OculusDistorsionCallback: public irr::video::IShaderConstantSetCallBack 
@@ -73,6 +92,8 @@ public:
 	void drawAll(irr::scene::ISceneManager* smgr);
 
 private: 
+	HMDDescriptor _hmd;
+
 	irr::video::IVideoDriver* _driver;
 	irr::video::ITexture* _renderTexture;
 	irr::scene::ISceneManager* _smgr;

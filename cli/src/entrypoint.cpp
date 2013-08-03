@@ -48,8 +48,8 @@ int entrypoint(int argc, char* argv[])
 	ISceneManager* smgr = device->getSceneManager();
 
 	//simple scene framework
-	std::unique_ptr<Scene> scene(new DebugDrawScene());
-	//std::unique_ptr<Scene> scene(new GameScene());
+	//std::unique_ptr<Scene> scene(new DebugDrawScene());
+	std::unique_ptr<Scene> scene(new GameScene());
 
 	if(Lib::audio->isSupport()) {
 		const std::string bg("res/sound/bg.wav");

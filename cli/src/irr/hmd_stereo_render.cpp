@@ -54,7 +54,7 @@ static const char *fragShader =
 	"}";
 
 // Parameters from the Oculus Rift DK1
-HMDDescriptor::HMDDescriptor()
+HMDDescriptorBind::HMDDescriptorBind()
 	: hResolution(CVarUtils::CreateCVar<int>("hmd.hResolution", 1280)),
 	vResolution(CVarUtils::CreateCVar<int>("hmd.vResolution", 800)),
 	hScreenSize(CVarUtils::CreateCVar<float>("hmd.hScreenSize", 0.14976f)),
@@ -67,6 +67,64 @@ HMDDescriptor::HMDDescriptor()
 	distortionK_3(CVarUtils::CreateCVar<float>("hmd.distortionK_3", 0.24f)),
 	distortionK_4(CVarUtils::CreateCVar<float>("hmd.distortionK_4", 0.0f))
 {
+}
+
+HMDDescriptor HMDDescriptorBind::convert() const
+{
+	HMDDescriptor retval;	
+	retval.hResolution = this->hResolution;
+	retval.vResolution = this->vResolution;
+	retval.hScreenSize = this->hScreenSize;
+	retval.vScreenSize = this->vScreenSize;
+	retval.interpupillaryDistance = this->interpupillaryDistance;
+	retval.lensSeparationDistance = this->lensSeparationDistance;
+	retval.eyeToScreenDistance = this->eyeToScreenDistance;
+	retval.distortionK[0] = this->distortionK_1;
+	retval.distortionK[1] = this->distortionK_2;
+	retval.distortionK[2] = this->distortionK_3;
+	retval.distortionK[3] = this->distortionK_4;
+	return retval;
+}
+
+const HMDDescriptor &HMDDescriptor::invalid()
+{
+	static bool init = false;
+	static HMDDescriptor ctx;
+	if(init == false) {
+		init = true;
+		ctx.hResolution = 0;
+	}
+	return ctx;
+}
+bool HMDDescriptor::operator==(const HMDDescriptor &o) const
+{
+	if(hResolution != o.hResolution) {
+		return false;
+	}
+	if(vResolution != o.vResolution) {
+		return false;
+	}
+	if(hScreenSize != o.hScreenSize) {
+		return false;
+	}
+	if(vScreenSize != o.vScreenSize) {
+		return false;
+	}
+	if(interpupillaryDistance != o.interpupillaryDistance) {
+		return false;
+	}
+	if(lensSeparationDistance != o.lensSeparationDistance) {
+		return false;
+	}
+	if(eyeToScreenDistance != o.eyeToScreenDistance) {
+		return false;
+	}
+	for(int i = 0 ; i < 4 ; ++i) {
+		if(distortionK[i] != o.distortionK[i]) {
+			return false;
+		}
+	}
+	return true;
 }
 
 //OculusDistorsionCallback as singleton
@@ -84,7 +142,8 @@ E_MATERIAL_TYPE getOculusDistorsionCallbackMaterial(irr::video::IVideoDriver *dr
 
 HMDStereoRender::HMDStereoRender(irr::IrrlichtDevice *device, const HMDDescriptor &HMD, f32 worldScale)
 	: _worldScale(worldScale),
-	_renderTexture(NULL)
+	_renderTexture(nullptr),
+	_hmd(HMDDescriptor::invalid())
 {
 	_smgr = device->getSceneManager();
 	_driver = device->getVideoDriver();
@@ -121,6 +180,11 @@ HMDStereoRender::~HMDStereoRender() {
 }
 
 void HMDStereoRender::setHMD(const HMDDescriptor &HMD) {
+	if(_hmd == HMD) {
+		return;
+	}
+	_hmd = HMD;
+
 	// Compute aspect ratio and FOV
 	float aspect = HMD.hResolution / (2.0f*HMD.vResolution);
 
@@ -128,7 +192,7 @@ void HMDStereoRender::setHMD(const HMDDescriptor &HMD) {
 	//   2*atan2(HMD.vScreenSize,2*HMD.eyeToScreenDistance)
 	// But with lens distortion it is increased (see Oculus SDK Documentation)
 	float r = -1.0f - (4.0f * (HMD.hScreenSize/4.0f - HMD.lensSeparationDistance/2.0f) / HMD.hScreenSize);
-	float distScale = (HMD.distortionK_1 + HMD.distortionK_2 * pow(r,2) + HMD.distortionK_3 * pow(r,4) + HMD.distortionK_4 * pow(r,6));
+	float distScale = (HMD.distortionK[0] + HMD.distortionK[1] * pow(r,2) + HMD.distortionK[2] * pow(r,4) + HMD.distortionK[3] * pow(r,6));
 	float fov = 2.0f*atan2(HMD.vScreenSize*distScale, 2.0f*HMD.eyeToScreenDistance);
 
 	// Compute camera projection matrices
@@ -153,16 +217,17 @@ void HMDStereoRender::setHMD(const HMDDescriptor &HMD) {
 	g_distortionCB.scaleIn[0] = 1.0f;
 	g_distortionCB.scaleIn[1] = 1.0f/aspect;
 
-	g_distortionCB.hmdWarpParam[0] = HMD.distortionK_1;
-	g_distortionCB.hmdWarpParam[1] = HMD.distortionK_2;
-	g_distortionCB.hmdWarpParam[2] = HMD.distortionK_3;
-	g_distortionCB.hmdWarpParam[3] = HMD.distortionK_4;
+	g_distortionCB.hmdWarpParam[0] = HMD.distortionK[0];
+	g_distortionCB.hmdWarpParam[1] = HMD.distortionK[1];
+	g_distortionCB.hmdWarpParam[2] = HMD.distortionK[2];
+	g_distortionCB.hmdWarpParam[3] = HMD.distortionK[3];
 
 	// Create render target
 	if (_driver->queryFeature(video::EVDF_RENDER_TO_TARGET))
 	{
-		if (_renderTexture != NULL) {
-			_renderTexture->drop();
+		if (_renderTexture != nullptr) {
+			_driver->removeTexture(_renderTexture);
+			_renderTexture = nullptr;
 		}
 		_renderTexture = _driver->addRenderTargetTexture(dimension2d<u32>(HMD.hResolution*distScale/2.0f, HMD.vResolution*distScale));
 		_renderMaterial.setTexture(0, _renderTexture);

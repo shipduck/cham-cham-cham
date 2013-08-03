@@ -11,11 +11,13 @@ using namespace video;
 using namespace scene;
 using namespace gui;
 
+HMDDescriptorBind hmdDescriptorBind;
+
 Scene::Scene()
 {
 	//hmd 렌더링 지원
-	HMDDescriptor hmdDescriptor_;
-	renderer_.reset(new HMDStereoRender(Lib::device, hmdDescriptor_, 10));
+	HMDDescriptor descriptor = hmdDescriptorBind.convert();
+	renderer_.reset(new HMDStereoRender(Lib::device, descriptor, 10));
 }
 Scene::~Scene()
 {
@@ -40,6 +42,8 @@ void Scene::draw()
 {	
 	// draw the 3d scene
 	if(Lib::hmdEventReceiver->isSupportHMD()) {
+		HMDDescriptor descriptor = hmdDescriptorBind.convert();
+		renderer_->setHMD(descriptor);
 		drawAllStereo(Lib::smgr);
 	} else {
 		drawAllNormal(Lib::smgr);
