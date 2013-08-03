@@ -9,8 +9,8 @@
 #include "base/lib.h"
 
 // sequence
-#include "game/debug_draw_sequence.h"
-#include "game/game_sequence.h"
+#include "game/sequence.h"
+#include "game/sequence_factory.h"
 
 #include "util/event_receiver_manager.h"
 #include "console/irr_console.h"
@@ -48,17 +48,8 @@ int entrypoint(int argc, char* argv[])
 	ISceneManager* smgr = device->getSceneManager();
 
 	//simple scene framework
-	//std::unique_ptr<Sequence> sequence(new DebugDrawSequence());
-	std::unique_ptr<Sequence> sequence(new GameSequence());
-
-	if(Lib::audio->isSupport()) {
-		const std::string bg("res/sound/bg.wav");
-		BGM bgm;
-		bgm.startUp(bg);
-		bgm.open();
-		bgm.play();
-		Lib::audio->addBGM("bg", bgm);
-	}
+	SequenceFactory seqFactory;
+	std::unique_ptr<Sequence> sequence = seqFactory.create(kSequenceGame);
 
 	DebugDrawer debugDrawer;
 

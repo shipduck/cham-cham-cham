@@ -41,7 +41,8 @@ HMDStereoRender *Lib::stereoRenderer = nullptr;
 
 void initConsoleFunction()
 {
-	CVarUtils::CreateCVar( "driver_info", console::driverInfo, "Display Irrlicht Driver Info" );	
+	CVarUtils::CreateCVar("driver_info", console::driverInfo, "Display Irrlicht Driver Info");	
+	CVarUtils::CreateCVar("play_bgm", console::playBGM, "Play test bgm");
 }
 void initConsoleVar()
 {

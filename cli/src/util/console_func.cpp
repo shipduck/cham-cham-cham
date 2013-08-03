@@ -3,6 +3,7 @@
 #include "console_func.h"
 #include "base/lib.h"
 #include "base/string_util.h"
+#include "util/audio_manager.h"
 
 namespace console {;
 bool driverInfo(const std::vector<std::string> &args)
@@ -24,6 +25,22 @@ bool driverInfo(const std::vector<std::string> &args)
 		return true;
 	} else {
 		Lib::warning("No valid irrlicht device detected!");
+		return false;
+	}
+}
+
+bool playBGM(const std::vector<std::string> &args)
+{
+	//제대로 만드려면 중복재생같은거 예외처리 해야됨
+	if(Lib::audio->isSupport()) {
+		const std::string bg("res/sound/bg.wav");
+		BGM bgm;
+		bgm.startUp(bg);
+		bgm.open();
+		bgm.play();
+		Lib::audio->addBGM(bg, bgm);
+		return true;
+	} else {
 		return false;
 	}
 }
