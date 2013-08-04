@@ -7,11 +7,11 @@
 
 #include "console_function.h"
 #include "base/string_util.h"
+#include "util/console_func.h"
 
 /// TODO these should move to CVARS
 #define CONSOLE_HELP_FILE "helpfile.txt"
 #define CONSOLE_HISTORY_FILE ".cvar_history"
-#define CONSOLE_SETTINGS_FILE ".console_settings"
 #define CONSOLE_SCRIPT_FILE "default.script"
 #define CONSOLE_INITIAL_SCRIPT_FILE "initial.script"
 
@@ -110,15 +110,10 @@ void IrrConsole::Init(irr::IrrlichtDevice *device, const ConsoleConfig &cfg)
 	CVarUtils::CreateCVar( "find", ConsoleFind, "find 'name' will return the list of CVars containing 'name' as a substring." );
 	CVarUtils::CreateCVar( "exit", ConsoleExit, "Close the application" );
 	CVarUtils::CreateCVar( "quit", ConsoleExit, "Close the application" );
-	CVarUtils::CreateCVar( "save", ConsoleSave, "Save the CVars to a file" );
-	CVarUtils::CreateCVar( "load", ConsoleLoad, "Load CVars from a file" );
 
 	CVarUtils::CreateCVar( "console.history.load", ConsoleHistoryLoad, "Load console history from a file" );
 	CVarUtils::CreateCVar( "console.history.save", ConsoleHistorySave, "Save the console history to a file" );
 	CVarUtils::CreateCVar( "console.history.clear", ConsoleHistoryClear, "Clear the current console history" );
-
-	CVarUtils::CreateCVar( "console.settings.load", ConsoleSettingsLoad, "Load console settings from a file" );
-	CVarUtils::CreateCVar( "console.settings.save", ConsoleSettingsSave, "Save the console settings to a file" );
 
 	CVarUtils::CreateCVar( "script.record.start", ConsoleScriptRecordStart );
 	CVarUtils::CreateCVar( "script.record.stop", ConsoleScriptRecordStop );
@@ -128,8 +123,10 @@ void IrrConsole::Init(irr::IrrlichtDevice *device, const ConsoleConfig &cfg)
 	CVarUtils::CreateCVar( "script.save", ConsoleScriptSave );
 	CVarUtils::CreateCVar( "script.load", ConsoleScriptLoad );
 
-	//load the default settings file
-	SettingsLoad();
+	std::vector<std::string> cvarNamespaceList;
+	cvarNamespaceList.push_back("console");
+	cvarNamespaceList.push_back("script");
+	console::load(cvarNamespaceList);
 
 	//load the history file
 	HistoryLoad();
@@ -144,79 +141,6 @@ void IrrConsole::Init(irr::IrrlichtDevice *device, const ConsoleConfig &cfg)
 		//std::cout << "Info: Initial script file, " << m_sInitialScriptFileName << ", not found." << std::endl;
 		ifs.clear(std::ios::failbit);
 	}
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// Save settings current console settings to a file
-//  @param sFileName the file to save to. if none given the one specified in
-//  console.SettingsFileName is use 
-//  @return sucess or failure
-bool IrrConsole::SettingsSave(std::string sFileName)
-{
-	if( !m_bExecutingHistory ) {
-		if( sFileName == ""){
-			if(m_sSettingsFileName != "") {
-				sFileName = m_sSettingsFileName;
-			}
-			else {
-				PrintError( "Warning: No default name. Resetting settings filename to: \"%s\".", CONSOLE_SETTINGS_FILE );
-				sFileName = m_sHistoryFileName = CONSOLE_SETTINGS_FILE;
-			}
-		}
-
-		std::ofstream ofs( sFileName.c_str() );
-
-		if( !ofs.is_open() ) {
-			PrintError("Error: could not open \"%s\" for saving.", sFileName.c_str());
-			return false;
-		}
-
-		std::vector<std::string> vSave;
-		vSave.push_back(sFileName);
-		vSave.push_back("console");
-		vSave.push_back("script");
-		ConsoleSave( vSave );
-
-		ofs.close();
-	}
-	return true;
-
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// Load console settings from a file.
-//  @param sFileName the file to load from. if none given the one specified in
-//  console.SettingsFileName is used
-//  @return sucess or failure
-bool IrrConsole::SettingsLoad( std::string sFileName )
-{
-	if( sFileName == "" ) {
-		if( m_sSettingsFileName != "" ) {
-			sFileName = m_sSettingsFileName;
-		}
-		else {
-			PrintError( "Warning: No default name. Resetting settigns filename to: \"%s\".", CONSOLE_SETTINGS_FILE );
-			sFileName = m_sSettingsFileName = CONSOLE_SETTINGS_FILE;
-		}
-	}
-
-	//test if file exists
-	std::ifstream ifs( sFileName.c_str() );
-
-	if( ifs.is_open() ) {
-		ifs.close();
-		std::vector<std::string> v;
-		v.push_back(sFileName);
-		ConsoleLoad(v);
-	}
-	else {
-		//        std::cout << "Info: Settings file, " << sFileName << ", not found." << std::endl;
-		return false;
-	}
-
-	return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -276,7 +200,6 @@ IrrConsole::IrrConsole()
 	m_fOverlayPercent( CVarUtils::CreateCVar<float>(      "console.OverlayPercent", 0.75f ) ),
 	m_sHistoryFileName( CVarUtils::CreateCVar<> (         "console.history.HistoryFileName", std::string( CONSOLE_HISTORY_FILE ) ) ),
 	m_sScriptFileName( CVarUtils::CreateCVar<> (          "script.ScriptFileName", std::string( CONSOLE_SCRIPT_FILE ) ) ),
-	m_sSettingsFileName( CVarUtils::CreateCVar<> (        "console.settings.SettingsFileName", std::string( CONSOLE_SETTINGS_FILE ) ) ),
 	m_sInitialScriptFileName( CVarUtils::CreateCVar<> (   "console.InitialScriptFileName", std::string( CONSOLE_INITIAL_SCRIPT_FILE ) ) ),
 	m_pGuiFont(nullptr),
 	m_pDevice(nullptr)
@@ -290,7 +213,7 @@ IrrConsole::IrrConsole()
 IrrConsole::~IrrConsole()
 {
 	HistorySave();
-	SettingsSave();
+	//cvar는 엔진 차원에서 저장
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

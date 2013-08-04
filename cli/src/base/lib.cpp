@@ -66,19 +66,40 @@ void initConsoleFunction()
 {
 	CVarUtils::CreateCVar("driver_info", console::driverInfo, "Display Irrlicht Driver Info");	
 	CVarUtils::CreateCVar("play_bgm", console::playBGM, "Play test bgm");
+	CVarUtils::CreateCVar("save", console::save, "Save the CVars to a file");
+	CVarUtils::CreateCVar("load", console::load, "Load CVars from a file");
 }
 void initConsoleVar()
 {
 }
 
-void Lib::startUp(irr::IrrlichtDevice *dev)
+bool Lib::startUp()
 {
-	device = dev;
+	int &fullscreen = CVarUtils::CreateCVar<int>("display.fullscreen", 0);
+	int &screenWidth = CVarUtils::CreateCVar<int>("display.width", 1280);
+	int &screenHeight = CVarUtils::CreateCVar<int>("display.height", 800);
+
+	std::vector<std::string> varLoad;
+	varLoad.push_back("display");
+	console::load(varLoad);
+
+	bool stencil = true;
+	bool vsync = true;
+
+	device = createDevice(
+		video::EDT_OPENGL, 
+		core::dimension2d<u32>(screenWidth, screenHeight), 
+		32, 
+		(fullscreen > 0), stencil, vsync, nullptr);
+	if(device == nullptr) {
+		return false;
+	}
+
 	driver = device->getVideoDriver();
 	guienv = device->getGUIEnvironment();
 	smgr = device->getSceneManager();
 
-	bool deviceSupport = checkDeviceSupport(dev);
+	bool deviceSupport = checkDeviceSupport(device);
 	SR_ASSERT(deviceSupport == true);
 
 	//모든 초기화 중에서 콘솔이 가장 우선
@@ -118,10 +139,19 @@ void Lib::startUp(irr::IrrlichtDevice *dev)
 
 	//사운든는 우선순위 가장 낮음
 	audio->startUp();
+
+	return true;
 }
 
 void Lib::shutDown()
 {
+	vector<string> cvarNamespaceList;
+	cvarNamespaceList.push_back("console");
+	cvarNamespaceList.push_back("hmd");
+	cvarNamespaceList.push_back("display");
+	cvarNamespaceList.push_back("script");
+	console::save(cvarNamespaceList);
+
 	delete(stereoRenderer);
 	audio->shutDown();
 	headTracker->shutDown();

@@ -7,6 +7,7 @@
 #include "irr/head_tracker.h"
 #include "irr/hmd_event_receiver.h"
 #include "base/lib.h"
+#include "console/console_function.h"
 
 // sequence
 #include "game/sequence.h"
@@ -23,26 +24,17 @@ using namespace video;
 using namespace io;
 using namespace gui;
 
-// Configuration
-int SCREEN_WIDTH = 1280;
-int SCREEN_HEIGHT = 800;
-
 int entrypoint(int argc, char* argv[])
-{
-	bool fullscreen = false;
-	bool stencil = true;
-	bool vsync = true;
+{	
+	//detect memory leak
+	//_CrtSetBreakAlloc(27254);
 
-	// Check fullscreen
-	for (int i=1;i<argc;i++) fullscreen |= !strcmp("-f", argv[i]);
-	//fullscreen = true;
-		
-	IrrlichtDevice *device = createDevice(EDT_OPENGL, dimension2d<u32>(SCREEN_WIDTH, SCREEN_HEIGHT), 32, fullscreen, stencil, vsync, nullptr);
-	if (!device){
+	bool initResult = Lib::startUp();
+	if(initResult == false) {
 		return 1;
 	}
-	Lib::startUp(device);
 	
+	IrrlichtDevice *device = Lib::device;
 	IVideoDriver* driver = device->getVideoDriver();
 	IGUIEnvironment* guienv = device->getGUIEnvironment();
 	ISceneManager* smgr = device->getSceneManager();

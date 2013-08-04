@@ -44,4 +44,32 @@ bool playBGM(const std::vector<std::string> &args)
 		return false;
 	}
 }
+
+bool save(const std::vector<std::string> &args)
+{
+	std::string sFile = "cvars.xml";
+	const std::vector<std::string> &vAcceptedSubstrings = args;
+
+	printf( "Saving cvars to \"%s\".", sFile.c_str() );
+	if( !CVarUtils::Save( sFile, vAcceptedSubstrings ) ) {
+		printf( "Error saving file.\n" );
+		return false;
+	}
+
+	return true;
+}
+
+bool load(const std::vector<std::string> &args)
+{
+	std::string sFile = "cvars.xml";
+	const std::vector<std::string> &vAcceptedSubstrings = args;
+
+	printf( "Loading file \"%s\".\n", sFile.c_str() );
+	if( !CVarUtils::Load( sFile, vAcceptedSubstrings ) ) {
+		printf( "Error: Could not load \"%s\".", sFile.c_str() );
+	}
+	return true;
+}
+
+
 }	// namespace console

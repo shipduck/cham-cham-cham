@@ -17,6 +17,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include "stdafx.h"
 #include "hmd_stereo_render.h"
 #include "cvars/CVar.h"
+#include "util/console_func.h"
 
 #include <iostream>
 #include <cassert>
@@ -67,6 +68,9 @@ HMDDescriptorBind::HMDDescriptorBind()
 	distortionK_3(CVarUtils::CreateCVar<float>("hmd.distortionK_3", 0.24f)),
 	distortionK_4(CVarUtils::CreateCVar<float>("hmd.distortionK_4", 0.0f))
 {
+	std::vector<std::string> varLoad;
+	varLoad.push_back("hmd");
+	console::load(varLoad);
 }
 
 HMDDescriptor HMDDescriptorBind::convert() const

@@ -111,9 +111,6 @@ public:
 	bool HistorySave( std::string sFileName = "" );
 	bool HistoryLoad( std::string sFileName = "" );
 
-	bool SettingsSave(std::string sFileName = "");
-	bool SettingsLoad(std::string sFileName = "");
-
 	bool ScriptRun( std::string sFileName = "" );
 	bool ScriptSave( std::string sFileName = "" );
 	bool ScriptLoad( std::string sFileName = "" );
@@ -182,7 +179,6 @@ private:
 	float& m_fOverlayPercent;
 	std::string& m_sHistoryFileName;
 	std::string& m_sScriptFileName;
-	std::string& m_sSettingsFileName;
 	std::string& m_sInitialScriptFileName;
 
 	bool          m_bExecutingHistory; //Are we executing a script or not.

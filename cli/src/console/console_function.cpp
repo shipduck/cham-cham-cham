@@ -46,52 +46,6 @@ bool ConsoleFind( const std::vector<std::string> &vArgs )
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// First argument indicates the file name, the following arguments are
-//  used to choose a subset of variables to be saved using the provided
-//  substrings.
-//  Last argument can be used to be verbose when saving.
-bool ConsoleSave( const std::vector<std::string> &vArgs )
-{
-	std::string sFile = "cvars.xml";
-	std::vector< std::string > vAcceptedSubstrings;
-
-	if( vArgs.size() > 0 ) {
-		sFile = vArgs.at( 0 );
-		for( size_t i=1; i<vArgs.size(); i++ ) {
-			vAcceptedSubstrings.push_back( vArgs.at( i ) );
-		}
-	}
-
-	printf( "Saving cvars to \"%s\".", sFile.c_str() );
-	if( !CVarUtils::Save( sFile, vAcceptedSubstrings ) ) {
-		printf( "Error saving file.\n" );
-		return false;
-	}
-
-	return true;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Load CVars from a file.
-bool ConsoleLoad( const std::vector<std::string> &vArgs )
-{
-	std::string sFile = "cvars.xml";
-	std::vector< std::string > vAcceptedSubstrings;
-
-	if( vArgs.size() > 0 ) {
-		sFile = vArgs.at( 0 ); 
-		for( size_t i=1; i<vArgs.size(); i++ ) {
-			vAcceptedSubstrings.push_back( vArgs.at(i) );
-		}
-	}
-	printf( "Loading file \"%s\".", sFile.c_str() );
-	if( !CVarUtils::Load( sFile, vAcceptedSubstrings ) ) {
-		printf( "Error: Could not load \"%s\".", sFile.c_str() );
-	}
-	return true;
-}
-
-////////////////////////////////////////////////////////////////////////////////
 /// Exits program from command line.
 bool ConsoleExit( const std::vector<std::string> &vArgs )
 {
@@ -198,30 +152,4 @@ bool ConsoleScriptRun( const std::vector<std::string> &vArgs )
 	else {
 		return g_console->ScriptRun();
 	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///  Save the console settings.
-bool ConsoleSettingsSave( const std::vector<std::string> &vArgs )
-{
-	if( vArgs.size() != 0 ) {
-		return g_console->SettingsSave( vArgs.at( 0 ) );
-	}
-	else {
-		return g_console->SettingsSave();
-	}
-	return false;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Load console settings.
-bool ConsoleSettingsLoad( const std::vector<std::string> &vArgs )
-{
-	if( vArgs.size() != 0 ) {
-		return g_console->SettingsLoad( vArgs.at( 0 ) );
-	}
-	else {
-		return g_console->SettingsLoad();
-	}
-	return false;
 }

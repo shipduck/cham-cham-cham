@@ -29,6 +29,7 @@ TitleSequence::TitleSequence()
 	ITexture *quitBtnTex = Lib::driver->getTexture(quitBtnFileName);
 	ITexture *imgTex = Lib::driver->getTexture(gameImgFileName);
 
+	
 	IBillboardSceneNode *bill = nullptr;
 
 	auto comp = new hmd_ui::TestComp();
@@ -42,39 +43,40 @@ TitleSequence::TitleSequence()
 
 	// let the cube rotate and set some light settings
 	scene::ISceneNodeAnimator* anim = Lib::smgr->createRotationAnimator(core::vector3df(0.3f, 0.3f,0));
-
 	test->setPosition(core::vector3df(-30, 0, 100));
 	test->setMaterialFlag(video::EMF_LIGHTING, false); // disable dynamic lighting
 	test->addAnimator(anim);
 	anim->drop();
 	test->setMaterialTexture(0, comp->getTexture()); // set material of cube to render target
 
+	auto node = Lib::smgr->addEmptySceneNode(camNode);
 	{
 		//auto cylinderNode = new hmd_ui::CylinderMappingNode(Lib::smgr->getRootSceneNode(), Lib::smgr, 124);
-		auto cylinderNode = new hmd_ui::CylinderMappingNode(camNode, Lib::smgr, 0);
+		auto cylinderNode = new hmd_ui::CylinderMappingNode(node, Lib::smgr, 0);
 		cylinderNode->setPosition(core::vector3df(0, 5, 0));
-		anim = Lib::smgr->createRotationAnimator(core::vector3df(0, 1.0f,0));
+		anim = Lib::smgr->createRotationAnimator(core::vector3df(0, 0.4f,0));
 		cylinderNode->addAnimator(anim);
 		anim->drop();
 		auto tex = Lib::driver->getTexture("res/texture/sora2.png");
 		cylinderNode->radius = 30.0f;
 		cylinderNode->scale = 0.02f;
 		cylinderNode->setTexture(tex);
+
+		cylinderNode->drop();
 	}
+	
 	{
 		//auto cylinderNode = new hmd_ui::CylinderMappingNode(Lib::smgr->getRootSceneNode(), Lib::smgr, 124);
-		auto cylinderNode = new hmd_ui::CylinderMappingNode(camNode, Lib::smgr, 0);
+		auto cylinderNode = new hmd_ui::CylinderMappingNode(node, Lib::smgr, 0);
 		cylinderNode->setPosition(core::vector3df(0, 5, 0));
-		cylinderNode->setRotation(core::vector3df(0, 20, 0));
-		cylinderNode->addAnimator(anim);
-		anim->drop();
+		cylinderNode->setRotation(core::vector3df(0, 30, 0));
 		auto tex = Lib::driver->getTexture("res/texture/sora2.png");
 		cylinderNode->radius = 30.0f;
 		cylinderNode->scale = 0.02f;
 		cylinderNode->setTexture(tex);
+
+		cylinderNode->drop();
 	}
-
-
 	
 
 	/*

@@ -66,6 +66,9 @@
 // boost
 #include <boost/format.hpp>
 
+// cvar. 
+#include "cvars/CVar.h"
+
 // for unit test
 #include <gtest/gtest.h>
 #else

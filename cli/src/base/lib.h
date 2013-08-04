@@ -26,7 +26,7 @@ public:
 	static void warning(const char *fmt, ...);
 	static void warning(const std::string &text);
 
-	static void startUp(irr::IrrlichtDevice *dev);
+	static bool startUp();
 	static void shutDown();
 
 	// irrlicht
