@@ -152,7 +152,8 @@ void Lib::shutDown()
 	cvarNamespaceList.push_back("script");
 	console::save(cvarNamespaceList);
 
-	delete(stereoRenderer);
+	safeDelete(stereoRenderer);
+
 	audio->shutDown();
 	headTracker->shutDown();
 	eventReceiver->shutDown();

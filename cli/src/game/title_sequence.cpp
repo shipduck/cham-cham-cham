@@ -13,119 +13,71 @@ using namespace scene;
 //TODO: 리소스를 직접 파일명이 아니라 key-real file로 연결하는 중간단계가 필요할지도?
 const char *titleFileName = "res/menu/title.png";
 const char *playBtnFileName = "res/menu/play_btn.png";
+const char *playBtnSelectFileName = "res/menu/play_btn_select.png";
 const char *quitBtnFileName = "res/menu/quit_btn.png";
+const char *quitBtnSelectFileName = "res/menu/quit_btn.png";
 const char *gameImgFileName = "res/menu/starship_troopers_3-_marauder_2.jpg";
 
 scene::ISceneNode *test = nullptr;
 scene::ICameraSceneNode* fpsCamera = nullptr;
+hmd_ui::CylinderButtonNode *btnNode = nullptr;
 
 hmd_ui::Manager uiMgr;
 
 TitleSequence::TitleSequence()
 {
-	// 스프라이트 로딩. 하지만 오큘러스 대응 타이틀로 만들기 위해서 gui를 사용하지 않고 3d환경으로 구현한다
-	ITexture *titleTex = Lib::driver->getTexture(titleFileName);
-	ITexture *playBtnTex = Lib::driver->getTexture(playBtnFileName);
-	ITexture *quitBtnTex = Lib::driver->getTexture(quitBtnFileName);
-	ITexture *imgTex = Lib::driver->getTexture(gameImgFileName);
-
-	
-	IBillboardSceneNode *bill = nullptr;
-
 	auto comp = new hmd_ui::TestComp();
 	uiMgr.add(comp);
 
 	// add fps camera
 	auto camNode = Lib::smgr->addCameraSceneNodeFPS();
 
-	// create test cube
-	test = Lib::smgr->addCubeSceneNode(60);
+	{
+		// create test cube
+		test = Lib::smgr->addCubeSceneNode(60);
 
-	// let the cube rotate and set some light settings
-	scene::ISceneNodeAnimator* anim = Lib::smgr->createRotationAnimator(core::vector3df(0.3f, 0.3f,0));
-	test->setPosition(core::vector3df(-30, 0, 100));
-	test->setMaterialFlag(video::EMF_LIGHTING, false); // disable dynamic lighting
-	test->addAnimator(anim);
-	anim->drop();
-	test->setMaterialTexture(0, comp->getTexture()); // set material of cube to render target
+		// let the cube rotate and set some light settings
+		scene::ISceneNodeAnimator* anim = Lib::smgr->createRotationAnimator(core::vector3df(0.3f, 0.3f,0));
+		test->setPosition(core::vector3df(-30, 0, 100));
+		test->setMaterialFlag(video::EMF_LIGHTING, false); // disable dynamic lighting
+		test->addAnimator(anim);
+		anim->drop();
+		test->setMaterialTexture(0, comp->getTexture()); // set material of cube to render target
+	}
 
 	auto node = Lib::smgr->addEmptySceneNode(camNode);
 	{
+		auto tex = Lib::driver->getTexture("res/texture/sora2.png");
 		//auto cylinderNode = new hmd_ui::CylinderMappingNode(Lib::smgr->getRootSceneNode(), Lib::smgr, 124);
-		auto cylinderNode = new hmd_ui::CylinderMappingNode(node, Lib::smgr, 0);
+		auto cylinderNode = new hmd_ui::CylinderTextureNode(node, Lib::smgr, 0, tex);
 		cylinderNode->setPosition(core::vector3df(0, 5, 0));
-		anim = Lib::smgr->createRotationAnimator(core::vector3df(0, 0.4f,0));
+		auto anim = Lib::smgr->createRotationAnimator(core::vector3df(0, 0.4f,0));
 		cylinderNode->addAnimator(anim);
 		anim->drop();
-		auto tex = Lib::driver->getTexture("res/texture/sora2.png");
 		cylinderNode->radius = 30.0f;
-		cylinderNode->scale = 0.02f;
-		cylinderNode->setTexture(tex);
-
+		cylinderNode->rebuild();
 		cylinderNode->drop();
 	}
 	
 	{
+		auto tex = Lib::driver->getTexture("res/texture/sora2.png");
 		//auto cylinderNode = new hmd_ui::CylinderMappingNode(Lib::smgr->getRootSceneNode(), Lib::smgr, 124);
-		auto cylinderNode = new hmd_ui::CylinderMappingNode(node, Lib::smgr, 0);
+		auto cylinderNode = new hmd_ui::CylinderTextureNode(node, Lib::smgr, 0, tex);
 		cylinderNode->setPosition(core::vector3df(0, 5, 0));
 		cylinderNode->setRotation(core::vector3df(0, 30, 0));
-		auto tex = Lib::driver->getTexture("res/texture/sora2.png");
 		cylinderNode->radius = 30.0f;
-		cylinderNode->scale = 0.02f;
-		cylinderNode->setTexture(tex);
-
+		cylinderNode->rebuild();
 		cylinderNode->drop();
 	}
-	
-
-	/*
-	//rt
-	test = smgr->addCubeSceneNode(60);
-	auto anim = Lib::smgr->createRotationAnimator(core::vector3df(0.3f, 0.3f, 0));
-	test->setPosition(vector3df(0, 0, -100));
-	test->setMaterialFlag(video::EMF_LIGHTING, false);
-	test->addAnimator(anim);
-	anim->drop();
-
-	rt_ = Lib::driver->addRenderTargetTexture(core::dimension2d<u32>(256, 256), "RTT1");
-	test->setMaterialTexture(0, rt_);
-
-	fixedCam = Lib::smgr->addCameraSceneNode(0, vector3df(10, 10, -80), vector3df(-10, 10, -100));
-	*/
-	/*
 	{
-		float scale = 0.1f;
-		bill = smgr->addBillboardSceneNode();
-		bill->setMaterialTexture(0, titleTex);
-		bill->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-		bill->setMaterialFlag(video::EMF_LIGHTING, false);
-		bill->setMaterialFlag(video::EMF_ZBUFFER, false);	
-		bill->setPosition(vector3df(0, 0, 100));
-		auto titleSize = titleTex->getSize();
-		bill->setSize(dimension2df(titleSize.Width * scale, titleSize.Height * scale));
+		//button
+		btnNode = new hmd_ui::CylinderButtonNode(node, Lib::smgr, 0, playBtnFileName, playBtnSelectFileName);
+		btnNode->setPosition(core::vector3df(0, -5, 0));
+		btnNode->setRotation(core::vector3df(0, 30, 0));
+		btnNode->radius = 20.0f;
+		btnNode->rebuild();
+		btnNode->drop();
 	}
-	{
-		float scale = 0.1f;
-		bill = smgr->addBillboardSceneNode();
-		//bill->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-
-		SMaterial &mat = bill->getMaterial(0);
-		mat.ColorMaterial = video::ECM_NONE;
-		//mat.MaterialType = video::EMT_TRANSPARENT_MODUL;
-		mat.MaterialTypeParam = 0.01f;
-		mat.DiffuseColor.set(128, 255, 255, 0);
-
-		bill->setMaterialTexture(0, playBtnTex);
-		bill->setMaterialFlag(video::EMF_LIGHTING, false);
-		bill->setMaterialFlag(video::EMF_ZBUFFER, false);	
-		bill->setPosition(vector3df(100, 0, 100));
-		auto size = playBtnTex->getSize();
-		bill->setSize(dimension2df(size.Width * scale, size.Height * scale));	
-	}
-	*/
-
-	//
 }
 
 TitleSequence::~TitleSequence()
@@ -135,6 +87,15 @@ TitleSequence::~TitleSequence()
 
 void TitleSequence::update(int ms)
 {
+	static int elapsedTime = 0;
+	elapsedTime += ms;
+	if((elapsedTime / 1000) % 2 == 0) {
+		btnNode->selected = false;
+		btnNode->rebuild();
+	} else {
+		btnNode->selected = true;
+		btnNode->rebuild();
+	}
 }
 
 void TitleSequence::preDraw()

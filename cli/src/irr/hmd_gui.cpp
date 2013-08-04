@@ -106,14 +106,15 @@ TestComp::~TestComp()
 
 CylinderMappingNode::CylinderMappingNode(irr::scene::ISceneNode *parent, irr::scene::ISceneManager *smgr, irr::s32 id)
 	: ISceneNode(parent, smgr, id),
-	radius(10.0f),
-	scale(1.0f)
+	radius(10.0f)
 {
 	setAutomaticCulling(false);
 	box_.reset(core::vector3df(0, 0, 0));
 
 	material_.Wireframe = false;
+	//material_.Wireframe = true;
 	material_.Lighting = false;
+	material_.MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
 	//디버깅 삽질 줄일라고 일단 해제
 	//material_.BackfaceCulling = false;
 
@@ -122,13 +123,43 @@ CylinderMappingNode::CylinderMappingNode(irr::scene::ISceneNode *parent, irr::sc
 	cube->setIsDebugObject(true);
 	cube->setMaterialFlag(video::EMF_LIGHTING, false);
 }
-
-void CylinderMappingNode::setTexture(irr::video::ITexture *tex)
+CylinderMappingNode::~CylinderMappingNode()
 {
-	material_.setTexture(0, tex);
+}
 
-	vertexList_.clear();
-	indexList_.clear();
+void CylinderMappingNode::OnRegisterSceneNode()
+{
+	if(IsVisible) {
+		SceneManager->registerNodeForRendering(this);
+	}
+	ISceneNode::OnRegisterSceneNode();
+}
+void CylinderMappingNode::renderBasic(const vertex_list_type &vertexList,
+		const index_list_type &indexList)
+{
+	if(indexList.empty()) {
+		return;
+	}
+
+	video::IVideoDriver* driver = SceneManager->getVideoDriver();
+
+	driver->setMaterial(material_);
+	driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);	
+
+	driver->drawVertexPrimitiveList(
+		vertexList.data(), 
+		vertexList.size(), 
+		indexList.data(), 
+		indexList.size() - 2, 
+		video::EVT_STANDARD, scene::EPT_TRIANGLE_STRIP, video::EIT_16BIT);
+}
+void CylinderMappingNode::buildVertexList(irr::video::ITexture *tex, 
+		float scale, 
+		vertex_list_type *vertexList, 
+		index_list_type *indexList)
+{
+	vertexList->clear();
+	indexList->clear();
 
 	float width = tex->getSize().Width * scale;
 	float height = tex->getSize().Height * scale;
@@ -168,37 +199,100 @@ void CylinderMappingNode::setTexture(irr::video::ITexture *tex)
 		auto v1 = video::S3DVertex(x,-height/2.0f,z, sinVal,0,cosVal, white, u, 1);
 		auto v2 = video::S3DVertex(x,+height/2.0f,z, sinVal,0,cosVal, white, u, 0);
 
-		vertexList_.push_back(v1);
-		vertexList_.push_back(v2);
+		vertexList->push_back(v1);
+		vertexList->push_back(v2);
 	}
-	for(int i = 0 ; i < radList.size() * 2 ; ++i) {
-		indexList_.push_back(i);
+	for(size_t i = 0 ; i < radList.size() * 2 ; ++i) {
+		indexList->push_back(i);
 	}
 }
-void CylinderMappingNode::OnRegisterSceneNode()
+
+CylinderTextureNode::CylinderTextureNode(irr::scene::ISceneNode *parent, 
+		irr::scene::ISceneManager *smgr, 
+		irr::s32 id,
+		irr::video::ITexture *tex)
+	: CylinderMappingNode(parent, smgr, id),
+	tex_(tex)
 {
-	if(IsVisible) {
-		SceneManager->registerNodeForRendering(this);
-	}
-	ISceneNode::OnRegisterSceneNode();
+	tex_->grab();
+
+	material_.setTexture(0, tex);
+
+	float scale = 0.02f;
+	buildVertexList(tex, scale, &vertexList_, &indexList_);
 }
-void CylinderMappingNode::render()
+
+void CylinderTextureNode::rebuild()
 {
-	if(indexList_.empty()) {
-		return;
-	}
-
-	video::IVideoDriver* driver = SceneManager->getVideoDriver();
-
-	driver->setMaterial(material_);
-	driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);	
-
-	driver->drawVertexPrimitiveList(
-		vertexList_.data(), 
-		vertexList_.size(), 
-		indexList_.data(), 
-		indexList_.size() - 2, 
-		video::EVT_STANDARD, scene::EPT_TRIANGLE_STRIP, video::EIT_16BIT);
+	float scale = 0.02f;
+	buildVertexList(tex_, scale, &vertexList_, &indexList_);
+}
+CylinderTextureNode::~CylinderTextureNode()
+{
+	tex_->drop();
+	tex_ = nullptr;
 }
 
+void CylinderTextureNode::render()
+{
+	renderBasic(vertexList_, indexList_);
+}
+
+CylinderButtonNode::CylinderButtonNode(irr::scene::ISceneNode *parent, 
+									   irr::scene::ISceneManager *smgr, 
+									   irr::s32 id,
+									   const char *normalFile,
+									   const char *selectFile)
+	: CylinderMappingNode(parent, smgr, id),
+	normalTex_(nullptr),
+	selectTex_(nullptr),
+	selected(false)
+{
+	normalTex_ = Lib::driver->getTexture(normalFile);
+
+	if(selectFile != nullptr) {
+		selectTex_ = Lib::driver->getTexture(selectFile);
+	} else {
+		selectTex_ = normalTex_;
+	}
+
+	rebuild();
+}
+
+CylinderButtonNode::~CylinderButtonNode()
+{
+	if(selectTex_ != normalTex_) {
+		Lib::driver->removeTexture(normalTex_);
+		Lib::driver->removeTexture(selectTex_);
+		normalTex_ = nullptr;
+		selectTex_ = nullptr;
+	} else {
+		Lib::driver->removeTexture(normalTex_);
+		normalTex_ = nullptr;
+	}
+}
+
+void CylinderButtonNode::render()
+{
+	renderBasic(vertexList_, indexList_);
+}
+
+void CylinderButtonNode::rebuild()
+{
+	auto tex = getTexture();
+	material_.setTexture(0, tex);
+	float scale = 0.02f;
+	buildVertexList(tex, scale, &vertexList_, &indexList_);
+}
+
+irr::video::ITexture *CylinderButtonNode::getTexture()
+{
+	video::ITexture *tex = nullptr;
+	if(selected) {
+		tex = selectTex_;
+	} else {
+		tex = normalTex_;
+	}
+	return tex;
+}
 }	// namespace hmd_ui
