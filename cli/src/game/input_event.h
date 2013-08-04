@@ -1,3 +1,4 @@
+// Å¬nicode please
 #pragma once
 
 #include "util/event_receiver_manager.h"
@@ -44,7 +45,7 @@ private:
 
 	std::unique_ptr<KeyMapping> keyMapping_;
 
-	//keyboard down/up ÃßÀû. ÀÌº¥Æ® µé¾î¿Ã¶§¸¶´Ù °è¼Ó ÀúÀåÇØ¼­ ÀÌº¥Æ® Àç±¸¼ºÇÏ±â
+	//keyboard down/up ì¶”ì . ì´ë²¤íŠ¸ ë“¤ì–´ì˜¬ë•Œë§ˆë‹¤ ê³„ì† ì €ì¥í•´ì„œ ì´ë²¤íŠ¸ ì¬êµ¬ì„±í•˜ê¸°
 	bool leftKeyDown_;
 	bool rightKeyDown_;
 	bool upKeyDown_;
