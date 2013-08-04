@@ -40,7 +40,7 @@ template<> struct StringHolder<wchar_t> {
 template<typename T>
 class StringTable {
 public:
-	typedef typename T elem_type;
+	typedef T elem_type;
 	typedef typename StringHolder<T>::value_type string_type;
 	typedef CRC32 HashFunc;
 	typedef std::unordered_map<unsigned int, StrID<elem_type>* > TableType;
@@ -155,7 +155,7 @@ public:
 	template<typename T>
 	static T join(const T &str, const std::vector<T> &tokenlist) 
 	{
-		typename typedef T::value_type elem_type;
+		typedef typename T::value_type elem_type;
 		typename StringHolder<elem_type>::stringstream_type oss;
 		for (size_t i = 0 ; i < tokenlist.size() ; i++) {
 			oss << tokenlist[i];

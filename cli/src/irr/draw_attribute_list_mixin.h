@@ -10,7 +10,7 @@ void swapVectorElement(T &vec, int a, int b)
 {
 	SR_ASSERT(a >= 0 && a < static_cast<int>(vec.size()));
 	SR_ASSERT(b >= 0 && b < static_cast<int>(vec.size()));
-	T::value_type tmp = vec[a];
+	typename T::value_type tmp = vec[a];
 	vec[a] = vec[b];
 	vec[b] = tmp;
 }

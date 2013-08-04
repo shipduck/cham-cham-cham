@@ -20,13 +20,13 @@ public:
 	template<typename VertexListType, typename IndexListType>
 	static void createSimpleMesh(VertexListType &vertexList, IndexListType &indexList)
 	{
-		static_assert(std::is_same<vertex_type, VertexListType::value_type>::value == 1, "");
-		static_assert(std::is_same<index_type, IndexListType::value_type>::value == 1, "");
+		static_assert(std::is_same<vertex_type, typename VertexListType::value_type>::value == 1, "");
+		static_assert(std::is_same<index_type, typename IndexListType::value_type>::value == 1, "");
 		SR_ASSERT(vertexList.size() == kVertexCount);
 		SR_ASSERT(indexList.size() == kIndexCount);
 
-		const float drho = PI / Stacks;
-		const float dtheta = 2.0f * PI / Slices;
+		const float drho = irr::core::PI / Stacks;
+		const float dtheta = 2.0f * irr::core::PI / Slices;
 
 		//한방에 그릴수 잇도록하자.
 		//vertex list + index로 구성을 변경한다는 소리

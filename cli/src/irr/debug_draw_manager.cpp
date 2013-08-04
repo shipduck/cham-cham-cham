@@ -75,7 +75,7 @@ struct DebugDrawListFunctor< Typelist<T, U> > {
 			[](int a, int b) { return a > b; });
 
 		//index 순서대로 복사, 경과시간 고려해서 지나친항목은 무시
-		typedef std::remove_reference<decltype(durationDrawList)>::type DurationDrawList;
+		typedef typename std::remove_reference<decltype(durationDrawList)>::type DurationDrawList;
 		DurationDrawList nextDurationDrawList;
 		for(const auto &dataTuple : durationIndexList) {
 			int idx = std::get<1>(dataTuple);

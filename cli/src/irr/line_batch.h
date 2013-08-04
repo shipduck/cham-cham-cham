@@ -21,8 +21,8 @@ public:
 	template<typename VertexListType, typename IndexListType>
 	void addIndexedVertices(const VertexListType &vertList, const IndexListType &idxList)
 	{
-		static_assert(std::is_same<vertex_type, VertexListType::value_type>::value == 1, "");
-		static_assert(std::is_same<unsigned short, IndexListType::value_type>::value == 1, "");
+		static_assert(std::is_same<vertex_type, typename VertexListType::value_type>::value == 1, "");
+		static_assert(std::is_same<unsigned short, typename IndexListType::value_type>::value == 1, "");
 		addIndexedVertices(vertList, idxList, &vertexList, &indexList);
 	}
 
@@ -38,8 +38,8 @@ private:
 		std::vector<vertex_type> *targetVertexList,
 		std::vector<unsigned short> *targetIndexList)
 	{
-		static_assert(std::is_same<vertex_type, InputVertexListType::value_type>::value == 1, "");
-		static_assert(std::is_same<unsigned short, InputIndexListType::value_type>::value == 1, "");
+		static_assert(std::is_same<vertex_type, typename InputVertexListType::value_type>::value == 1, "");
+		static_assert(std::is_same<unsigned short, typename InputIndexListType::value_type>::value == 1, "");
 
 		int currVertexSize = targetVertexList->size();
 		std::copy(vertexList.begin(), vertexList.end(), std::back_inserter(*targetVertexList));
