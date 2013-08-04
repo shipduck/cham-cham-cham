@@ -49,6 +49,24 @@ extern Trie* g_pCVarTrie;
 
 void InitCVars();
 
+////////////////////////////////////////////////////////////////////////////////
+// Console functions must have the following signature
+typedef bool (*ConsoleFunc)( const std::vector<std::string> &args);
+
+////////////////////////////////////////////////////////////////////////////////
+inline std::ostream &operator<<(std::ostream &stream, ConsoleFunc &ob)
+{
+    ob = ob;
+    return stream;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+inline std::istream &operator>>(std::istream &stream, ConsoleFunc &ob)
+{
+    ob = ob;
+    return stream;
+}
+
 namespace CVarUtils {
     ////////////////////////////////////////////////////////////////////////////////
     /** These functions must be called to create a CVar, they return a reference to
@@ -207,23 +225,6 @@ void StringToCVarValue( T *t, const std::string &sValue )
     iss >> *t;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Console functions must have the following signature
-typedef bool (*ConsoleFunc)( const std::vector<std::string> &args);
-
-////////////////////////////////////////////////////////////////////////////////
-inline std::ostream &operator<<(std::ostream &stream, ConsoleFunc &ob)
-{ 
-    ob = ob;
-    return stream;  
-}
-
-////////////////////////////////////////////////////////////////////////////////
-inline std::istream &operator>>(std::istream &stream, ConsoleFunc &ob)
-{
-    ob = ob;
-    return stream;  
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace CVarUtils {
@@ -422,7 +423,7 @@ namespace CVarUtils {
         printf( "Creating variable: %s.\n", s  );
 #endif
         CVarUtils::CVar<T> *pCVar = new CVarUtils::CVar<T>( s, val, sHelp, false, pSerialisationFuncPtr, pDeserialisationFuncPtr );
-        g_pCVarTrie->Insert( s, (void *) pCVar );
+        g_pCVarTrie->Insert( s, (CVarUtils::IVar *) pCVar );
         return *(pCVar->m_pVarData);
     }
 
