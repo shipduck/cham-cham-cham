@@ -62,7 +62,9 @@ bool EventReceiverManager::OnEvent(const SHeadTrackingEvent &evt)
 bool EventReceiverManager::OnEvent(const irr::SEvent &evt)
 {
 	for(auto &receiver : highPriorityReceiverList_) {
-		receiver.receiver->OnEvent(evt);
+		if (receiver.receiver->OnEvent(evt)) {
+            return false;
+        }
 	}
 
 	switch(evt.EventType) {
@@ -74,7 +76,9 @@ bool EventReceiverManager::OnEvent(const irr::SEvent &evt)
 	}
 	
 	for(auto &receiver : lowPriorityReceiverList_) {
-		receiver.receiver->OnEvent(evt);
+		if (receiver.receiver->OnEvent(evt)) {
+            return false;
+        }
 	}
 
 	return false;
