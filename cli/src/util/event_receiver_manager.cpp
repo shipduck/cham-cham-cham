@@ -26,7 +26,7 @@ void EventReceiverManager::shutDown()
 	highPriorityReceiverList_.clear();
 }
 
-ICustomEventReceiver *EventReceiverManager::addReceiver(ICustomEventReceiver *receiver, int priority)
+ICustomEventReceiver *EventReceiverManager::attachReceiver(ICustomEventReceiver *receiver, int priority)
 {
 	SR_ASSERT(receiver != nullptr)
 
@@ -39,13 +39,40 @@ ICustomEventReceiver *EventReceiverManager::addReceiver(ICustomEventReceiver *re
 	SPriorityEventReceiver tmp;
 	tmp.receiver.reset(receiver);
 	tmp.priority = priority;
-	receiverList->push_back(std::move(tmp));
-
-	std::sort(receiverList->begin(), receiverList->end(),
-		[](const SPriorityEventReceiver &a, const SPriorityEventReceiver &b) {
-			return a.priority < b.priority;
-	});
+	receiverList->insert(std::move(tmp));
 	return receiver;
+}
+
+bool EventReceiverManager::detachReceiver(ICustomEventReceiver *receiver)
+{
+    auto receiverPred = [receiver](const PriorityReceiverListType::value_type &val)->bool
+    {
+        return val.receiver.get() == receiver;
+    };
+    auto receiverRemover = [receiverPred](PriorityReceiverListType &receiverList)->bool
+    {
+        auto priorityReceiverEndItr = receiverList.end();
+        auto priorityReceiverItr =
+            std::find_if(receiverList.begin(), priorityReceiverEndItr, receiverPred);
+        if (priorityReceiverItr != priorityReceiverEndItr)
+        {
+            receiverList.erase(priorityReceiverItr);
+            return true;
+        }
+        return false;
+    };
+    
+    if (receiverRemover(highPriorityReceiverList_))
+    {
+        return true;
+    }
+    
+    if (receiverRemover(lowPriorityReceiverList_))
+    {
+        return true;
+    }
+    
+    return false;
 }
 
 bool EventReceiverManager::OnEvent(const SHeadTrackingEvent &evt)
