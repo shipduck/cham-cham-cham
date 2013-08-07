@@ -12,6 +12,7 @@
 // sequence
 #include "game/sequence.h"
 #include "game/sequence_factory.h"
+#include "demo/demo_factory.h"
 
 #include "util/event_receiver_manager.h"
 #include "console/irr_console.h"
@@ -40,8 +41,10 @@ int entrypoint(int argc, char* argv[])
 	ISceneManager* smgr = device->getSceneManager();
 
 	//simple scene framework
-	SequenceFactory seqFactory;
-	std::unique_ptr<Sequence> sequence = seqFactory.create(kSequenceTitle);
+	//SequenceFactory seqFactory;
+	DemoFactory seqFactory;
+	std::unique_ptr<Sequence> sequence = seqFactory.create(kDemoCylinderHMD);
+	//std::unique_ptr<Sequence> sequence = seqFactory.create(kSequenceTitle);
 	//std::unique_ptr<Sequence> sequence = seqFactory.create(kSequenceDebugDraw);
 
 	DebugDrawer debugDrawer;

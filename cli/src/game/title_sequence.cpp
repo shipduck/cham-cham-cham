@@ -20,8 +20,6 @@ const char *gameImgFileName = "res/menu/starship_troopers_3-_marauder_2.jpg";
 
 scene::ISceneNode *test = nullptr;
 scene::ICameraSceneNode* fpsCamera = nullptr;
-hmd_ui::CylinderButtonNode *btnNode = nullptr;
-
 hmd_ui::Manager uiMgr;
 
 TitleSequence::TitleSequence()
@@ -44,40 +42,6 @@ TitleSequence::TitleSequence()
 		anim->drop();
 		test->setMaterialTexture(0, comp->getTexture()); // set material of cube to render target
 	}
-
-	auto node = Lib::smgr->addEmptySceneNode(camNode);
-	{
-		auto tex = Lib::driver->getTexture("res/texture/sora2.png");
-		//auto cylinderNode = new hmd_ui::CylinderMappingNode(Lib::smgr->getRootSceneNode(), Lib::smgr, 124);
-		auto cylinderNode = new hmd_ui::CylinderTextureNode(node, Lib::smgr, 0, tex);
-		cylinderNode->setPosition(core::vector3df(0, 5, 0));
-		auto anim = Lib::smgr->createRotationAnimator(core::vector3df(0, 0.4f,0));
-		cylinderNode->addAnimator(anim);
-		anim->drop();
-		cylinderNode->radius = 30.0f;
-		cylinderNode->rebuild();
-		cylinderNode->drop();
-	}
-	
-	{
-		auto tex = Lib::driver->getTexture("res/texture/sora2.png");
-		//auto cylinderNode = new hmd_ui::CylinderMappingNode(Lib::smgr->getRootSceneNode(), Lib::smgr, 124);
-		auto cylinderNode = new hmd_ui::CylinderTextureNode(node, Lib::smgr, 0, tex);
-		cylinderNode->setPosition(core::vector3df(0, 5, 0));
-		cylinderNode->setRotation(core::vector3df(0, 30, 0));
-		cylinderNode->radius = 30.0f;
-		cylinderNode->rebuild();
-		cylinderNode->drop();
-	}
-	{
-		//button
-		btnNode = new hmd_ui::CylinderButtonNode(node, Lib::smgr, 0, playBtnFileName, playBtnSelectFileName);
-		btnNode->setPosition(core::vector3df(0, -5, 0));
-		btnNode->setRotation(core::vector3df(0, 30, 0));
-		btnNode->radius = 20.0f;
-		btnNode->rebuild();
-		btnNode->drop();
-	}
 }
 
 TitleSequence::~TitleSequence()
@@ -87,15 +51,7 @@ TitleSequence::~TitleSequence()
 
 void TitleSequence::update(int ms)
 {
-	static int elapsedTime = 0;
-	elapsedTime += ms;
-	if((elapsedTime / 1000) % 2 == 0) {
-		btnNode->selected = false;
-		btnNode->rebuild();
-	} else {
-		btnNode->selected = true;
-		btnNode->rebuild();
-	}
+	
 }
 
 void TitleSequence::preDraw()
