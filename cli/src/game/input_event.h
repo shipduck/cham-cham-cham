@@ -2,8 +2,15 @@
 #pragma once
 
 #include "util/event_receiver_manager.h"
+#include "key_mapping.h"
 
-class KeyMapping;
+struct ButtonEvent {
+    ButtonEvent() : buttonState{{0}} {}
+    std::array<bool, KeyMapping::kKeyTypeCount - 4> buttonState;
+    void setButton(const KeyMapping::eKeyType button, const bool isDown);
+    
+    ButtonEvent merge(const ButtonEvent &o) const;
+};
 
 struct MoveEvent {
 	MoveEvent() : forwardBackward(0.0f), leftRight(0.0f) {}
@@ -42,13 +49,12 @@ private:
 
 	LookEvent mouseLookEvent_;
 	LookEvent joystickLookEvent_;
+    
+    ButtonEvent buttonEvent_;
 
 	std::unique_ptr<KeyMapping> keyMapping_;
 
-	//keyboard down/up 추적. 이벤트 들어올때마다 계속 저장해서 이벤트 재구성하기
-	bool leftKeyDown_;
-	bool rightKeyDown_;
-	bool upKeyDown_;
-	bool downKeyDown_;
+    //keyboard down/up 추적. 이벤트 들어올때마다 계속 저장해서 이벤트 재구성하기
+    bool keyDownStatus_[KeyMapping::kKeyTypeCount];
 };
 
