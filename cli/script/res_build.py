@@ -4,6 +4,8 @@
 import os
 from os import walk
 import copy
+import sys
+from cStringIO import StringIO
 
 # 무시할 파일명은 대소문자 무시
 IGNORE_DIR_NAME = ['osx']
@@ -88,7 +90,7 @@ class Package(object):
 
         print indent+ '}'
 
-def main():
+def get_res_header_content():
     res_dir = get_res_dir()
     res_file_list = create_res_file_list(res_dir)
     #for x in res_file_list:
@@ -100,10 +102,40 @@ def main():
         assert node.package == x.package
         node.res_list.append(x)
 
-    # print stdout
+
+    # setup the environment
+    backup = sys.stdout
+
+    sys.stdout = StringIO()     # capture output
     print '#pragma once'
     print '#include <string>'
     root.render_stdout()
+    out = sys.stdout.getvalue() # release output
+
+    sys.stdout.close()  # close the stream
+    sys.stdout = backup # restore original stdout
+
+    return out
+
+def main():
+    out = get_res_header_content()
+
+    curr_dir = os.path.dirname(__file__)
+    target_file = os.path.join(curr_dir, '..', 'src', 'res.h')
+    if os.path.exists(target_file) == False:
+        f = open(target_file, 'w')
+        f.write(out)
+        f.close()
+        return
+
+    with open(target_file, 'r') as prev_file:
+        prev = prev_file.read()
+        if prev == out:
+            return
+
+    f = open(target_file, 'w')
+    f.write(out)
+    f.close()
 
 def filter_filename_list(filenames):
     for ignore in IGNORE_FILE_NAME:
