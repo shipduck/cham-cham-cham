@@ -11,8 +11,9 @@ using namespace scene;
 
 CylinderButtonNode *btnNode = nullptr;
 
-const char *playBtnFileName = "res/menu/play_btn.png";
-const char *playBtnSelectFileName = "res/menu/play_btn_select.png";
+// 임시코딩. 리소스 파일명 자동매핑을 짜면 필요없어질거다
+#define playBtnFileName "res/menu/play_btn.png"
+#define playBtnSelectFileName "res/menu/play_btn_select.png"
 
 CylinderHMDSequence::CylinderHMDSequence()
 {
