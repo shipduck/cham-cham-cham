@@ -55,3 +55,6 @@ cvars.xml
 # resource
 cli/res
 cli/src/res.h
+
+#python
+*.pyc

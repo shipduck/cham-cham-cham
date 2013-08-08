@@ -45,10 +45,14 @@ class Package(object):
     def find_node(self, package):
         assert len(package) >= len(self.package)
 
+        # 같은 레벨의 노드이면 package만 같아도 동일한것으로 볼수있다
         if len(package) == len(self.package):
             if package == self.package:
                 return self
+            else:
+                return None
 
+        # package 관계도를 볼떄 parent-child가 될리 없는 경우
         if package[:len(self.package)] != self.package:
             return None
 
@@ -62,7 +66,12 @@ class Package(object):
             self.child_list.append(node)
             return node
 
-        return None
+        # a,b,c 패키지인데 a,b가 없을떄 진입한다.
+        # 이경우, 빈 노드를 추가해주면 될듯
+        for x in range(1, len(package)):
+            parent_package = package[0:x]
+            self.find_node(parent_package)
+        return self.find_node(package)
 
     def render_stdout(self):
         indent_level = len(self.package) - 1
