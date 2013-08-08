@@ -10,14 +10,6 @@ using namespace core;
 using namespace video;
 using namespace scene;
 
-//TODO: 리소스를 직접 파일명이 아니라 key-real file로 연결하는 중간단계가 필요할지도?
-const char *titleFileName = "res/menu/title.png";
-const char *playBtnFileName = "res/menu/play_btn.png";
-const char *playBtnSelectFileName = "res/menu/play_btn_select.png";
-const char *quitBtnFileName = "res/menu/quit_btn.png";
-const char *quitBtnSelectFileName = "res/menu/quit_btn.png";
-const char *gameImgFileName = "res/menu/starship_troopers_3-_marauder_2.jpg";
-
 scene::ISceneNode *test = nullptr;
 scene::ICameraSceneNode* fpsCamera = nullptr;
 hmd_ui::Manager uiMgr;

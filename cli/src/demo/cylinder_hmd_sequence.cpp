@@ -11,10 +11,6 @@ using namespace scene;
 
 CylinderButtonNode *btnNode = nullptr;
 
-// 임시코딩. 리소스 파일명 자동매핑을 짜면 필요없어질거다
-#define playBtnFileName "res/menu/play_btn.png"
-#define playBtnSelectFileName "res/menu/play_btn_select.png"
-
 CylinderHMDSequence::CylinderHMDSequence()
 {
 	// add fps camera
@@ -22,7 +18,7 @@ CylinderHMDSequence::CylinderHMDSequence()
 
 	auto node = Lib::smgr->addEmptySceneNode(camNode);
 	{
-		auto tex = Lib::driver->getTexture("res/texture/sora2.png");
+		auto tex = Lib::driver->getTexture(res::texture::SORA2_PNG.c_str());
 		//auto cylinderNode = new hmd_ui::CylinderMappingNode(Lib::smgr->getRootSceneNode(), Lib::smgr, 124);
 		auto cylinderNode = new CylinderTextureNode(node, Lib::smgr, 0, tex);
 		cylinderNode->setPosition(core::vector3df(0, 5, 0));
@@ -35,7 +31,7 @@ CylinderHMDSequence::CylinderHMDSequence()
 	}
 	
 	{
-		auto tex = Lib::driver->getTexture("res/texture/sora2.png");
+		auto tex = Lib::driver->getTexture(res::texture::SORA2_PNG.c_str());
 		//auto cylinderNode = new hmd_ui::CylinderMappingNode(Lib::smgr->getRootSceneNode(), Lib::smgr, 124);
 		auto cylinderNode = new CylinderTextureNode(node, Lib::smgr, 0, tex);
 		cylinderNode->setPosition(core::vector3df(0, 5, 0));
@@ -46,7 +42,7 @@ CylinderHMDSequence::CylinderHMDSequence()
 	}
 	{
 		//button
-		btnNode = new CylinderButtonNode(node, Lib::smgr, 0, playBtnFileName, playBtnSelectFileName);
+		btnNode = new CylinderButtonNode(node, Lib::smgr, 0, res::menu::PLAY_BTN_PNG.c_str(), res::menu::PLAY_BTN_SELECT_PNG.c_str());
 		btnNode->setPosition(core::vector3df(0, -5, 0));
 		btnNode->setRotation(core::vector3df(0, 30, 0));
 		btnNode->radius = 20.0f;
