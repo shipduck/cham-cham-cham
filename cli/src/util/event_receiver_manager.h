@@ -27,9 +27,12 @@ public:
 		}
 		std::unique_ptr<ICustomEventReceiver> receiver;
 		int priority;
+        bool operator<(const SPriorityEventReceiver& other) const {
+            return priority < other.priority;
+        }
 	};
 
-	typedef std::vector<SPriorityEventReceiver> PriorityReceiverListType;
+	typedef std::multiset<SPriorityEventReceiver> PriorityReceiverListType;
 
 public:
 	EventReceiverManager();
@@ -45,7 +48,8 @@ public:
 	priority >= 0은 low priority로 분리해서 디바이스 이후에 처리됨
 	priority가 낮을수록 우선순위 높다
 	*/
-	ICustomEventReceiver *addReceiver(ICustomEventReceiver *receiver, int priority=0);
+	ICustomEventReceiver *attachReceiver(ICustomEventReceiver *receiver, int priority=0);
+    bool detachReceiver(ICustomEventReceiver *receiver);
 
 public:
 	const JoystickDevice &getJoystickDev() const { return *joystickDev_; }

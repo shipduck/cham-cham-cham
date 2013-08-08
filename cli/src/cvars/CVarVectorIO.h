@@ -30,13 +30,38 @@ namespace CVarUtils {
         std::istream &operator>>(std::istream &stream, std::vector<T>& vT ) {
 
         std::string sBuf; // Have a buffer string
-  
-        vT.clear();
+            
+        uint8_t mode = 0;
         
         // Only works for splitting with whitespaces
         while( stream >> sBuf ) {
-            if( sBuf.find( "[" ) == std::string::npos &&
-                sBuf.find( "]" ) == std::string::npos ) {
+            if( sBuf.find( "[" ) != std::string::npos ) {
+                if( mode == 0 ) {
+                    mode = 1;
+                    vT.clear();
+                } else {
+                    puts( "ERROR syntax error\n" );
+                    break;
+                }
+            } else if ( sBuf.find( "]" ) != std::string::npos ) {
+                if( mode == 1) {
+                    break;
+                } else {
+                    puts( "ERROR syntax erorr\n" );
+                    break;
+                }
+            } else if ( sBuf.find( "<<" ) != std::string::npos ) {
+                mode = 2;
+            } else if ( sBuf.find( ">>" ) != std::string::npos ) {
+                mode = 3;
+            } else if( mode != 0 ) {
+                
+                if( mode == 3 ) {
+                    unsigned int idx;
+                    std::stringstream( sBuf ) >> idx;
+                    vT.erase(vT.begin() + idx);
+                    continue;
+                }
                 
                 T TVal;
                 std::stringstream( sBuf ) >> TVal;
@@ -47,7 +72,7 @@ namespace CVarUtils {
                             sBuf.c_str() );
                     continue;
                 }
-
+                
                 vT.push_back( TVal );
             }
         }

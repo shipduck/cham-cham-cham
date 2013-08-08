@@ -65,6 +65,8 @@
 
 // boost
 #include <boost/format.hpp>
+#include <boost/bimap.hpp>
+#include <boost/assign.hpp>
 
 // cvar. 
 #include "cvars/CVar.h"
