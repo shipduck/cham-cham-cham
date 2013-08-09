@@ -5,7 +5,9 @@
 #include "key_mapping.h"
 
 struct ButtonEvent {
-    ButtonEvent() : buttonState{{0}} {}
+    ButtonEvent() {
+		std::fill(buttonState.begin(), buttonState.end(), false);
+	}
     std::array<bool, KeyMapping::kKeyTypeCount - 4> buttonState;
     void setButton(const KeyMapping::eKeyType button, const bool isDown);
     

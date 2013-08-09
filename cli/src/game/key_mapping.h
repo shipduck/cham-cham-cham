@@ -6,6 +6,8 @@
 
 struct KeyMapData {
 	//keyboard event
+	KeyMapData() : keyCode(irr::KEY_RETURN) {}
+	KeyMapData(irr::EKEY_CODE code) : keyCode(code) {}
 	irr::EKEY_CODE keyCode;
 };
 

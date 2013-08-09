@@ -1,6 +1,7 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
 #include "key_mapping.h"
+#include "base/math_helper.h"
 
 using namespace irr;
 
@@ -19,7 +20,7 @@ std::istream &operator>>( std::istream &stream, KeyMapData& mKeyMap ) {
             || (state == 2 && buf == 'Y')
             || (state == 3 && buf == '(')) {
             state++;
-        } else if (state == 4 && isnumber(buf)) {
+		} else if (state == 4 && isdigit(buf)) {
             strBuf += buf;
         } else if (state == 4 && buf == ')') {
             break;
@@ -67,16 +68,28 @@ KeyMapping::KeyMapping()
     // keyboard
     
 	//forward
-    keyBoardKeyMapList_[kForwardKey] = {{irr::KEY_UP}, {irr::KEY_KEY_W}};
+	keyMapList_t forwardKeyMap;
+	forwardKeyMap.push_back(KeyMapData(irr::KEY_UP));
+	forwardKeyMap.push_back(KeyMapData(irr::KEY_KEY_W));
+    keyBoardKeyMapList_[kForwardKey] = forwardKeyMap;
     
     //backward
-    keyBoardKeyMapList_[kBackwardKey] = {{irr::KEY_DOWN}, {irr::KEY_KEY_S}};
+	keyMapList_t backwardKeyMap;
+	backwardKeyMap.push_back(KeyMapData(irr::KEY_DOWN));
+	backwardKeyMap.push_back(KeyMapData(irr::KEY_KEY_S));
+	keyBoardKeyMapList_[kBackwardKey] = backwardKeyMap;
     
     //left
-    keyBoardKeyMapList_[kLeftKey] = {{irr::KEY_LEFT}, {irr::KEY_KEY_A}};
+	keyMapList_t leftKeyMap;
+	leftKeyMap.push_back(KeyMapData(irr::KEY_LEFT));
+	leftKeyMap.push_back(KeyMapData(irr::KEY_KEY_A));
+	keyBoardKeyMapList_[kLeftKey] = leftKeyMap;
     
     //right
-    keyBoardKeyMapList_[kRightKey] = {{irr::KEY_RIGHT}, {irr::KEY_KEY_D}};
+	keyMapList_t rightKeyMap;
+	rightKeyMap.push_back(KeyMapData(irr::KEY_RIGHT));
+	rightKeyMap.push_back(KeyMapData(irr::KEY_KEY_D));
+	keyBoardKeyMapList_[kRightKey] = rightKeyMap;
     
     CVarUtils::AttachCVar("input.keyboard.forward", &keyBoardKeyMapList_[kForwardKey]);
     CVarUtils::AttachCVar("input.keyboard.backward", &keyBoardKeyMapList_[kBackwardKey]);

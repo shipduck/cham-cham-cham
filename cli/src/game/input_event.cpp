@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "input_event.h"
 #include "base/lib.h"
+#include "base/template_lib.h"
 
 using namespace irr;
 
@@ -59,10 +60,9 @@ inline bool isSetBinaryFlag(const u32& flags, const u32 offset) {
 }
 
 GameEventReceiver::GameEventReceiver()
-: keyDownStatus_{0},
-	keyMapping_(new KeyMapping())
+: keyMapping_(new KeyMapping())
 {
-	
+	std::fill(keyDownStatus_, keyDownStatus_ + getArraySize(keyDownStatus_), false);
 }
 
 GameEventReceiver::~GameEventReceiver()
@@ -122,8 +122,8 @@ void GameEventReceiver::onEvent(const irr::SEvent::SJoystickEvent &evt)
 		YMovement = 0.0f;
 	}
 
-	const float povDegrees = ((-evt.POV / 100.0) - 90) * 180 / M_PI;
-	if(povDegrees < 2 * M_PI && povDegrees > 0) {
+	const float povDegrees = ((-evt.POV / 100.0) - 90) * 180 / irr::core::PI;
+	if(povDegrees < 2 * irr::core::PI && povDegrees > 0) {
         XMovement = cosf(povDegrees);
         YMovement = sinf(povDegrees);
 	}
