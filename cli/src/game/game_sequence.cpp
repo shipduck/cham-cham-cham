@@ -66,7 +66,7 @@ GameSequence::GameSequence()
 	
 	// event receiver 등록
 	// TODO 이벤트 리시버 제거기능이 없으면 씬 교체시에 문제 발생함
-	eventReceiver_ = static_cast<GameEventReceiver*>(Lib::eventReceiver->addReceiver(new GameEventReceiver(), 0));
+	eventReceiver_ = static_cast<GameEventReceiver*>(Lib::eventReceiver->attachReceiver(new GameEventReceiver(), 0));
 }
 
 GameSequence::~GameSequence()

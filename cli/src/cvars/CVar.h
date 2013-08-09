@@ -39,6 +39,7 @@
 #include "CVarVersion.h"
 #include "Trie.h"
 #include "TrieNode.h"
+#include "CVarVectorIO.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // A global Trie structure holds all of the variables organized by their string

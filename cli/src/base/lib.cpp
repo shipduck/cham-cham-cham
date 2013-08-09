@@ -118,11 +118,11 @@ bool Lib::startUp()
 	device->setEventReceiver(eventReceiver);
 
 	// 이벤트 잡는게 콘솔 이벤트 잡는거는 필수요소
-	eventReceiver->addReceiver(new ConsoleEventReceiver(), 0);
+	eventReceiver->attachReceiver(new ConsoleEventReceiver(), 0);
 
 	// f2로 hmd모드 전환하는거. 나중에 분리 가능
 	hmdEventReceiver = new HMDEventReceiver();
-	eventReceiver->addReceiver(hmdEventReceiver, 0);
+	eventReceiver->attachReceiver(hmdEventReceiver, 0);
 
 	//Oculus Rift Head Tracking
 	headTracker->startUp();

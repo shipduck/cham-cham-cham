@@ -1,7 +1,6 @@
 ﻿// Ŭnicode please
 #include "stdafx.h"
 #include "input_event.h"
-#include "key_mapping.h"
 #include "base/lib.h"
 
 using namespace irr;
@@ -31,11 +30,36 @@ LookEvent LookEvent::merge(const LookEvent &o) const
 	return tmp;
 }
 
-GameEventReceiver::GameEventReceiver() 
-	: leftKeyDown_(false),
-	rightKeyDown_(false),
-	upKeyDown_(false),
-	downKeyDown_(false),
+void ButtonEvent::setButton(const KeyMapping::eKeyType button, const bool isDown)
+{
+    assert(button < KeyMapping::kKeyTypeCount - 4);
+    if (button == KeyMapping::kUndefinedKey) {
+        return;
+    }
+    if (buttonState[button] != isDown) {
+        std::cout << button << " : " << (isDown?"down":"up") << std::endl; // for Debug
+        
+        buttonState[button] = isDown;
+    }
+}
+
+ButtonEvent ButtonEvent::merge(const ButtonEvent &o) const
+{
+    ButtonEvent tmp = *this;
+    
+    for(uint8_t i(0); i < KeyMapping::kKeyTypeCount - 4; i++) {
+        tmp.buttonState[i] |= o.buttonState[i];
+    }
+    
+    return tmp;
+}
+
+inline bool isSetBinaryFlag(const u32& flags, const u32 offset) {
+    return (flags & offset) == offset;
+}
+
+GameEventReceiver::GameEventReceiver()
+: keyDownStatus_{0},
 	keyMapping_(new KeyMapping())
 {
 	
@@ -98,18 +122,10 @@ void GameEventReceiver::onEvent(const irr::SEvent::SJoystickEvent &evt)
 		YMovement = 0.0f;
 	}
 
-	const u16 povDegrees = evt.POV / 100;
-	if(povDegrees < 360) {
-		if(povDegrees > 0 && povDegrees < 180) {
-			XMovement = 1.f;
-		} else if(povDegrees > 180) {
-			XMovement = -1.f;
-		}
-		if(povDegrees > 90 && povDegrees < 270) {
-			YMovement = -1.f;
-		} else if(povDegrees > 270 || povDegrees < 90) {
-			YMovement = +1.f;
-		}
+	const float povDegrees = ((-evt.POV / 100.0) - 90) * 180 / M_PI;
+	if(povDegrees < 2 * M_PI && povDegrees > 0) {
+        XMovement = cosf(povDegrees);
+        YMovement = sinf(povDegrees);
 	}
 
 	moveEvent.forwardBackward = YMovement;
@@ -117,6 +133,8 @@ void GameEventReceiver::onEvent(const irr::SEvent::SJoystickEvent &evt)
 
 	float XView = joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_R>();
 	float YView = joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_U>();
+    printf("%f\n", joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_Z>());
+    printf("%f\n", joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_V>());
 
 	YView = 0.0f;	//위아래 보는거 구현하기전까지는 막아놓기
 	if(fabs(XView) < DEAD_ZONE) {
@@ -136,12 +154,13 @@ void GameEventReceiver::onEvent(const irr::SEvent::SJoystickEvent &evt)
 		Moved = false;
 	}
 	*/
+    for(const KeyMapping::joystickMap_t::value_type &joystickMapValue : keyMapping_->getJoystickKeyMap()) {
+        buttonEvent_.setButton(joystickMapValue.second, isSetBinaryFlag(evt.ButtonStates, joystickMapValue.first));
+    }
 }
 
 void GameEventReceiver::onEvent(const irr::SEvent::SKeyInput &evt) 
 {
-	MoveEvent &moveEvent = keyboardMoveEvent_;
-
 	struct KeyCompFunctor {
 		KeyCompFunctor(irr::EKEY_CODE key) : key(key) {}
 		irr::EKEY_CODE key;
@@ -150,47 +169,28 @@ void GameEventReceiver::onEvent(const irr::SEvent::SKeyInput &evt)
 			return (a.keyCode == key);
 		}
 	};
-
+    
 	//processing move event
-	auto forwardIt = keyMapping_->getForwardKeyList().begin();
-	auto forwardEndit = keyMapping_->getForwardKeyList().end();
-	auto forwardFound = std::find_if(forwardIt, forwardEndit, KeyCompFunctor(evt.Key));
-	if(forwardFound != forwardEndit) {
-		upKeyDown_ = evt.PressedDown;
-	}
-
-	auto backwardIt = keyMapping_->getBackwardKeyList().begin();
-	auto backwardEndit = keyMapping_->getBackwardKeyList().end();
-	auto backwardFound = std::find_if(backwardIt, backwardEndit, KeyCompFunctor(evt.Key));
-	if(backwardFound != backwardEndit) {
-		downKeyDown_ = evt.PressedDown;
-	}
-
-	auto leftIt = keyMapping_->getLeftKeyList().begin();
-	auto leftEndit = keyMapping_->getLeftKeyList().end();
-	auto leftFound = std::find_if(leftIt, leftEndit, KeyCompFunctor(evt.Key));
-	if(leftFound != leftEndit) {
-		leftKeyDown_ = evt.PressedDown;
-	}
-
-	auto rightIt = keyMapping_->getRightKeyList().begin();
-	auto rightEndit = keyMapping_->getRightKeyList().end();
-	auto rightFound = std::find_if(rightIt, rightEndit, KeyCompFunctor(evt.Key));
-	if(rightFound != rightEndit) {
-		rightKeyDown_ = evt.PressedDown;
-	}
+    for(const KeyMapping::keyMap_t::value_type &keyMapList : keyMapping_->getKeyMap()){
+        auto keyItr = keyMapList.second.begin();
+        auto keyEndItr = keyMapList.second.end();
+        auto keyFound = std::find_if(keyItr, keyEndItr, KeyCompFunctor(evt.Key));
+        if(keyFound != keyEndItr) {
+            keyDownStatus_[keyMapList.first] = evt.PressedDown;
+        }
+    }
 
 	MoveEvent moveEvt;
-	if(leftKeyDown_) {
+	if(keyDownStatus_[KeyMapping::kLeftKey]) {
 		moveEvt.leftRight -= 1.0f;
 	}
-	if(rightKeyDown_) {
+	if(keyDownStatus_[KeyMapping::kRightKey]) {
 		moveEvt.leftRight += 1.0f;
 	}
-	if(upKeyDown_) {
+	if(keyDownStatus_[KeyMapping::kForwardKey]) {
 		moveEvt.forwardBackward += 1.0f;
 	}
-	if(downKeyDown_) {
+	if(keyDownStatus_[KeyMapping::kBackwardKey]) {
 		moveEvt.forwardBackward -= 1.0f;
 	}
 	keyboardMoveEvent_ = moveEvt;
