@@ -34,10 +34,15 @@ int entrypoint(int argc, char* argv[])
 	//그렇다고 시퀀스 선택을 엔진생성 다음으로 넘기면
 	//엔진 GUI쪽으로 포커스가 넘어가버리니까 귀찮아서 시퀀스 번호만 먼저 고르게함
 	SequenceFactory seqFactory;
-	SequenceType seqType = seqFactory.select();
+	bool forceFullscreen = false;
+	SequenceType seqType = seqFactory.select(&forceFullscreen);
 
+	EngineParam engineParam;
+	if(forceFullscreen) {
+		engineParam.fullscreen = 1;
+	}
 
-	bool initResult = Lib::startUp();
+	bool initResult = Lib::startUp(engineParam);
 	if(initResult == false) {
 		return 1;
 	}

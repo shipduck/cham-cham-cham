@@ -16,5 +16,5 @@ class Sequence;
 class SequenceFactory {
 public:
 	std::unique_ptr<Sequence> create(SequenceType type) const;
-	SequenceType select() const;
+	SequenceType select(bool *fullscreen) const;
 };

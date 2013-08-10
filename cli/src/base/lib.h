@@ -14,6 +14,16 @@ class HMDStereoRender;
 미리 연결시켜놧다. 클래스로 선언되었지만 사실상 namespace 처럼 사용
 idlib/idLib.h에서 베낀 컨셉
 */
+
+class EngineParam {
+public:
+	EngineParam();
+
+	int &fullscreen;
+	int &screenWidth;
+	int &screenHeight;
+};
+
 class Lib {
 public:
 	static IrrConsole *console;
@@ -26,7 +36,7 @@ public:
 	static void warning(const char *fmt, ...);
 	static void warning(const std::string &text);
 
-	static bool startUp();
+	static bool startUp(const EngineParam &param);
 	static void shutDown();
 
 	// irrlicht

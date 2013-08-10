@@ -43,24 +43,34 @@ std::unique_ptr<Sequence> SequenceFactory::create(SequenceType type) const
 	return unique_ptr<Sequence>(seq);
 }
 
-SequenceType SequenceFactory::select() const
+SequenceType SequenceFactory::select(bool *fullscreen) const
 {
+	SR_ASSERT(fullscreen != nullptr);
 	//키보드 입력을 받아서 특정 demo sequence를 생성한다든가
 	//테스트 목족으로 sequence생성을 임의로 수정할떄
 	//이부분이 계속 diff에 걸리면 변경추적이 어려우니까
 	//작정하고 분리해놧음
 	ostringstream oss;
-	oss << "Select Sequence" << endl;
+	oss << "Select Sequence. If last character is f, run fullscreen mode." << endl;
 	oss << "(1) Demo Cylinder" << endl;
 	oss << "(2) Demo Spehere" << endl;
 	oss << "(3) Debug Draw" << endl;
 	oss << "(etc) Title" << endl;
 	cout << oss.str();
 
-	char i;
-	std::cin >> i;
+	std:string input;
+	std::cin >> input;
 
-	switch(i) {
+	char code = '\0';
+	if(input.length() == 1) {
+		code = input[0];
+		*fullscreen = false;
+	} else {
+		code = input[0];
+		*fullscreen = ('f' == input[input.length()-1]);
+	}
+
+	switch(code) {
 	case '1':
 		return kSequenceDemoCylinderHMD;
 	case '2':

@@ -73,27 +73,29 @@ void initConsoleVar()
 {
 }
 
-bool Lib::startUp()
+EngineParam::EngineParam()
+	: fullscreen(CVarUtils::CreateCVar<int>("engine.display.fullscreen", 0)),
+	screenWidth(CVarUtils::CreateCVar<int>("engine.display.width", 1280)),
+	screenHeight(CVarUtils::CreateCVar<int>("engine.display.height", 800))
+{
+	std::vector<std::string> varLoad;
+	varLoad.push_back("engine");
+	console::load(varLoad);
+}
+
+bool Lib::startUp(const EngineParam &param)
 {
 	//init c library
 	srand(time(NULL));
-
-	int &fullscreen = CVarUtils::CreateCVar<int>("display.fullscreen", 0);
-	int &screenWidth = CVarUtils::CreateCVar<int>("display.width", 1280);
-	int &screenHeight = CVarUtils::CreateCVar<int>("display.height", 800);
-
-	std::vector<std::string> varLoad;
-	varLoad.push_back("display");
-	console::load(varLoad);
 
 	bool stencil = true;
 	bool vsync = true;
 
 	device = createDevice(
 		video::EDT_OPENGL, 
-		core::dimension2d<u32>(screenWidth, screenHeight), 
+		core::dimension2d<u32>(param.screenWidth, param.screenHeight), 
 		32, 
-		(fullscreen > 0), stencil, vsync, nullptr);
+		(param.fullscreen > 0), stencil, vsync, nullptr);
 	if(device == nullptr) {
 		return false;
 	}
@@ -151,7 +153,7 @@ void Lib::shutDown()
 	vector<string> cvarNamespaceList;
 	cvarNamespaceList.push_back("console");
 	cvarNamespaceList.push_back("hmd");
-	cvarNamespaceList.push_back("display");
+	cvarNamespaceList.push_back("engine");
 	cvarNamespaceList.push_back("script");
 	console::save(cvarNamespaceList);
 
