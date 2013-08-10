@@ -1,7 +1,6 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
 #include "key_mapping.h"
-#include "base/math_helper.h"
 
 using namespace irr;
 

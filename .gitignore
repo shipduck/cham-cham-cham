@@ -13,6 +13,13 @@
 *.a
 build
 
+cli/lib/*
+cli/bin/*
+cli/Debug/*
+cli/Win32/*
+cli/*.dir/*
+
+CMakeOutput.log
 CMakeCache.txt
 CMakeFiles
 Makefile
@@ -25,6 +32,7 @@ install_manifest.txt
 *.filters
 *.sdf
 *.sln
+*.suo
 *.opensdf
 *.tlog
 *.lastbuildstate
