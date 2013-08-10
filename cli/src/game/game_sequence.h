@@ -13,6 +13,8 @@ public:
 	virtual ~GameSequence();
 
 	virtual void update(int ms);
+	virtual void preDraw() {}
+	virtual void postDraw() {}
 
 	void initCam();
 	void initSky();

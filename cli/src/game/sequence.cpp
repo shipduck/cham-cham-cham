@@ -42,9 +42,6 @@ void Sequence::draw()
 	} else {
 		drawAllNormal(Lib::smgr);
 	}
+	postDraw();
 	//smgr->drawAll();
-}
-
-void Sequence::preDraw()
-{
 }

@@ -9,4 +9,6 @@ public:
 	virtual ~CylinderHMDSequence();
 
 	virtual void update(int ms);
+	virtual void preDraw() {}
+	virtual void postDraw() {}
 };

@@ -3,6 +3,7 @@
 #include "cylinder_hmd_sequence.h"
 #include "irr/cylinder_mapping_node.h"
 #include "base/lib.h"
+#include "demo_sequence_helper.h"
 
 using namespace irr;
 using namespace core;
@@ -10,13 +11,17 @@ using namespace video;
 using namespace scene;
 
 CylinderButtonNode *btnNode = nullptr;
+scene::ISceneNode *node = nullptr;
 
 CylinderHMDSequence::CylinderHMDSequence()
 {
-	// add fps camera
-	auto camNode = Lib::smgr->addCameraSceneNodeFPS();
+	DemoSequenceHelper helper(this);
+	helper.loadSampleCollisionMap();
+	Lib::device->getCursorControl()->setVisible(false);
+	auto camNode = Lib::smgr->getActiveCamera();
+	SR_ASSERT(camNode != nullptr);
 
-	auto node = Lib::smgr->addEmptySceneNode(camNode);
+	node = Lib::smgr->addEmptySceneNode();
 	{
 		auto tex = Lib::driver->getTexture(res::texture::SORA2_PNG.c_str());
 		//auto cylinderNode = new hmd_ui::CylinderMappingNode(Lib::smgr->getRootSceneNode(), Lib::smgr, 124);
@@ -56,6 +61,12 @@ CylinderHMDSequence::~CylinderHMDSequence()
 
 void CylinderHMDSequence::update(int ms)
 {
+	//HMD 테스트 목적이기 일단은 카메라와 HMD는 좌표만 동기화 시키면된다
+	//회전까지는 동기화 하지 않아도 될듯. 근데 카메라 좌표계 변동 로직을 확실히 하지 않아서 밀리는 느낌
+	auto camNode = Lib::smgr->getActiveCamera();
+	SR_ASSERT(camNode != nullptr);
+	node->setPosition(camNode->getPosition());
+
 	static int elapsedTime = 0;
 	elapsedTime += ms;
 	if((elapsedTime / 1000) % 2 == 0) {

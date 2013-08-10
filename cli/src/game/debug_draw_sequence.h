@@ -12,5 +12,7 @@ public:
 	virtual ~DebugDrawSequence();
 
 	virtual void update(int ms);
+	virtual void preDraw() {}
+	virtual void postDraw() {}
 };
 
