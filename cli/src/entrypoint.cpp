@@ -29,6 +29,14 @@ int entrypoint(int argc, char* argv[])
 	//detect memory leak
 	//_CrtSetBreakAlloc(27254);
 
+	//게임에서 사용할 최조 시퀀스를 선택한다
+	//단, 생성까지 처리해버리면 시망한다(생성은 엔진객체가 필요하기 때문)
+	//그렇다고 시퀀스 선택을 엔진생성 다음으로 넘기면
+	//엔진 GUI쪽으로 포커스가 넘어가버리니까 귀찮아서 시퀀스 번호만 먼저 고르게함
+	SequenceFactory seqFactory;
+	SequenceType seqType = seqFactory.select();
+
+
 	bool initResult = Lib::startUp();
 	if(initResult == false) {
 		return 1;
@@ -39,11 +47,8 @@ int entrypoint(int argc, char* argv[])
 	IGUIEnvironment* guienv = device->getGUIEnvironment();
 	ISceneManager* smgr = device->getSceneManager();
 
-	//simple scene framework
-	SequenceFactory seqFactory;
-	std::unique_ptr<Sequence> sequence = seqFactory.create(kDemoCylinderHMD);
-	//std::unique_ptr<Sequence> sequence = seqFactory.create(kSequenceTitle);
-	//std::unique_ptr<Sequence> sequence = seqFactory.create(kSequenceDebugDraw);
+	
+	std::unique_ptr<Sequence> sequence = seqFactory.create(seqType);
 
 	DebugDrawer debugDrawer;
 
