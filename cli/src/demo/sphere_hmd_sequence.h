@@ -6,7 +6,7 @@
 class SphereHMDSequence : public Sequence {
 public:
 	SphereHMDSequence();
-	~SphereHMDSequence();
+	virtual ~SphereHMDSequence();
 
 	virtual void update(int ms);
 };

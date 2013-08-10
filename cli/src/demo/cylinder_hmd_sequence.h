@@ -6,7 +6,7 @@
 class CylinderHMDSequence : public Sequence {
 public:
 	CylinderHMDSequence();
-	~CylinderHMDSequence();
+	virtual ~CylinderHMDSequence();
 
 	virtual void update(int ms);
 };
