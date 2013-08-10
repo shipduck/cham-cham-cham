@@ -74,11 +74,6 @@ void Text3dSceneNode::OnAnimate(u32 timeMs)
 		return;
 	}
 
-	ICameraSceneNode* camera = SceneManager->getActiveCamera();
-	if (!camera) {
-		return;
-	}
-
 	// get text width
 	f32 textLength = 0.f;
 	for(u32 i=0; i!=symbol_.size(); ++i) {
@@ -89,32 +84,15 @@ void Text3dSceneNode::OnAnimate(u32 timeMs)
 		textLength=1.0f;
 	}
 
-	//const core::matrix4 &m = camera->getViewFrustum()->Matrices[ video::ETS_VIEW ];
-
-	// make billboard look to camera
-	core::vector3df pos = getAbsolutePosition();
-
-	core::vector3df campos = camera->getAbsolutePosition();
-	core::vector3df target = camera->getTarget();
-	core::vector3df up = camera->getUpVector();
-	core::vector3df view = target - campos;
-	view.normalize();
-
-	core::vector3df horizontal = up.crossProduct(view);
-	if ( horizontal.getLength() == 0 ) {
-		horizontal.set(up.Y,up.X,up.Z);
-	}
-
-	horizontal.normalize();
-	core::vector3df space = horizontal;
+	core::vector3df pos;
+	core::vector3df view(0, 0, -1);
+	core::vector3df vertical(0, -1, 0);
+	core::vector3df horizontal(1, 0, 0);
 
 	horizontal *= 0.5f * size_.Width;
-
-	core::vector3df vertical = horizontal.crossProduct(view);
-	vertical.normalize();
 	vertical *= 0.5f * size_.Height;
 
-	view *= -1.0f;
+	core::vector3df space = horizontal;
 
 	// center text
 	pos += space * (size_.Width * -0.5f);
@@ -250,7 +228,8 @@ void Text3dSceneNode::render()
 
 	// draw
 	core::matrix4 mat;
-	driver->setTransform(video::ETS_WORLD, mat);
+	//driver->setTransform(video::ETS_WORLD, mat);
+	driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);	
 
 	for (u32 i = 0; i < mesh_->getMeshBufferCount(); ++i) {
 		driver->setMaterial(mesh_->getMeshBuffer(i)->getMaterial());
