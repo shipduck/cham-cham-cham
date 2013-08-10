@@ -25,7 +25,7 @@ HeadTracker::~HeadTracker()
 
 bool HeadTracker::startUp()
 {
-	OVR::System::Init();
+	OVR::System::Init(OVR::Log::ConfigureDefaultLog(OVR::LogMask_All));
 
 	// *** Initialization - Create the first available HMD Device
     manager_ = *DeviceManager::Create();
@@ -68,10 +68,10 @@ void HeadTracker::update()
 
     // Create a matrix from quaternion,
     // where elements [0][0] through [3][3] contain rotation.
-    Matrix4f bodyFrameMatrix(q); 
+    //Matrix4f bodyFrameMatrix(q); 
 
     // Get Euler angles from quaternion, in specified axis rotation order.
-    q.GetEulerAngles<Axis_Y, Axis_X, Axis_Z>(&lastEvt_.yaw, &lastEvt_.pitch, &lastEvt_.roll);
+    q.GetEulerAngles<Axis_X, Axis_Y, Axis_Z>(&lastEvt_.pitch, &lastEvt_.yaw, &lastEvt_.roll);
 }
 
 bool HeadTracker::isConnected() const

@@ -4,6 +4,7 @@
 #include "irr/cylinder_mapping_node.h"
 #include "base/lib.h"
 #include "demo_sequence_helper.h"
+#include "irr/head_tracker.h"
 
 using namespace irr;
 using namespace core;
@@ -12,16 +13,21 @@ using namespace scene;
 
 CylinderButtonNode *btnNode = nullptr;
 scene::ISceneNode *node = nullptr;
+scene::ICameraSceneNode *cam = nullptr;
 
 CylinderHMDSequence::CylinderHMDSequence()
 {
 	DemoSequenceHelper helper(this);
-	helper.loadSampleCollisionMap();
+	//helper.loadSampleCollisionMap();
+	helper.loadSampleMap();
+	helper.createFPSCamera();
+
 	Lib::device->getCursorControl()->setVisible(false);
-	auto camNode = Lib::smgr->getActiveCamera();
-	SR_ASSERT(camNode != nullptr);
+	//auto camNode = Lib::smgr->getActiveCamera();
+	//SR_ASSERT(camNode != nullptr);
 
 	node = Lib::smgr->addEmptySceneNode();
+	node->setPosition(helper.getDefaultCamPos());
 	{
 		auto tex = Lib::driver->getTexture(res::texture::SORA2_PNG.c_str());
 		//auto cylinderNode = new hmd_ui::CylinderMappingNode(Lib::smgr->getRootSceneNode(), Lib::smgr, 124);
@@ -54,6 +60,12 @@ CylinderHMDSequence::CylinderHMDSequence()
 		btnNode->rebuild();
 		btnNode->drop();
 	}
+
+	//수동 카메라 테스트
+	cam = Lib::smgr->addCameraSceneNode();
+	cam->setPosition(helper.getDefaultCamPos());
+	cam->setTarget(helper.getDefaultCamTarget());
+	cam->bindTargetAndRotation(true);
 }
 CylinderHMDSequence::~CylinderHMDSequence()
 {
@@ -63,9 +75,9 @@ void CylinderHMDSequence::update(int ms)
 {
 	//HMD 테스트 목적이기 일단은 카메라와 HMD는 좌표만 동기화 시키면된다
 	//회전까지는 동기화 하지 않아도 될듯. 근데 카메라 좌표계 변동 로직을 확실히 하지 않아서 밀리는 느낌
-	auto camNode = Lib::smgr->getActiveCamera();
-	SR_ASSERT(camNode != nullptr);
-	node->setPosition(camNode->getPosition());
+	//auto camNode = Lib::smgr->getActiveCamera();
+	//SR_ASSERT(camNode != nullptr);
+	//node->setPosition(camNode->getPosition());
 
 	static int elapsedTime = 0;
 	elapsedTime += ms;
@@ -76,4 +88,17 @@ void CylinderHMDSequence::update(int ms)
 		btnNode->selected = true;
 		btnNode->rebuild();
 	}
+
+	//head tracking 값에 따라서 카메라를 흔드는건 fps카메라에서 시망(그건 up vector가 불변이다)
+	//이를 해결하려면 카메라를 새로 만들거나 장면 자체를 회전해야될듯
+	/*
+	if(Lib::headTracker->isConnected()) {
+		auto evt = Lib::headTracker->getValue();
+		float degPitch = core::radToDeg(evt.pitch);
+		float degYaw = core::radToDeg(evt.yaw);
+		float degRoll = core::radToDeg(evt.roll);
+
+		cam->setRotation(core::vector3df(-degPitch, -degYaw, 0));
+	}
+	*/
 }

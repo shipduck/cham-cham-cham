@@ -124,7 +124,7 @@ bool Lib::startUp()
 	hmdEventReceiver = new HMDEventReceiver();
 	eventReceiver->attachReceiver(hmdEventReceiver, 0);
 
-	//Oculus Rift Head Tracking
+	//Oculus Rift Head Tracking. stereo render보다 먼저 초기화 되어야한다
 	headTracker->startUp();
 
 	//set oculus renderer

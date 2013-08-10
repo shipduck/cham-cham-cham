@@ -30,7 +30,8 @@ void Sequence::drawAllNormal(irr::scene::ISceneManager *smgr)
 void Sequence::drawAllStereo(irr::scene::ISceneManager *smgr)
 {
 	Lib::updateStereoRenderer();
-	Lib::stereoRenderer->drawAll(smgr);
+	//Lib::stereoRenderer->drawAll(smgr);
+	Lib::stereoRenderer->drawAll();
 }
 
 void Sequence::draw()

@@ -1,3 +1,4 @@
+﻿// Ŭnicode please 
 /*
 Copyright (C) 2012 Luca Siciliano
 
@@ -21,14 +22,24 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include <irrlicht.h>
 
 struct HMDDescriptor {
-	int hResolution;
-	int vResolution;
-	float hScreenSize;
-	float vScreenSize;
-	float interpupillaryDistance;
-	float lensSeparationDistance;
-	float eyeToScreenDistance;
-	float distortionK[4];
+	//뻐킹 양놈의 코딩 스타일 갈아치움
+	//int hResolution;
+	//int vResolution;
+	//float hScreenSize;
+	//float vScreenSize;
+	//float interpupillaryDistance;
+	//float lensSeparationDistance;
+	//float eyeToScreenDistance;
+	//float distortionK[4];
+
+	irr::s32 m_iResolutionH;
+	irr::s32 m_iResolutionV;
+	irr::f32 m_fSizeH;
+	irr::f32 m_fSizeV;
+	irr::f32 m_fInterpupillaryDistance;
+	irr::f32 m_fLensSeparationDistance;
+	irr::f32 m_fEyeToScreenDistance;
+	irr::f32 m_fDistortionK[4];
 
 	bool operator==(const HMDDescriptor &o) const;
 	bool operator!=(const HMDDescriptor &o) const { return !(*this == o); }
@@ -53,20 +64,19 @@ struct HMDDescriptorBind {
 	HMDDescriptor convert() const;
 };
 
-class OculusDistorsionCallback: public irr::video::IShaderConstantSetCallBack 
-{ 
+class OculusDistorsionCallback: public irr::video::IShaderConstantSetCallBack {
 public:
-	irr::f32 scale[2];
-	irr::f32 scaleIn[2];
-	irr::f32 lensCenter[2];
-	irr::f32 hmdWarpParam[4];
+	irr::f32 m_fScale[2];
+	irr::f32 m_fScaleIn[2];
+	irr::f32 m_fLensCenter[2];
+	irr::f32 m_fHmdWarpParam[4];
 	virtual void OnSetConstants(irr::video::IMaterialRendererServices* services, irr::s32 userData) 
 	{ 
 		irr::video::IVideoDriver* driver = services->getVideoDriver();
-		services->setPixelShaderConstant("scale", scale, 2);
-		services->setPixelShaderConstant("scaleIn", scaleIn ,2);
-		services->setPixelShaderConstant("lensCenter", lensCenter ,2);
-		services->setPixelShaderConstant("hmdWarpParam", hmdWarpParam ,4);
+		services->setPixelShaderConstant("scale", m_fScale, 2);
+		services->setPixelShaderConstant("scaleIn", m_fScaleIn ,2);
+		services->setPixelShaderConstant("lensCenter", m_fLensCenter ,2);
+		services->setPixelShaderConstant("hmdWarpParam", m_fHmdWarpParam ,4);
 	}
 };
 /*
@@ -75,8 +85,7 @@ NEED only ONE OculusDistorsionCallback!
 */
 extern OculusDistorsionCallback g_distortionCB;
 
-class HMDStereoRender
-{
+class HMDStereoRender {
 public:
 	HMDStereoRender(irr::IrrlichtDevice *device, const HMDDescriptor &HMD, irr::f32 worldScale = 1.0);
 	~HMDStereoRender();
@@ -87,29 +96,42 @@ public:
 	irr::f32 getWorldScale(); 
 	void setWorldScale(irr::f32 worldScale);
 
-	void drawAll(irr::scene::ISceneManager* smgr);
+	//void drawAll(irr::scene::ISceneManager* smgr);
+	void drawAll();
 
 private: 
-	HMDDescriptor _hmd;
+	irr::video::IVideoDriver *m_pDriver;
+	irr::video::ITexture *m_pRenderTexture;
+	irr::scene::ISceneManager *m_pSmgr;
 
-	irr::video::IVideoDriver* _driver;
-	irr::video::ITexture* _renderTexture;
-	irr::scene::ISceneManager* _smgr;
+	irr::scene::ISceneNode *m_pHeadX;
+	irr::scene::ISceneNode *m_pHeadY;
+	irr::scene::ISceneNode *m_pHeadZ;
+	irr::scene::ISceneNode *m_pYaw;
+	irr::scene::ISceneNode *m_pLeftEye;
+	irr::scene::ISceneNode *m_pRghtEye;
 
-	irr::f32 _worldScale;
-	irr::core::matrix4 _projectionLeft;
-	irr::core::matrix4 _projectionRight;
-	irr::f32 _eyeSeparation;
-	irr::f32 _lensShift;
+	HMDDescriptor m_cHMD;
 
-	irr::core::rect<irr::s32> _viewportLeft;
-	irr::core::rect<irr::s32> _viewportRight;
+	irr::f32 m_fWorldScale;
+	irr::f32 m_fEyeSeparation;
+	irr::f32 m_fLensShift;
 
-	irr::scene::ICameraSceneNode* _pCamera;
+	bool m_bRiftAvailable;
 
-	irr::video::SMaterial _renderMaterial;
-	irr::video::S3DVertex _planeVertices[4];
-	irr::u16 _planeIndices[6];
-	irr::ITimer* _timer;
+	irr::core::matrix4 m_cProjectionLeft;
+	irr::core::matrix4 m_cProjectionRght;
+
+	irr::core::rect<irr::s32> m_cViewportLeft;
+	irr::core::rect<irr::s32> m_cViewportRght;
+
+	irr::scene::ICameraSceneNode *m_pCamera;
+
+	irr::video::SMaterial m_cRenderMaterial;
+	irr::video::S3DVertex m_cPlaneVertices[4];
+	irr::u16 m_iPlaneIndices[6];
+	irr::ITimer* m_pTimer;
+
+	OculusDistorsionCallback &m_cDistortionCB;
 };
 #endif

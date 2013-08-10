@@ -18,6 +18,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include "hmd_stereo_render.h"
 #include "cvars/CVar.h"
 #include "util/console_func.h"
+#include "irr/head_tracker.h"
+#include "base/lib.h"
 
 #include <iostream>
 #include <cassert>
@@ -76,17 +78,17 @@ HMDDescriptorBind::HMDDescriptorBind()
 HMDDescriptor HMDDescriptorBind::convert() const
 {
 	HMDDescriptor retval;	
-	retval.hResolution = this->hResolution;
-	retval.vResolution = this->vResolution;
-	retval.hScreenSize = this->hScreenSize;
-	retval.vScreenSize = this->vScreenSize;
-	retval.interpupillaryDistance = this->interpupillaryDistance;
-	retval.lensSeparationDistance = this->lensSeparationDistance;
-	retval.eyeToScreenDistance = this->eyeToScreenDistance;
-	retval.distortionK[0] = this->distortionK_1;
-	retval.distortionK[1] = this->distortionK_2;
-	retval.distortionK[2] = this->distortionK_3;
-	retval.distortionK[3] = this->distortionK_4;
+	retval.m_iResolutionH = this->hResolution;
+	retval.m_iResolutionV = this->vResolution;
+	retval.m_fSizeH = this->hScreenSize;
+	retval.m_fSizeV = this->vScreenSize;
+	retval.m_fInterpupillaryDistance = this->interpupillaryDistance;
+	retval.m_fLensSeparationDistance = this->lensSeparationDistance;
+	retval.m_fEyeToScreenDistance = this->eyeToScreenDistance;
+	retval.m_fDistortionK[0] = this->distortionK_1;
+	retval.m_fDistortionK[1] = this->distortionK_2;
+	retval.m_fDistortionK[2] = this->distortionK_3;
+	retval.m_fDistortionK[3] = this->distortionK_4;
 	return retval;
 }
 
@@ -96,36 +98,36 @@ const HMDDescriptor &getInvalidDescriptor()
 	static HMDDescriptor ctx;
 	if(init == false) {
 		init = true;
-		ctx.hResolution = 0;
+		ctx.m_iResolutionH = 0;
 	}
 	return ctx;
 }
 
 bool HMDDescriptor::operator==(const HMDDescriptor &o) const
 {
-	if(hResolution != o.hResolution) {
+	if(m_iResolutionH != o.m_iResolutionH) {
 		return false;
 	}
-	if(vResolution != o.vResolution) {
+	if(m_iResolutionV != o.m_iResolutionV) {
 		return false;
 	}
-	if(hScreenSize != o.hScreenSize) {
+	if(m_fSizeH != o.m_fSizeH) {
 		return false;
 	}
-	if(vScreenSize != o.vScreenSize) {
+	if(m_fSizeV != o.m_fSizeV) {
 		return false;
 	}
-	if(interpupillaryDistance != o.interpupillaryDistance) {
+	if(m_fInterpupillaryDistance != o.m_fInterpupillaryDistance) {
 		return false;
 	}
-	if(lensSeparationDistance != o.lensSeparationDistance) {
+	if(m_fLensSeparationDistance != o.m_fLensSeparationDistance) {
 		return false;
 	}
-	if(eyeToScreenDistance != o.eyeToScreenDistance) {
+	if(m_fEyeToScreenDistance != o.m_fEyeToScreenDistance) {
 		return false;
 	}
 	for(int i = 0 ; i < 4 ; ++i) {
-		if(distortionK[i] != o.distortionK[i]) {
+		if(m_fDistortionK[i] != o.m_fDistortionK[i]) {
 			return false;
 		}
 	}
@@ -147,96 +149,128 @@ E_MATERIAL_TYPE getOculusDistorsionCallbackMaterial(irr::video::IVideoDriver *dr
 }
 
 HMDStereoRender::HMDStereoRender(irr::IrrlichtDevice *device, const HMDDescriptor &HMD, f32 worldScale)
-	: _worldScale(worldScale),
-	_renderTexture(nullptr),
-	_hmd(getInvalidDescriptor())
+	: m_fWorldScale(worldScale),
+	m_cHMD(getInvalidDescriptor()),
+	m_pDriver(device->getVideoDriver()),
+	m_pRenderTexture(nullptr),
+	m_pSmgr(device->getSceneManager()),
+	m_pHeadX(nullptr),
+	m_pHeadY(nullptr),
+	m_pHeadZ(nullptr),
+	m_pYaw(nullptr),
+	m_pLeftEye(nullptr),
+	m_pRghtEye(nullptr),
+	m_pTimer(device->getTimer()),
+	m_cDistortionCB(g_distortionCB),
+	m_pCamera(m_pSmgr->addCameraSceneNode())	// Create perspectiva camera used for rendering
 {
-	_smgr = device->getSceneManager();
-	_driver = device->getVideoDriver();
-	_timer = device->getTimer();
-
-	// Create perspectiva camera used for rendering
-	_pCamera = _smgr->addCameraSceneNode();
-
 	// Init shader parameters
-	g_distortionCB.scale[0] = 1.0f; g_distortionCB.scale[1] = 1.0f;
-	g_distortionCB.scaleIn[0] = 1.0f; g_distortionCB.scaleIn[1] = 1.0f;
-	g_distortionCB.lensCenter[0] = 0.0f;g_distortionCB.lensCenter[1] = 0.0f;
-	g_distortionCB.hmdWarpParam[0] = 1.0f;g_distortionCB.hmdWarpParam[1] = 0.0f;g_distortionCB.hmdWarpParam[2] = 0.0f;g_distortionCB.hmdWarpParam[3] = 0.0f;
+	m_cDistortionCB.m_fScale     [0] = 1.0f; m_cDistortionCB.m_fScale     [1] = 1.0f;
+	m_cDistortionCB.m_fScaleIn   [0] = 1.0f; m_cDistortionCB.m_fScaleIn   [1] = 1.0f;
+	m_cDistortionCB.m_fLensCenter[0] = 0.0f; m_cDistortionCB.m_fLensCenter[1] = 0.0f;
+
+	m_cDistortionCB.m_fHmdWarpParam[0] = 1.0f;
+	m_cDistortionCB.m_fHmdWarpParam[1] = 0.0f;
+	m_cDistortionCB.m_fHmdWarpParam[2] = 0.0f;
+	m_cDistortionCB.m_fHmdWarpParam[3] = 0.0f;
 
 	// Plane
-	_planeVertices[0] = video::S3DVertex(-1.0f, -1.0f, 1.0f,1,1,0, video::SColor(255,0,255,255), 0.0f, 0.0f);
-	_planeVertices[1] = video::S3DVertex(-1.0f,  1.0f, 1.0f,1,1,0, video::SColor(255,0,255,255), 0.0f, 1.0f);
-	_planeVertices[2] = video::S3DVertex( 1.0f,  1.0f, 1.0f,1,1,0, video::SColor(255,0,255,255), 1.0f, 1.0f);
-	_planeVertices[3] = video::S3DVertex( 1.0f, -1.0f, 1.0f,1,1,0, video::SColor(255,0,255,255), 1.0f, 0.0f);
-	_planeIndices[0] = 0; _planeIndices[1] = 1; _planeIndices[2] = 2; _planeIndices[3] = 0; _planeIndices[4] = 2; _planeIndices[5] = 3;
+	m_cPlaneVertices[0] = video::S3DVertex(-1.0f, -1.0f, 1.0f,1,1,0, video::SColor(255,0,255,255), 0.0f, 0.0f);
+	m_cPlaneVertices[1] = video::S3DVertex(-1.0f,  1.0f, 1.0f,1,1,0, video::SColor(255,0,255,255), 0.0f, 1.0f);
+	m_cPlaneVertices[2] = video::S3DVertex( 1.0f,  1.0f, 1.0f,1,1,0, video::SColor(255,0,255,255), 1.0f, 1.0f);
+	m_cPlaneVertices[3] = video::S3DVertex( 1.0f, -1.0f, 1.0f,1,1,0, video::SColor(255,0,255,255), 1.0f, 0.0f);
+
+	m_iPlaneIndices[0] = 0; 
+	m_iPlaneIndices[1] = 1; 
+	m_iPlaneIndices[2] = 2; 
+	m_iPlaneIndices[3] = 0; 
+	m_iPlaneIndices[4] = 2; 
+	m_iPlaneIndices[5] = 3;
 
 	// Create shader material
-	_renderMaterial.Wireframe = false;
-	_renderMaterial.Lighting = false;
-	_renderMaterial.TextureLayer[0].TextureWrapU = ETC_CLAMP;
-	_renderMaterial.TextureLayer[0].TextureWrapV = ETC_CLAMP;
+	m_cRenderMaterial.Wireframe = false;
+	m_cRenderMaterial.Lighting = false;
+	m_cRenderMaterial.TextureLayer[0].TextureWrapU = ETC_CLAMP;
+	m_cRenderMaterial.TextureLayer[0].TextureWrapV = ETC_CLAMP;
 
-	IGPUProgrammingServices* gpu = _driver->getGPUProgrammingServices();
-	_renderMaterial.MaterialType = getOculusDistorsionCallbackMaterial(_driver);
+	IGPUProgrammingServices* gpu = m_pDriver->getGPUProgrammingServices();
+	m_cRenderMaterial.MaterialType = getOculusDistorsionCallbackMaterial(m_pDriver);
+
+	// Start of Oculus Rift Code provided by Christian Keimel / bulletbyte.de
+	m_bRiftAvailable = Lib::headTracker->isConnected();
+
+	m_pYaw = m_pSmgr->addEmptySceneNode(0, 0);
+	m_pHeadX = m_pSmgr->addEmptySceneNode(m_pYaw , 0);
+	m_pHeadY = m_pSmgr->addEmptySceneNode(m_pHeadX, 0);
+	m_pHeadZ = m_pSmgr->addEmptySceneNode(m_pHeadY, 0);
+
+	m_pLeftEye = m_pSmgr->addEmptySceneNode(m_pHeadZ, 0);
+	m_pLeftEye->setPosition(irr::core::vector3df(-0.25, 0, 0));
+	m_pRghtEye = m_pSmgr->addEmptySceneNode(m_pHeadZ, 0);
+	m_pRghtEye->setPosition(irr::core::vector3df( 0.25, 0, 0));
+
+	// End of Oculus Rift Code provided by Christian Keimel / bulletbyte.de
+
 	setHMD(HMD);
 }
 
-HMDStereoRender::~HMDStereoRender() {
+HMDStereoRender::~HMDStereoRender()
+{
 }
 
-void HMDStereoRender::setHMD(const HMDDescriptor &HMD) {
-	if(_hmd == HMD) {
+void HMDStereoRender::setHMD(const HMDDescriptor &HMD)
+{
+	if(m_cHMD == HMD) {
 		return;
 	}
-	_hmd = HMD;
+	m_cHMD = HMD;
 
 	// Compute aspect ratio and FOV
-	float aspect = HMD.hResolution / (2.0f*HMD.vResolution);
-
-	// Fov is normally computed with:
-	//   2*atan2(HMD.vScreenSize,2*HMD.eyeToScreenDistance)
-	// But with lens distortion it is increased (see Oculus SDK Documentation)
-	float r = -1.0f - (4.0f * (HMD.hScreenSize/4.0f - HMD.lensSeparationDistance/2.0f) / HMD.hScreenSize);
-	float distScale = (HMD.distortionK[0] + HMD.distortionK[1] * pow(r,2) + HMD.distortionK[2] * pow(r,4) + HMD.distortionK[3] * pow(r,6));
-	float fov = 2.0f*atan2(HMD.vScreenSize*distScale, 2.0f*HMD.eyeToScreenDistance);
+	irr::f32 l_fAspect    = m_cHMD.m_iResolutionH / (2.0f * m_cHMD.m_iResolutionV),
+		l_fR         = -1.0f - (4.0f * (m_cHMD.m_fSizeH / 4.0f - m_cHMD.m_fLensSeparationDistance / 2.0f) / m_cHMD.m_fSizeH),
+		l_fDistScale = (m_cHMD.m_fDistortionK[0] + m_cHMD.m_fDistortionK[1] * pow(l_fR,2) + m_cHMD.m_fDistortionK[2] * pow(l_fR,4) + m_cHMD.m_fDistortionK[3] * pow(l_fR,6)),
+		l_fFov       = 2.0f * atan2(m_cHMD.m_fSizeV * l_fDistScale, 2.0f * m_cHMD.m_fEyeToScreenDistance),
+		l_fH         = 4 * (m_cHMD.m_fSizeH / 4 - m_cHMD.m_fInterpupillaryDistance/2) / m_cHMD.m_fSizeH;
 
 	// Compute camera projection matrices
-	matrix4 centerProjection = matrix4().buildProjectionMatrixPerspectiveFovLH (fov, aspect, 1, 10000);
-	float h = 4 * (HMD.hScreenSize/4 - HMD.interpupillaryDistance/2) / HMD.hScreenSize;
-	_projectionLeft = matrix4().setTranslation(vector3df(h, 0.0, 0.0)) * centerProjection;
-	_projectionRight = matrix4().setTranslation(vector3df(-h, 0.0, 0.0)) * centerProjection;
+	irr::core::matrix4 l_cCenterProjection = irr::core::matrix4().buildProjectionMatrixPerspectiveFovLH (l_fFov, l_fAspect, 1, 10000);
+
+	m_cProjectionLeft = irr::core::matrix4().setTranslation(irr::core::vector3df( l_fH, 0.0, 0.0)) * l_cCenterProjection;
+	m_cProjectionRght = irr::core::matrix4().setTranslation(irr::core::vector3df(-l_fH, 0.0, 0.0)) * l_cCenterProjection;
 
 	// Compute camera offset
-	_eyeSeparation = _worldScale * HMD.interpupillaryDistance/2.0f;
+	m_fEyeSeparation = m_fWorldScale * m_cHMD.m_fInterpupillaryDistance/2.0f;
+
+	m_pLeftEye->setPosition(irr::core::vector3df( m_fEyeSeparation, 0.0f, 0.0f));
+	m_pRghtEye->setPosition(irr::core::vector3df(-m_fEyeSeparation, 0.0f, 0.0f));
 
 	// Compute Viewport
-	_viewportLeft = rect<s32>(0, 0, HMD.hResolution/2, HMD.vResolution);
-	_viewportRight = rect<s32>(HMD.hResolution/2, 0, HMD.hResolution, HMD.vResolution);
+	m_cViewportLeft = irr::core::rect<irr::s32>(                        0, 0, m_cHMD.m_iResolutionH / 2, m_cHMD.m_iResolutionV);
+	m_cViewportRght = irr::core::rect<irr::s32>(m_cHMD.m_iResolutionH / 2, 0, m_cHMD.m_iResolutionH    , m_cHMD.m_iResolutionV);
 
 	// Distortion shader parameters
-	_lensShift = 4.0f * (HMD.hScreenSize/4.0f - HMD.lensSeparationDistance/2.0f) / HMD.hScreenSize;
+	m_fLensShift = 4.0f * (m_cHMD.m_fSizeH / 4.0f - m_cHMD.m_fLensSeparationDistance/2.0f) / m_cHMD.m_fSizeH;
 
-	g_distortionCB.scale[0] = 1.0f/distScale;
-	g_distortionCB.scale[1] = 1.0f*aspect/distScale;
+	m_cDistortionCB.m_fScale[0] = 1.0f            / l_fDistScale;
+	m_cDistortionCB.m_fScale[1] = 1.0f * l_fAspect/ l_fDistScale;
 
-	g_distortionCB.scaleIn[0] = 1.0f;
-	g_distortionCB.scaleIn[1] = 1.0f/aspect;
+	m_cDistortionCB.m_fScaleIn[0] = 1.0f;
+	m_cDistortionCB.m_fScaleIn[1] = 1.0f / l_fAspect;
 
-	g_distortionCB.hmdWarpParam[0] = HMD.distortionK[0];
-	g_distortionCB.hmdWarpParam[1] = HMD.distortionK[1];
-	g_distortionCB.hmdWarpParam[2] = HMD.distortionK[2];
-	g_distortionCB.hmdWarpParam[3] = HMD.distortionK[3];
+	m_cDistortionCB.m_fHmdWarpParam[0] = m_cHMD.m_fDistortionK[0];
+	m_cDistortionCB.m_fHmdWarpParam[1] = m_cHMD.m_fDistortionK[1];
+	m_cDistortionCB.m_fHmdWarpParam[2] = m_cHMD.m_fDistortionK[2];
+	m_cDistortionCB.m_fHmdWarpParam[3] = m_cHMD.m_fDistortionK[3];
 
 	// Create render target
-	if (_driver->queryFeature(video::EVDF_RENDER_TO_TARGET))
+	if (m_pDriver->queryFeature(irr::video::EVDF_RENDER_TO_TARGET))
 	{
-		if (_renderTexture != nullptr) {
-			_driver->removeTexture(_renderTexture);
-			_renderTexture = nullptr;
+		if (m_pRenderTexture != NULL) {
+			m_pRenderTexture->drop();
 		}
-		_renderTexture = _driver->addRenderTargetTexture(dimension2d<u32>(HMD.hResolution*distScale/2.0f, HMD.vResolution*distScale));
-		_renderMaterial.setTexture(0, _renderTexture);
+		auto tex = m_pRenderTexture = m_pDriver->addRenderTargetTexture(irr::core::dimension2d<irr::u32>((irr::u32)(m_cHMD.m_iResolutionH * l_fDistScale / 2.0f), (irr::u32)(m_cHMD.m_iResolutionV * l_fDistScale)));
+		SR_ASSERT(tex != nullptr);
+		m_cRenderMaterial.setTexture(0, m_pRenderTexture);
 	}
 	else {
 		// Render to target not supported
@@ -245,58 +279,95 @@ void HMDStereoRender::setHMD(const HMDDescriptor &HMD) {
 }
 
 
-void HMDStereoRender::drawAll(ISceneManager* smgr) {
+//void HMDStereoRender::drawAll(ISceneManager* smgr)
+void HMDStereoRender::drawAll()
+{
+	irr::scene::ICameraSceneNode *l_pCamera = m_pSmgr->getActiveCamera();
+	l_pCamera->OnAnimate(m_pTimer->getTime());
 
-	ICameraSceneNode* camera = smgr->getActiveCamera();
-	camera->OnAnimate(_timer->getTime());
+	// Start of Oculus Rift Code provided by Christian Keimel / bulletbyte.de
+
+	irr::core::matrix4 l_cMat;
+	if (m_bRiftAvailable) {
+		irr::core::vector3df v;
+
+		//IrrRift_poll(v.X, v.Y, v.Z);
+		SHeadTrackingEvent evt = Lib::headTracker->getValue();
+		v.X = evt.pitch;
+		v.Y = evt.yaw;
+		v.Z = evt.roll;
+
+		v.X *=  irr::core::RADTODEG;
+		v.Y *= -irr::core::RADTODEG;
+		v.Z *= -irr::core::RADTODEG;
+
+		m_pYaw  ->setRotation(l_pCamera->getRotation()); // irr::core::vector3df(        0, l_pCamera->getRotation().Y,   0));
+		m_pHeadY->setRotation(irr::core::vector3df(        0, v.Y                       ,   0));
+		m_pHeadX->setRotation(irr::core::vector3df(      v.X,   0                       ,   0));
+		m_pHeadZ->setRotation(irr::core::vector3df(        0,   0                       , v.Z));
+
+		l_cMat.setRotationDegrees(m_pHeadZ->getAbsoluteTransformation().getRotationDegrees());
+	}
+
+	irr::core::vector3df vFore = irr::core::vector3df(0, 0, -1),
+		vUp   = irr::core::vector3df(0, 1,  0);
+
+	l_cMat.transformVect(vFore);
+	l_cMat.transformVect(vUp  );
+
+	l_pCamera->setTarget  (l_pCamera->getPosition() + vFore);
+	l_pCamera->setUpVector(                           vUp  );
 
 	// Render Left
-	_driver->setRenderTarget(_renderTexture, true, true, video::SColor(0,0,0,0));
+	m_pDriver->setRenderTarget(m_pRenderTexture, true, true, irr::video::SColor(0,0,0,0));
 
-	_pCamera->setProjectionMatrix(_projectionLeft);
+	// End of Oculus Rift Code provided by Christian Keimel / bulletbyte.de
 
-	vector3df r = camera->getRotation();
-	vector3df tx(-_eyeSeparation, 0.0,0.0);
-	tx.rotateXZBy(-r.Y);
-	tx.rotateYZBy(-r.X);
-	tx.rotateXYBy(-r.Z);
+	m_pCamera->setProjectionMatrix(m_cProjectionLeft);
 
-	_pCamera->setPosition(camera->getPosition() + tx);
-	_pCamera->setTarget(camera->getTarget() + tx);  
+	irr::core::vector3df l_vR = l_pCamera->getRotation();
+	irr::core::vector3df l_vTx(0, 0, 1);//-m_fEyeSeparation, 0.0, 0.0);
+	l_vTx.rotateXZBy(-l_vR.Y);
+	l_vTx.rotateYZBy(-l_vR.X);
+	l_vTx.rotateXYBy(-l_vR.Z);
 
-	smgr->setActiveCamera(_pCamera);
-	smgr->drawAll();
+	m_pCamera->setPosition(l_pCamera->getPosition() + m_pLeftEye->getAbsolutePosition());
+	m_pCamera->setTarget  (l_pCamera->getTarget  () + m_pLeftEye->getAbsolutePosition());//getTarget  () + l_vTx);
+	m_pCamera->setUpVector(l_pCamera->getUpVector());
 
-	_driver->setRenderTarget(0, false, false, video::SColor(0,100,100,100));
-	_driver->setViewPort(_viewportLeft);
+	m_pSmgr->setActiveCamera(m_pCamera);
+	m_pSmgr->drawAll();
 
-	g_distortionCB.lensCenter[0] = _lensShift;
+	m_pDriver->setRenderTarget(0, false, false, irr::video::SColor(0,100,100,100));
+	m_pDriver->setViewPort(m_cViewportLeft);
 
-	_driver->setMaterial(_renderMaterial); 
-	_driver->drawIndexedTriangleList(_planeVertices, 4, _planeIndices, 2);
+	m_cDistortionCB.m_fLensCenter[0] = m_fLensShift;
+
+	m_pDriver->setMaterial(m_cRenderMaterial);
+	m_pDriver->drawIndexedTriangleList(m_cPlaneVertices, 4, m_iPlaneIndices, 2);
 
 	// Render Right
-	_driver->setRenderTarget(_renderTexture, true, true, video::SColor(0,0,0,0));
-	_pCamera->setProjectionMatrix(_projectionRight);
+	m_pDriver->setRenderTarget(m_pRenderTexture, true, true, irr::video::SColor(0,0,0,0));
+	m_pCamera->setProjectionMatrix(m_cProjectionRght);
 
-	vector3df r2 = camera->getRotation();
-	vector3df tx2(-_eyeSeparation, 0.0,0.0);
-	tx.rotateXZBy(-r2.Y);
-	tx.rotateYZBy(-r2.X);
-	tx.rotateXYBy(-r2.Z);
+	irr::core::vector3df l_vTxt2(0, 0, 1);//m_fEyeSeparation, 0.0, 0.0);
+	l_vTxt2.rotateXZBy(-l_vR.Y);
+	l_vTxt2.rotateYZBy(-l_vR.X);
+	l_vTxt2.rotateXYBy(-l_vR.Z);
 
-	_pCamera->setPosition(camera->getPosition() + tx2);
-	_pCamera->setTarget(camera->getTarget() + tx2);  
+	m_pCamera->setPosition(l_pCamera->getPosition() + m_pRghtEye->getAbsolutePosition()); //l_vTxt2);
+	m_pCamera->setTarget  (l_pCamera->getTarget  () + m_pRghtEye->getAbsolutePosition());
+	m_pCamera->setUpVector(l_pCamera->getUpVector());
 
-	smgr->drawAll();
+	m_pSmgr->drawAll();
 
-	_driver->setRenderTarget(0, false, false, video::SColor(0,100,100,100));  
-	_driver->setViewPort(_viewportRight);
+	m_pDriver->setRenderTarget(0, false, false, irr::video::SColor(0,100,100,100));
+	m_pDriver->setViewPort(m_cViewportRght);
 
-	g_distortionCB.lensCenter[0] = -_lensShift;
+	m_cDistortionCB.m_fLensCenter[0] = -m_fLensShift;
 
-	_driver->setMaterial(_renderMaterial); 
-	_driver->drawIndexedTriangleList(_planeVertices, 4, _planeIndices, 2);
+	m_pDriver->setMaterial(m_cRenderMaterial);
+	m_pDriver->drawIndexedTriangleList(m_cPlaneVertices, 4, m_iPlaneIndices, 2);
 
-	smgr->setActiveCamera(camera);
+	m_pSmgr->setActiveCamera(l_pCamera);
 }
