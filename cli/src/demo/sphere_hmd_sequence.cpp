@@ -4,6 +4,8 @@
 #include "irr/sphere_attach_node.h"
 #include "base/lib.h"
 #include "irr/sprite_scene_node.h"
+#include "irr/debug_drawer.h"
+#include "irr/text_3d_scene_node.h"
 
 using namespace std;
 using namespace irr;
@@ -15,6 +17,8 @@ struct SphereSpriteInitData {
 	float pitch;	//x축 기준 회전. 위아래
 	float radius;
 };
+
+irr::video::ITexture *rt = nullptr;
 
 SphereHMDSequence::SphereHMDSequence()
 {
@@ -37,12 +41,24 @@ SphereHMDSequence::SphereHMDSequence()
 	for(auto &data : dataList) {
 		auto node = Lib::smgr->addEmptySceneNode();
 		node->setRotation(core::vector3df(data.pitch, data.yaw, 0));
-
+		/*
 		auto sprite = new irr::scene::SpriteSceneNode(node, Lib::smgr, 0, tex);
 		sprite->setSize(core::dimension2d<f32>(5, 5));
 		sprite->setPosition(core::vector3df(0, 0, data.radius));
 		node->addChild(sprite);
 		sprite->drop();
+		*/
+
+		
+		auto text = new irr::scene::Text3dSceneNode(node, Lib::smgr, 0, getNormalFont14(), L"HELP ME!"); 
+		text->setPosition(core::vector3df(0, 0, data.radius));
+		auto size = core::dimension2d<f32>(10.0f, 10.0f);
+		text->setSize(size);
+		node->addChild(text);
+		text->drop();
+		
+		auto text1 = Lib::smgr->addBillboardTextSceneNode(getNormalFont14(), L"---", node); 
+		text1->setPosition(core::vector3df(0, 0, data.radius));
 	}
 }
 SphereHMDSequence::~SphereHMDSequence()
