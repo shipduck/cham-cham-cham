@@ -6,7 +6,7 @@
 using namespace irr;
 using namespace std;
 
-CylinderMappingNode::CylinderMappingNode(irr::scene::ISceneNode *parent, irr::scene::ISceneManager *smgr, irr::s32 id)
+CylinderMappingNode::CylinderMappingNode(irr::scene::ISceneNode *parent, irr::scene::ISceneManager *smgr, irr::s32 id, irr::video::ITexture *tex)
 	: ISceneNode(parent, smgr, id),
 	radius(10.0f)
 {
@@ -17,13 +17,17 @@ CylinderMappingNode::CylinderMappingNode(irr::scene::ISceneNode *parent, irr::sc
 	//material_.Wireframe = true;
 	material_.Lighting = false;
 	material_.MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
-	//디버깅 삽질 줄일라고 일단 해제
-	//material_.BackfaceCulling = false;
+	material_.setTexture(0, tex);
+	//디버깅 삽질 줄일라고 일단 해제. 그거 외에 나중에 원기둥에 광고 붙이는 효과에도 쓰기 위해서 일단 앞뒤 구분 제거
+	material_.BackfaceCulling = false;
 
 	//원점에 해당하는곳에 적절히 뭐 하나 찍기. 이거조차 없으면 디버깅하다 망할듯
-	auto cube = smgr->addCubeSceneNode(1, this);
-	cube->setIsDebugObject(true);
-	cube->setMaterialFlag(video::EMF_LIGHTING, false);
+	//auto cube = smgr->addCubeSceneNode(1, this);
+	//cube->setIsDebugObject(true);
+	//cube->setMaterialFlag(video::EMF_LIGHTING, false);
+
+	float scale = 0.01f;
+	buildVertexList(tex, scale, &vertexList_, &indexList_);
 }
 CylinderMappingNode::~CylinderMappingNode()
 {
@@ -71,22 +75,14 @@ void CylinderMappingNode::buildVertexList(irr::video::ITexture *tex,
 	SR_ASSERT(halfRad <= 2 * core::PI && "too large texture or too small radius");
 
 	// 각도를 얼마나 잘게 쪼개서 보여줄지는 대충 정하면 될듯
-	// 대략 10도=1조각 정도로 생각하자
-	float segmentRad = core::degToRad(10.0f);
+	// 어차피 테스트 수준이니까 간단하게 8등분
+	const int numSegment = 8;
 	vector<float> radList;
-	float currRad = -halfRad;
-	while(currRad < 0) {
-		radList.push_back(currRad);
-		currRad += segmentRad;
+	float segmentRad = width / radius / numSegment;
+	for(int i = 0 ; i < numSegment ; ++i) {
+		float rad = segmentRad * i - halfRad;
+		radList.push_back(rad);
 	}
-	radList.push_back(0);
-	currRad = segmentRad;
-	while(currRad < halfRad) {
-		radList.push_back(currRad);
-		currRad += segmentRad;
-	}
-	radList.push_back(halfRad);
-	SR_ASSERT(radList.size() >= 3);
 
 	video::SColor white(255, 255, 255, 255);
 	for(size_t i = 0 ; i < radList.size() ; ++i) {
@@ -109,91 +105,7 @@ void CylinderMappingNode::buildVertexList(irr::video::ITexture *tex,
 	}
 }
 
-CylinderTextureNode::CylinderTextureNode(irr::scene::ISceneNode *parent, 
-		irr::scene::ISceneManager *smgr, 
-		irr::s32 id,
-		irr::video::ITexture *tex)
-	: CylinderMappingNode(parent, smgr, id),
-	tex_(tex)
-{
-	tex_->grab();
-
-	material_.setTexture(0, tex);
-
-	float scale = 0.02f;
-	buildVertexList(tex, scale, &vertexList_, &indexList_);
-}
-
-void CylinderTextureNode::rebuild()
-{
-	float scale = 0.02f;
-	buildVertexList(tex_, scale, &vertexList_, &indexList_);
-}
-CylinderTextureNode::~CylinderTextureNode()
-{
-	tex_->drop();
-	tex_ = nullptr;
-}
-
-void CylinderTextureNode::render()
+void CylinderMappingNode::render()
 {
 	renderBasic(vertexList_, indexList_);
-}
-
-CylinderButtonNode::CylinderButtonNode(irr::scene::ISceneNode *parent, 
-									   irr::scene::ISceneManager *smgr, 
-									   irr::s32 id,
-									   const char *normalFile,
-									   const char *selectFile)
-	: CylinderMappingNode(parent, smgr, id),
-	normalTex_(nullptr),
-	selectTex_(nullptr),
-	selected(false)
-{
-	normalTex_ = Lib::driver->getTexture(normalFile);
-
-	if(selectFile != nullptr) {
-		selectTex_ = Lib::driver->getTexture(selectFile);
-	} else {
-		selectTex_ = normalTex_;
-	}
-
-	rebuild();
-}
-
-CylinderButtonNode::~CylinderButtonNode()
-{
-	if(selectTex_ != normalTex_) {
-		Lib::driver->removeTexture(normalTex_);
-		Lib::driver->removeTexture(selectTex_);
-		normalTex_ = nullptr;
-		selectTex_ = nullptr;
-	} else {
-		Lib::driver->removeTexture(normalTex_);
-		normalTex_ = nullptr;
-	}
-}
-
-void CylinderButtonNode::render()
-{
-	renderBasic(vertexList_, indexList_);
-}
-
-void CylinderButtonNode::rebuild()
-{
-	auto tex = getTexture();
-	material_.setTexture(0, tex);
-	float scale = 0.02f;
-	buildVertexList(tex, scale, &vertexList_, &indexList_);
-}
-
-irr::video::ITexture *CylinderButtonNode::getTexture()
-{
-	video::ITexture *tex = nullptr;
-	if(selected) {
-		tex = selectTex_;
-	} else {
-		tex = normalTex_;
-	}
-	return tex;
 }

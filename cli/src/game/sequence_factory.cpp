@@ -30,10 +30,10 @@ std::unique_ptr<Sequence> SequenceFactory::create(SequenceType type) const
 		seq = new GameLoadingSequence();
 		break;
 	case kSequenceDemoCylinderHMD:
-		seq = new CylinderHMDSequence();
+		seq = new demo::CylinderHMDSequence();
 		break;
 	case kSequenceDemoSphereHMD:
-		seq = new SphereHMDSequence();
+		seq = new demo::SphereHMDSequence();
 		break;
 
 	default:

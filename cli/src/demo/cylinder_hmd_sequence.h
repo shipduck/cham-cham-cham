@@ -1,14 +1,16 @@
 ﻿// Ŭnicode please 
 #pragma once
 
-#include "game/sequence.h"
+#include "demo_sequence.h"
 
-class CylinderHMDSequence : public Sequence {
+namespace demo {;
+
+class CylinderHMDSequence : public AbstractHMDSequence {
 public:
 	CylinderHMDSequence();
 	virtual ~CylinderHMDSequence();
 
 	virtual void update(int ms);
-	virtual void preDraw() {}
-	virtual void postDraw() {}
 };
+
+}	// namespace demo

@@ -75,6 +75,9 @@ void initConsoleVar()
 
 bool Lib::startUp()
 {
+	//init c library
+	srand(time(NULL));
+
 	int &fullscreen = CVarUtils::CreateCVar<int>("display.fullscreen", 0);
 	int &screenWidth = CVarUtils::CreateCVar<int>("display.width", 1280);
 	int &screenHeight = CVarUtils::CreateCVar<int>("display.height", 800);
