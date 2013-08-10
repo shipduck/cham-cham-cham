@@ -1,6 +1,8 @@
 ﻿// Ŭnicode please 
 #pragma once
 
+namespace irr {;
+namespace scene {;
 class CylinderMappingNode : public irr::scene::ISceneNode {
 public:
 	typedef irr::video::S3DVertex vertex_type;
@@ -39,3 +41,5 @@ protected:
 	std::vector<vertex_type> vertexList_;
 	std::vector<unsigned short> indexList_;
 };	
+}	// namespace scene
+}	// namespace irr

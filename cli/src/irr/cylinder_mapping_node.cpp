@@ -6,6 +6,9 @@
 using namespace irr;
 using namespace std;
 
+namespace irr {;
+namespace scene {;
+
 CylinderMappingNode::CylinderMappingNode(irr::scene::ISceneNode *parent, irr::scene::ISceneManager *smgr, irr::s32 id, irr::video::ITexture *tex)
 	: ISceneNode(parent, smgr, id),
 	radius(10.0f)
@@ -110,3 +113,5 @@ void CylinderMappingNode::render()
 {
 	renderBasic(vertexList_, indexList_);
 }
+}	// namespace scene
+}	// namespace irr

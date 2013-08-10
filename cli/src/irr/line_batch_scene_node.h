@@ -1,7 +1,10 @@
 ﻿// Ŭnicode please 
 #pragma once
 
-#include "line_batch.h"
+class LineBatch;
+
+namespace irr {;
+namespace scene {;
 
 class LineBatchSceneNode : public irr::scene::ISceneNode {
 public:
@@ -40,7 +43,9 @@ public:
 private:
 	irr::core::aabbox3d<irr::f32> box_;
 	irr::video::SMaterial material_;
-	LineBatch batch3D_;
-	LineBatch batch2D_;
+	std::unique_ptr<LineBatch> batch3D_;
+	std::unique_ptr<LineBatch> batch2D_;
 };
 
+}	// namespace scene
+}	// namespace irr
