@@ -10,6 +10,7 @@ CylinderMappingNode::CylinderMappingNode(irr::scene::ISceneNode *parent, irr::sc
 	: ISceneNode(parent, smgr, id),
 	radius(10.0f)
 {
+	//aabb구현 귀찮으니까 일단 culling을 안하는 객체로
 	setAutomaticCulling(false);
 	box_.reset(core::vector3df(0, 0, 0));
 

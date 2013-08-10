@@ -8,7 +8,10 @@ public:
 	typedef std::vector<unsigned short> index_list_type;
 
 public:
-	SphereAttachNode(irr::scene::ISceneNode *parent, irr::scene::ISceneManager *smgr, irr::s32 id);
+	SphereAttachNode(irr::scene::ISceneNode *parent, 
+		irr::scene::ISceneManager *smgr, 
+		irr::s32 id,
+		irr::video::ITexture *tex);
 	virtual ~SphereAttachNode();
 
 	virtual void OnRegisterSceneNode();
@@ -19,6 +22,7 @@ public:
 	virtual irr::video::SMaterial &getMaterial(irr::u32 i) { return material_; }
 
 public:
+	float scale;
 	float radius;
 
 protected:
