@@ -22,6 +22,7 @@ public:
 	int &fullscreen;
 	int &screenWidth;
 	int &screenHeight;
+	int &showFps;
 };
 
 class Lib {

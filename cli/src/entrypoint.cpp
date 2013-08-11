@@ -13,6 +13,7 @@
 #include "game/sequence.h"
 #include "game/sequence_factory.h"
 
+#include "util/fps_counter.h"
 #include "util/event_receiver_manager.h"
 #include "console/irr_console.h"
 #include "console/console_event_receiver.h"
@@ -58,25 +59,15 @@ int entrypoint(int argc, char* argv[])
 	std::unique_ptr<Sequence> sequence = seqFactory.create(seqType);
 
 	DebugDrawer debugDrawer;
+	FPSCounter fpsCounter;
 
-	int lastFPS = -1;
-	// 첫번째 프레임 가동에서 시간이 오래 걸릴수 있으니까
-	// 씬 변환이후 첫번쨰 프레임은 dt=0으로 생각하고 돌린다
-	bool isFirstRun = true;
-	u32 then = device->getTimer()->getTime();
 	// Render loop
+	irr::ITimer *timer = device->getTimer();
+	irr::u32 then = timer->getTime();
 	while(device->run()) {
-		int frameDeltaTime = 0;
-		if(isFirstRun) {
-			isFirstRun = false;
-			then = device->getTimer()->getTime();
-			frameDeltaTime = 0;
-		} else {
-			// Work out a frame delta time.
-			const u32 now = device->getTimer()->getTime();
-			frameDeltaTime = now - then;	// Time in milliseconds
-			then = now;
-		}
+		irr::u32 now = timer->getTime();
+		irr::u32 frameDeltaTime = now - then;
+		then = now;
 
 		// Read-Write Head Tracking Sensor Value to Camera
 		Lib::headTracker->update();
@@ -102,16 +93,8 @@ int entrypoint(int argc, char* argv[])
 		//제대로 렌더링된다
 		g_debugDrawMgr->updateAll(frameDeltaTime);
 		
-		int fps = driver->getFPS();
-		if (lastFPS != fps) {
-			core::stringw str = L"Collision detection example - Irrlicht Engine [";
-			str += driver->getName();
-			str += "] FPS:";
-			str += fps;
-
-			device->setWindowCaption(str.c_str());
-			lastFPS = fps;
-		}
+		// fps는 다음프레임에 보여주면 될듯
+		fpsCounter.draw();
 	}
 	//shut down scene before device drop!
 	sequence.reset(nullptr);

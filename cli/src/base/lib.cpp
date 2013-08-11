@@ -11,6 +11,7 @@
 #include "util/audio_manager.h"
 #include "util/event_receiver_manager.h"
 #include "util/console_func.h"
+#include "cvar_key.h"
 
 using namespace std;
 using namespace irr;
@@ -74,9 +75,10 @@ void initConsoleVar()
 }
 
 EngineParam::EngineParam()
-	: fullscreen(CVarUtils::CreateCVar<int>("engine.display.fullscreen", 0)),
-	screenWidth(CVarUtils::CreateCVar<int>("engine.display.width", 1280)),
-	screenHeight(CVarUtils::CreateCVar<int>("engine.display.height", 800))
+	: fullscreen(CVarUtils::CreateCVar<int>(CVAR_ENGINE_DISPLAY_FULLSCREEN, 0)),
+	screenWidth(CVarUtils::CreateCVar<int>(CVAR_ENGINE_DISPLAY_WIDTH, 1280)),
+	screenHeight(CVarUtils::CreateCVar<int>(CVAR_ENGINE_DISPLAY_HEIGHT, 800)),
+	showFps(CVarUtils::CreateCVar<int>(CVAR_ENGINE_DISPLAY_SHOW_FPS, 1))
 {
 	std::vector<std::string> varLoad;
 	varLoad.push_back("engine");

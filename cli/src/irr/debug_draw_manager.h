@@ -160,8 +160,14 @@ typedef TYPELIST_9(
 
 class DebugDrawManager : public Loki::GenScatterHierarchy<DrawAttributeElemList, DrawAttributeListHolder> {
 public:
+	enum {
+		kFont12Height = 12,
+		kFont14Height = 14
+	};
+public:
 	DebugDrawManager();
 	~DebugDrawManager();
+
 public:
 	void updateAll(int ms);
 	void clear();
@@ -224,4 +230,3 @@ public:
 
 // 주력으로 사용할것을 전역변수로 걸어놔야 속편하다
 extern DebugDrawManager *g_debugDrawMgr;
-
