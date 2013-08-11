@@ -36,15 +36,21 @@ CylinderHMDSequence::CylinderHMDSequence()
 	node = Lib::smgr->addEmptySceneNode();
 	node->setPosition(camNode->getPosition());
 
+	//랜덤생성은 C++을 좀 써보자
+	std::default_random_engine e1;
+	std::uniform_real_distribution<float> posYRandGen(-30.f, 30.0f);
+	std::uniform_real_distribution<float> rotateRandGen(0, 360.0f);
+	std::uniform_real_distribution<float> basicRandGen(0, 1.0f);
+
 	vector<CylinderMappingNodeData> dataList;
 	for(int i = 0 ; i < 30 ; i++) {
 		CylinderMappingNodeData data;
 		data.radius = i*0.5f + 40.0f;
-		data.posY = (((float)rand() / RAND_MAX) - 0.5) * 60;
-		data.rotate = ((float)rand() / RAND_MAX) * 360;
+		data.posY = posYRandGen(e1);
+		data.rotate = rotateRandGen(e1);
 
 		float rotateRatio = 0.3f;
-		float randRotate = (float)rand() / RAND_MAX;
+		float randRotate = basicRandGen(e1);
 		if(randRotate < rotateRatio) {
 			if(rotateRatio / 2.0f < randRotate) {
 				data.rotationAnim = core::vector3df(0, 0.3f,0);
