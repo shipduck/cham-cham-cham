@@ -21,6 +21,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include "util/console_func.h"
 #include "irr/head_tracker.h"
 #include "base/lib.h"
+#include "util/cvar_key.h"
 
 #include <iostream>
 #include <cassert>
@@ -59,21 +60,18 @@ static const char *fragShader =
 
 // Parameters from the Oculus Rift DK1
 HMDDescriptorBind::HMDDescriptorBind()
-	: hResolution(CVarUtils::CreateCVar<int>("hmd.hResolution", 1280)),
-	vResolution(CVarUtils::CreateCVar<int>("hmd.vResolution", 800)),
-	hScreenSize(CVarUtils::CreateCVar<float>("hmd.hScreenSize", 0.14976f)),
-	vScreenSize(CVarUtils::CreateCVar<float>("hmd.vScreenSize", 0.0936f)),
-	interpupillaryDistance(CVarUtils::CreateCVar<float>("hmd.interpupillaryDistance", 0.064f)),
-	lensSeparationDistance(CVarUtils::CreateCVar<float>("hmd.lensSeparationDistance", 0.064f)),
-	eyeToScreenDistance(CVarUtils::CreateCVar<float>("hmd.eyeToScreenDistance", 0.041f)),
-	distortionK_1(CVarUtils::CreateCVar<float>("hmd.distortionK_1", 1.0f)),
-	distortionK_2(CVarUtils::CreateCVar<float>("hmd.distortionK_2", 0.22f)),
-	distortionK_3(CVarUtils::CreateCVar<float>("hmd.distortionK_3", 0.24f)),
-	distortionK_4(CVarUtils::CreateCVar<float>("hmd.distortionK_4", 0.0f))
+	: hResolution(CVarUtils::GetCVarRef<int>(CVAR_HMD_H_RESOLUTION)),
+	vResolution(CVarUtils::GetCVarRef<int>(CVAR_HMD_V_RESOLUTION)),
+	hScreenSize(CVarUtils::GetCVarRef<float>(CVAR_HMD_H_SCREEN_SIZE)),
+	vScreenSize(CVarUtils::GetCVarRef<float>(CVAR_HMD_V_SCREEN_SIZE)),
+	interpupillaryDistance(CVarUtils::GetCVarRef<float>(CVAR_HMD_INTERPUPILLARY_DISTANCE)),
+	lensSeparationDistance(CVarUtils::GetCVarRef<float>(CVAR_HMD_LENS_SEPARATION_DISTANCE)),
+	eyeToScreenDistance(CVarUtils::GetCVarRef<float>(CVAR_HMD_EYE_TO_SCREEN_DISTANCE)),
+	distortionK_1(CVarUtils::GetCVarRef<float>(CVAR_HMD_DISTORTION_K_1)),
+	distortionK_2(CVarUtils::GetCVarRef<float>(CVAR_HMD_DISTORTION_K_2)),
+	distortionK_3(CVarUtils::GetCVarRef<float>(CVAR_HMD_DISTORTION_K_3)),
+	distortionK_4(CVarUtils::GetCVarRef<float>(CVAR_HMD_DISTORTION_K_4))
 {
-	std::vector<std::string> varLoad;
-	varLoad.push_back("hmd");
-	console::load(varLoad);
 }
 
 HMDDescriptor HMDDescriptorBind::convert() const
