@@ -20,6 +20,7 @@
 #include <string>   // stoi and u32string
 
 #include <sstream>
+#include <random>
 
 #include <array>
 #include <list>
