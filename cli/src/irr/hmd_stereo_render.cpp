@@ -262,16 +262,15 @@ void HMDStereoRender::setHMD(const HMDDescriptor &HMD)
 	m_cDistortionCB.m_fHmdWarpParam[3] = m_cHMD.m_fDistortionK[3];
 
 	// Create render target
-	if (m_pDriver->queryFeature(irr::video::EVDF_RENDER_TO_TARGET))
-	{
+	if (m_pDriver->queryFeature(irr::video::EVDF_RENDER_TO_TARGET)) {
 		if (m_pRenderTexture != NULL) {
-			m_pRenderTexture->drop();
+			m_pDriver->removeTexture(m_pRenderTexture);
+			m_pRenderTexture = nullptr;
 		}
 		auto tex = m_pRenderTexture = m_pDriver->addRenderTargetTexture(irr::core::dimension2d<irr::u32>((irr::u32)(m_cHMD.m_iResolutionH * l_fDistScale / 2.0f), (irr::u32)(m_cHMD.m_iResolutionV * l_fDistScale)));
 		SR_ASSERT(tex != nullptr);
 		m_cRenderMaterial.setTexture(0, m_pRenderTexture);
-	}
-	else {
+	} else {
 		// Render to target not supported
 		assert(0);
 	}
