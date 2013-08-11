@@ -43,15 +43,17 @@ std::unique_ptr<Sequence> SequenceFactory::create(SequenceType type) const
 	return unique_ptr<Sequence>(seq);
 }
 
-SequenceType SequenceFactory::select(bool *fullscreen) const
+SequenceType SequenceFactory::select(DisplayType *displayType) const
 {
-	SR_ASSERT(fullscreen != nullptr);
+	SR_ASSERT(displayType != nullptr);
 	//키보드 입력을 받아서 특정 demo sequence를 생성한다든가
 	//테스트 목족으로 sequence생성을 임의로 수정할떄
 	//이부분이 계속 diff에 걸리면 변경추적이 어려우니까
 	//작정하고 분리해놧음
 	ostringstream oss;
-	oss << "Select Sequence. If last character is f, run fullscreen mode." << endl;
+	oss << "Select Sequence." << endl;
+	oss << "If last character is f, run fullscreen mode." << endl;
+	oss << "If last character is w, run window mode." << endl;
 	oss << "(1) Demo Cylinder" << endl;
 	oss << "(2) Demo Spehere" << endl;
 	oss << "(3) Debug Draw" << endl;
@@ -64,10 +66,15 @@ SequenceType SequenceFactory::select(bool *fullscreen) const
 	char code = '\0';
 	if(input.length() == 1) {
 		code = input[0];
-		*fullscreen = false;
+		*displayType = kDisplayDefault;
 	} else {
 		code = input[0];
-		*fullscreen = ('f' == input[input.length()-1]);
+		char lastChar = input[input.length()-1];
+		if(lastChar == 'f') {
+			*displayType = kDisplayFullscreen;
+		} else if(lastChar == 'w') {
+			*displayType = kDisplayWindow;
+		}
 	}
 
 	switch(code) {

@@ -11,10 +11,16 @@ typedef enum {
 	kSequenceDemoSphereHMD,
 } SequenceType;
 
+typedef enum {
+	kDisplayDefault,
+	kDisplayFullscreen,
+	kDisplayWindow,
+} DisplayType;
+
 class Sequence;
 
 class SequenceFactory {
 public:
 	std::unique_ptr<Sequence> create(SequenceType type) const;
-	SequenceType select(bool *fullscreen) const;
+	SequenceType select(DisplayType *displayType) const;
 };

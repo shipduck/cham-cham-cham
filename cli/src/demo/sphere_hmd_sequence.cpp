@@ -28,10 +28,14 @@ SphereHMDSequence::SphereHMDSequence()
 
 	vector<SphereSpriteInitData> dataList;
 	
+	std::default_random_engine e1;
+	std::uniform_real_distribution<float> yawRandGen(0, 360.0f);
+	std::uniform_real_distribution<float> pitchRandGen(-80, 80);
+
 	for(int i = 0 ; i < 25 ; i++) {
 		SphereSpriteInitData data;
-		data.yaw = ((float)rand() / RAND_MAX) * 360;
-		data.pitch = (((float)rand() / RAND_MAX) * 160) - 80;
+		data.yaw = yawRandGen(e1);
+		data.pitch = pitchRandGen(e1);
 		data.radius = 30 + i * 0.5f;
 		dataList.push_back(data);
 	}
