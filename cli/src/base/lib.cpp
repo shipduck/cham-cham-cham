@@ -11,7 +11,7 @@
 #include "util/audio_manager.h"
 #include "util/event_receiver_manager.h"
 #include "util/console_func.h"
-#include "cvar_key.h"
+#include "util/cvar_key.h"
 
 using namespace std;
 using namespace irr;
@@ -63,26 +63,12 @@ bool checkDeviceSupport(irr::IrrlichtDevice *device)
 	return true;
 }
 
-void initConsoleFunction()
-{
-	CVarUtils::CreateCVar("driver_info", console::driverInfo, "Display Irrlicht Driver Info");	
-	CVarUtils::CreateCVar("play_bgm", console::playBGM, "Play test bgm");
-	CVarUtils::CreateCVar("save", console::save, "Save the CVars to a file");
-	CVarUtils::CreateCVar("load", console::load, "Load CVars from a file");
-}
-void initConsoleVar()
-{
-}
-
 EngineParam::EngineParam()
-	: fullscreen(CVarUtils::CreateCVar<int>(CVAR_ENGINE_DISPLAY_FULLSCREEN, 0)),
-	screenWidth(CVarUtils::CreateCVar<int>(CVAR_ENGINE_DISPLAY_WIDTH, 1280)),
-	screenHeight(CVarUtils::CreateCVar<int>(CVAR_ENGINE_DISPLAY_HEIGHT, 800)),
-	showFps(CVarUtils::CreateCVar<int>(CVAR_ENGINE_DISPLAY_SHOW_FPS, 1))
+	: fullscreen(CVarUtils::GetCVarRef<int>(CVAR_ENGINE_DISPLAY_FULLSCREEN)),
+	screenWidth(CVarUtils::GetCVarRef<int>(CVAR_ENGINE_DISPLAY_WIDTH)),
+	screenHeight(CVarUtils::GetCVarRef<int>(CVAR_ENGINE_DISPLAY_HEIGHT)),
+	showFps(CVarUtils::GetCVarRef<int>(CVAR_ENGINE_DISPLAY_SHOW_FPS))
 {
-	std::vector<std::string> varLoad;
-	varLoad.push_back("engine");
-	console::load(varLoad);
 }
 
 bool Lib::startUp(const EngineParam &param)
@@ -112,8 +98,6 @@ bool Lib::startUp(const EngineParam &param)
 	//모든 초기화 중에서 콘솔이 가장 우선
 	console = g_console;
 	setUpConsole(device);
-	initConsoleVar();
-	initConsoleFunction();
 
 	//이벤트 시스템을 엔진에 장착
 	//이것이 제대로 달라붙어야 일리히트에서 발생한 로그 이벤트가 콘솔에 뜬다
@@ -152,13 +136,6 @@ bool Lib::startUp(const EngineParam &param)
 
 void Lib::shutDown()
 {
-	vector<string> cvarNamespaceList;
-	cvarNamespaceList.push_back("console");
-	cvarNamespaceList.push_back("hmd");
-	cvarNamespaceList.push_back("engine");
-	cvarNamespaceList.push_back("script");
-	console::save(cvarNamespaceList);
-
 	safeDelete(stereoRenderer);
 
 	audio->shutDown();

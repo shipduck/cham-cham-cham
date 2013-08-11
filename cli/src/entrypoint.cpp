@@ -8,6 +8,7 @@
 #include "irr/hmd_event_receiver.h"
 #include "base/lib.h"
 #include "console/console_function.h"
+#include "util/cvar_key.h"
 
 // sequence
 #include "game/sequence.h"
@@ -29,6 +30,9 @@ int entrypoint(int argc, char* argv[])
 {	
 	//detect memory leak
 	//_CrtSetBreakAlloc(27254);
+
+	//var 관련 내용 로딩을 미리 해놓는다
+	startUpCVar();
 
 	//게임에서 사용할 최조 시퀀스를 선택한다
 	//단, 생성까지 처리해버리면 시망한다(생성은 엔진객체가 필요하기 때문)
@@ -102,6 +106,6 @@ int entrypoint(int argc, char* argv[])
 	Lib::shutDown();
 	
 	device->drop();	
-
+	shutDownCVar();
 	return 0;
 }
