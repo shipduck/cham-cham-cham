@@ -60,4 +60,8 @@ public:
 	// oculus stereo renderer는 시스템상에 단 1개만 존재해야한다
 	static HMDStereoRender *stereoRenderer;
 	static void updateStereoRenderer();
+
+	//임시로 때려박은 렌더링 기본색
+	//콘솔에서 바꾸게 하는게 있을필요가 있나?
+	static irr::video::SColor backgroundColor;
 };

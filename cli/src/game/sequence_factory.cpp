@@ -10,6 +10,7 @@
 // demo
 #include "demo/cylinder_hmd_sequence.h"
 #include "demo/sphere_hmd_sequence.h"
+#include "demo/color_sequence.h"
 
 using namespace std;
 
@@ -35,7 +36,9 @@ std::unique_ptr<Sequence> SequenceFactory::create(SequenceType type) const
 	case kSequenceDemoSphereHMD:
 		seq = new demo::SphereHMDSequence();
 		break;
-
+	case kSequenceDemoColor:
+		seq = new demo::ColorSequence();
+		break;
 	default:
 		break;
 	}
@@ -57,6 +60,7 @@ SequenceType SequenceFactory::select(DisplayType *displayType) const
 	oss << "(1) Demo Cylinder" << endl;
 	oss << "(2) Demo Spehere" << endl;
 	oss << "(3) Debug Draw" << endl;
+	oss << "(4) Color" << endl;
 	oss << "(etc) Title" << endl;
 	cout << oss.str();
 
@@ -77,14 +81,14 @@ SequenceType SequenceFactory::select(DisplayType *displayType) const
 		}
 	}
 
-	switch(code) {
-	case '1':
-		return kSequenceDemoCylinderHMD;
-	case '2':
-		return kSequenceDemoSphereHMD;
-	case '3':
-		return kSequenceDebugDraw;
-	default:
+	std::map<char, SequenceType> sequenceCodeTable;
+	sequenceCodeTable['1'] = kSequenceDemoCylinderHMD;
+	sequenceCodeTable['2'] = kSequenceDemoSphereHMD;
+	sequenceCodeTable['3'] = kSequenceDebugDraw;
+	sequenceCodeTable['4'] = kSequenceDemoColor;
+	auto found = sequenceCodeTable.find(code);
+	if(found == sequenceCodeTable.end()) {
 		return kSequenceTitle;
 	}
+	return found->second;
 }

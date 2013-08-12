@@ -9,6 +9,7 @@ typedef enum {
 	// demo라고 해서 다른 enum으로 분리하면 관리가 귀찮을듯
 	kSequenceDemoCylinderHMD,
 	kSequenceDemoSphereHMD,
+	kSequenceDemoColor,
 } SequenceType;
 
 typedef enum {

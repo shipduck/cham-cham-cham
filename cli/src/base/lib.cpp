@@ -41,6 +41,8 @@ HMDEventReceiver *Lib::hmdEventReceiver = nullptr;
 std::unique_ptr<HMDDescriptorBind> hmdDescriptorBind;
 HMDStereoRender *Lib::stereoRenderer = nullptr;
 
+irr::video::SColor Lib::backgroundColor = video::SColor(255, 10, 10, 10);
+
 // 게임에서 사용할 특수 기능을 그래픽카드에서 지원하는지 미리 검증하는 함수
 // 최초에 미리 검증하면 실제 게임작동중에는 기능을 지원하는지 신경쓰지 않고 막써도 된다
 bool checkDeviceSupport(irr::IrrlichtDevice *device)

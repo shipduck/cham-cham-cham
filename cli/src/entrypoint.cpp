@@ -82,7 +82,7 @@ int entrypoint(int argc, char* argv[])
 
 		sequence->update(frameDeltaTime);
 		{
-			driver->beginScene(true, true, video::SColor(255, 10, 10, 10));
+			driver->beginScene(true, true, Lib::backgroundColor);
 			sequence->draw();
 			
 			// debug render. 실제 렌더링 이후에 그려야됨
