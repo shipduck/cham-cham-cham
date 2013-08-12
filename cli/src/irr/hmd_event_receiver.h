@@ -5,12 +5,12 @@
 
 class HMDEventReceiver : public ICustomEventReceiver {
 public:
-	HMDEventReceiver() : supportHMD_(false) {}
+	HMDEventReceiver();
 	virtual ~HMDEventReceiver() {}
 	virtual bool OnEvent(const irr::SEvent &evt);
 	virtual bool OnEvent(const SHeadTrackingEvent &evt) { return false; }
-	bool isSupportHMD() const { return supportHMD_; }
+	bool isSupportHMD() const { return (supportHMD_ > 0); }
 
 private:
-	bool supportHMD_;
+	int &supportHMD_;
 };

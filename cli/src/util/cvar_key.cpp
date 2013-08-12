@@ -24,6 +24,7 @@ void initConsoleVar()
 	CVarUtils::CreateCVar<int>(CVAR_ENGINE_DISPLAY_WIDTH, 1280);
 	CVarUtils::CreateCVar<int>(CVAR_ENGINE_DISPLAY_HEIGHT, 800);
 	CVarUtils::CreateCVar<int>(CVAR_ENGINE_DISPLAY_SHOW_FPS, 1);
+	CVarUtils::CreateCVar<int>(CVAR_ENGINE_DISPLAY_HMD, 0);
 	
 	//hmd
 	CVarUtils::CreateCVar<int>(CVAR_HMD_H_RESOLUTION, 1280);
