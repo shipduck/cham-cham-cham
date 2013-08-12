@@ -96,13 +96,13 @@ public:
 	irr::f32 getWorldScale(); 
 	void setWorldScale(irr::f32 worldScale);
 
-	//void drawAll(irr::scene::ISceneManager* smgr);
-	void drawAll();
+	void drawAll(irr::scene::ISceneManager* smgr);
+
+	void update(irr::scene::ISceneManager *smgr);
 
 private: 
 	irr::video::IVideoDriver *m_pDriver;
 	irr::video::ITexture *m_pRenderTexture;
-	irr::scene::ISceneManager *m_pSmgr;
 
 	irr::scene::ISceneNode *m_pHeadX;
 	irr::scene::ISceneNode *m_pHeadY;

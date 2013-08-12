@@ -152,7 +152,6 @@ HMDStereoRender::HMDStereoRender(irr::IrrlichtDevice *device, const HMDDescripto
 	m_cHMD(getInvalidDescriptor()),
 	m_pDriver(device->getVideoDriver()),
 	m_pRenderTexture(nullptr),
-	m_pSmgr(device->getSceneManager()),
 	m_pHeadX(nullptr),
 	m_pHeadY(nullptr),
 	m_pHeadZ(nullptr),
@@ -160,9 +159,12 @@ HMDStereoRender::HMDStereoRender(irr::IrrlichtDevice *device, const HMDDescripto
 	m_pLeftEye(nullptr),
 	m_pRghtEye(nullptr),
 	m_pTimer(device->getTimer()),
-	m_cDistortionCB(g_distortionCB),
-	m_pCamera(m_pSmgr->addCameraSceneNode())	// Create perspectiva camera used for rendering
+	m_cDistortionCB(g_distortionCB)
 {
+	auto smgr = device->getSceneManager();
+	// Create perspectiva camera used for rendering
+	m_pCamera = smgr->addCameraSceneNode();
+
 	// Init shader parameters
 	m_cDistortionCB.m_fScale     [0] = 1.0f; m_cDistortionCB.m_fScale     [1] = 1.0f;
 	m_cDistortionCB.m_fScaleIn   [0] = 1.0f; m_cDistortionCB.m_fScaleIn   [1] = 1.0f;
@@ -198,14 +200,14 @@ HMDStereoRender::HMDStereoRender(irr::IrrlichtDevice *device, const HMDDescripto
 	// Start of Oculus Rift Code provided by Christian Keimel / bulletbyte.de
 	m_bRiftAvailable = Lib::headTracker->isConnected();
 
-	m_pYaw = m_pSmgr->addEmptySceneNode(0, 0);
-	m_pHeadX = m_pSmgr->addEmptySceneNode(m_pYaw , 0);
-	m_pHeadY = m_pSmgr->addEmptySceneNode(m_pHeadX, 0);
-	m_pHeadZ = m_pSmgr->addEmptySceneNode(m_pHeadY, 0);
+	m_pYaw = smgr->addEmptySceneNode(0, 0);
+	m_pHeadX = smgr->addEmptySceneNode(m_pYaw , 0);
+	m_pHeadY = smgr->addEmptySceneNode(m_pHeadX, 0);
+	m_pHeadZ = smgr->addEmptySceneNode(m_pHeadY, 0);
 
-	m_pLeftEye = m_pSmgr->addEmptySceneNode(m_pHeadZ, 0);
+	m_pLeftEye = smgr->addEmptySceneNode(m_pHeadZ, 0);
 	m_pLeftEye->setPosition(irr::core::vector3df(-0.25, 0, 0));
-	m_pRghtEye = m_pSmgr->addEmptySceneNode(m_pHeadZ, 0);
+	m_pRghtEye = smgr->addEmptySceneNode(m_pHeadZ, 0);
 	m_pRghtEye->setPosition(irr::core::vector3df( 0.25, 0, 0));
 
 	// End of Oculus Rift Code provided by Christian Keimel / bulletbyte.de
@@ -276,36 +278,35 @@ void HMDStereoRender::setHMD(const HMDDescriptor &HMD)
 	}
 }
 
-
-//void HMDStereoRender::drawAll(ISceneManager* smgr)
-void HMDStereoRender::drawAll()
+void HMDStereoRender::update(irr::scene::ISceneManager *smgr)
 {
-	irr::scene::ICameraSceneNode *l_pCamera = m_pSmgr->getActiveCamera();
+	irr::scene::ICameraSceneNode *l_pCamera = smgr->getActiveCamera();
 	l_pCamera->OnAnimate(m_pTimer->getTime());
 
 	// Start of Oculus Rift Code provided by Christian Keimel / bulletbyte.de
 
 	irr::core::matrix4 l_cMat;
+	irr::core::vector3df v;
 	if (m_bRiftAvailable) {
-		irr::core::vector3df v;
-
 		//IrrRift_poll(v.X, v.Y, v.Z);
 		SHeadTrackingEvent evt = Lib::headTracker->getValue();
 		v.X = evt.pitch;
 		v.Y = evt.yaw;
 		v.Z = evt.roll;
-
-		v.X *=  irr::core::RADTODEG;
-		v.Y *= -irr::core::RADTODEG;
-		v.Z *= -irr::core::RADTODEG;
-
-		m_pYaw  ->setRotation(l_pCamera->getRotation()); // irr::core::vector3df(        0, l_pCamera->getRotation().Y,   0));
-		m_pHeadY->setRotation(irr::core::vector3df(        0, v.Y                       ,   0));
-		m_pHeadX->setRotation(irr::core::vector3df(      v.X,   0                       ,   0));
-		m_pHeadZ->setRotation(irr::core::vector3df(        0,   0                       , v.Z));
-
-		l_cMat.setRotationDegrees(m_pHeadZ->getAbsoluteTransformation().getRotationDegrees());
+	} else {
+		v = irr::core::vector3df(0, 0, 0);
 	}
+
+	v.X *=  irr::core::RADTODEG;
+	v.Y *= -irr::core::RADTODEG;
+	v.Z *= -irr::core::RADTODEG;
+
+	m_pYaw  ->setRotation(l_pCamera->getRotation()); // irr::core::vector3df(        0, l_pCamera->getRotation().Y,   0));
+	m_pHeadY->setRotation(irr::core::vector3df(        0, v.Y                       ,   0));
+	m_pHeadX->setRotation(irr::core::vector3df(      v.X,   0                       ,   0));
+	m_pHeadZ->setRotation(irr::core::vector3df(        0,   0                       , v.Z));
+
+	l_cMat.setRotationDegrees(m_pHeadZ->getAbsoluteTransformation().getRotationDegrees());
 
 	irr::core::vector3df vFore = irr::core::vector3df(0, 0, -1),
 		vUp   = irr::core::vector3df(0, 1,  0);
@@ -315,6 +316,11 @@ void HMDStereoRender::drawAll()
 
 	l_pCamera->setTarget  (l_pCamera->getPosition() + vFore);
 	l_pCamera->setUpVector(                           vUp  );
+
+}
+void HMDStereoRender::drawAll(ISceneManager* smgr)
+{
+	irr::scene::ICameraSceneNode *l_pCamera = smgr->getActiveCamera();
 
 	// Render Left
 	m_pDriver->setRenderTarget(m_pRenderTexture, true, true, irr::video::SColor(0,0,0,0));
@@ -333,8 +339,8 @@ void HMDStereoRender::drawAll()
 	m_pCamera->setTarget  (l_pCamera->getTarget  () + m_pLeftEye->getAbsolutePosition());//getTarget  () + l_vTx);
 	m_pCamera->setUpVector(l_pCamera->getUpVector());
 
-	m_pSmgr->setActiveCamera(m_pCamera);
-	m_pSmgr->drawAll();
+	smgr->setActiveCamera(m_pCamera);
+	smgr->drawAll();
 
 	m_pDriver->setRenderTarget(0, false, false, irr::video::SColor(0,100,100,100));
 	m_pDriver->setViewPort(m_cViewportLeft);
@@ -357,7 +363,7 @@ void HMDStereoRender::drawAll()
 	m_pCamera->setTarget  (l_pCamera->getTarget  () + m_pRghtEye->getAbsolutePosition());
 	m_pCamera->setUpVector(l_pCamera->getUpVector());
 
-	m_pSmgr->drawAll();
+	smgr->drawAll();
 
 	m_pDriver->setRenderTarget(0, false, false, irr::video::SColor(0,100,100,100));
 	m_pDriver->setViewPort(m_cViewportRght);
@@ -367,5 +373,5 @@ void HMDStereoRender::drawAll()
 	m_pDriver->setMaterial(m_cRenderMaterial);
 	m_pDriver->drawIndexedTriangleList(m_cPlaneVertices, 4, m_iPlaneIndices, 2);
 
-	m_pSmgr->setActiveCamera(l_pCamera);
+	smgr->setActiveCamera(l_pCamera);
 }

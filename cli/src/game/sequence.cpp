@@ -24,14 +24,15 @@ void Sequence::drawAllNormal(irr::scene::ISceneManager *smgr)
 	int w = Lib::driver->getScreenSize().Width;
 	int h = Lib::driver->getScreenSize().Height;
 	Lib::driver->setViewPort(core::recti(0, 0, w, h));
+	Lib::stereoRenderer->update(smgr);
 	Lib::smgr->drawAll();
 }
 
 void Sequence::drawAllStereo(irr::scene::ISceneManager *smgr)
 {
 	Lib::updateStereoRenderer();
-	//Lib::stereoRenderer->drawAll(smgr);
-	Lib::stereoRenderer->drawAll();
+	Lib::stereoRenderer->update(smgr);
+	Lib::stereoRenderer->drawAll(smgr);
 }
 
 void Sequence::draw()
