@@ -9,10 +9,18 @@ from cStringIO import StringIO
 
 # 무시할 파일명은 대소문자 무시
 IGNORE_DIR_NAME = ['osx']
-IGNORE_FILE_NAME = ['thumbs.db', 'desktop.ini']
+IGNORE_FILE_NAME = ['thumbs.db', 'desktop.ini', 'Icon\r']
+SCRIPT_PATH = None
+
+def get_script_path():
+    global SCRIPT_PATH
+    if SCRIPT_PATH == None:
+        SCRIPT_PATH = os.path.relpath(os.path.realpath(__file__), os.path.realpath(os.curdir))
+    
+    return SCRIPT_PATH
 
 def get_res_dir():
-    curr_dir = os.path.dirname(__file__)
+    curr_dir = os.path.dirname(get_script_path())
     res_dir = os.path.join(curr_dir, '..', 'res')
     if os.path.isdir(res_dir) == False:
        print u'directory %s is not exist' % res_dir
@@ -120,7 +128,7 @@ def get_res_header_content():
 def main():
     out = get_res_header_content()
 
-    curr_dir = os.path.dirname(__file__)
+    curr_dir = os.path.dirname(get_script_path())
     target_file = os.path.join(curr_dir, '..', 'src', 'res.h')
     if os.path.exists(target_file) == False:
         f = open(target_file, 'w')
