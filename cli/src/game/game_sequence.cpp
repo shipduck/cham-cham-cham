@@ -4,7 +4,6 @@
 #include "scene_helper.h"
 #include "irr/debug_draw_manager.h"
 #include "util/event_receiver_manager.h"
-#include "input_event.h"
 #include "base/lib.h"
 
 using namespace irr;
@@ -66,7 +65,7 @@ GameSequence::GameSequence()
 	
 	// event receiver 등록
 	// TODO 이벤트 리시버 제거기능이 없으면 씬 교체시에 문제 발생함
-	eventReceiver_ = static_cast<GameEventReceiver*>(Lib::eventReceiver->attachReceiver(new GameEventReceiver(), 0));
+	//eventReceiver_ = static_cast<GameEventReceiver*>(Lib::eventReceiver->attachReceiver(new GameEventReceiver(), 0));
 }
 
 GameSequence::~GameSequence()
@@ -268,10 +267,11 @@ void GameSequence::initSky()
 
 void GameSequence::updateMoveEvent(int ms, const MoveEvent &evt)
 {
+	/*
 	core::vector3df pos = camNode->getPosition();
 	core::vector3df target = camNode->getTarget();
 	core::vector3df posDelta;
-
+	
 	{
 		//forward backward
 		float forwardBackwordDelta = evt.forwardBackward * MoveSpeed * ms / 1000.0f;
@@ -311,9 +311,11 @@ void GameSequence::updateMoveEvent(int ms, const MoveEvent &evt)
 	// write right target
 	target += posDelta;
 	camNode->setTarget(target);
+	*/
 }
 void GameSequence::updateLookEvent(int ms, const LookEvent &evt)
 {
+	/*
 	f32 rotateHoriziontal = evt.horizontalRotation;
 	f32 rotateVertical = evt.verticalRotation;
 
@@ -330,12 +332,13 @@ void GameSequence::updateLookEvent(int ms, const LookEvent &evt)
 
 	target += pos;
 	camNode->setTarget(target);
+	*/
 }
 
 void GameSequence::update(int ms)
 {
 	scene::ISceneCollisionManager* collMan = Lib::smgr->getSceneCollisionManager();
-
+	/*
 	//방향처리의 우선순위가 이동처리보다 높다
 	LookEvent lookEvent = eventReceiver_->getLookEvent();
 	updateLookEvent(ms, lookEvent);
@@ -343,6 +346,7 @@ void GameSequence::update(int ms)
 	//앞으로 이동하는거 처리
 	MoveEvent moveEvent = eventReceiver_->getMoveEvent();
 	updateMoveEvent(ms, moveEvent);
+	*/
 
 	// All intersections in this example are done with a ray cast out from the camera to
     // a distance of 1000.  You can easily modify this to check (e.g.) a bullet
