@@ -31,6 +31,13 @@ SphereHMDSequence::SphereHMDSequence()
 	hideCursor();
 	enableCollision();
 
+	auto cam = Lib::smgr->getActiveCamera();
+	receiver = new CameraEventReceiver(cam);
+	Lib::eventReceiver->attachReceiver(receiver);
+	//cam->bindTargetAndRotation(true);
+	//cam->setPosition(core::vector3df(0, 0, 0));
+	//cam->setTarget(core::vector3df(0, 0, 1));
+
 	vector<SphereSpriteInitData> dataList;
 	
 	std::default_random_engine e1;
@@ -50,7 +57,7 @@ SphereHMDSequence::SphereHMDSequence()
 	auto tex = Lib::driver->getTexture(res::texture::SORA2_PNG.c_str());
 
 	for(auto &data : dataList) {
-		auto node = Lib::smgr->addEmptySceneNode();
+		auto node = Lib::smgr->addEmptySceneNode(cam);
 		node->setRotation(core::vector3df(data.pitch, data.yaw, 0));
 		auto sprite = new irr::scene::SpriteSceneNode(node, Lib::smgr, 0, tex);
 		sprite->setSize(core::dimension2d<f32>(5, 5));
@@ -66,12 +73,9 @@ SphereHMDSequence::SphereHMDSequence()
 		text->drop();
 	}
 
-	receiver = new CameraEventReceiver(Lib::smgr->getActiveCamera());
-	Lib::eventReceiver->attachReceiver(receiver);
-
-	auto cam = Lib::smgr->getActiveCamera();
-	cam->setPosition(core::vector3df(0, 0, 0));
-	cam->setTarget(core::vector3df(0, 1, 0));
+	//auto cube = Lib::smgr->addCubeSceneNode();
+	//cube->setMaterialFlag(video::EMF_LIGHTING, false);
+	//cube->setPosition(core::vector3df(+20, 0, 0));
 }
 SphereHMDSequence::~SphereHMDSequence()
 {
