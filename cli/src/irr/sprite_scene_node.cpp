@@ -43,6 +43,9 @@ SpriteSceneNode::SpriteSceneNode(irr::scene::ISceneNode* parent,
 	material_.MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
 	material_.setTexture(0, tex);
 	material_.BackfaceCulling = false;
+
+	setMaterialFlag(video::EMF_LIGHTING, false);
+	setMaterialFlag(video::EMF_ZBUFFER, false);
 }
 SpriteSceneNode::~SpriteSceneNode()
 {

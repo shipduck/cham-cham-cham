@@ -56,8 +56,11 @@ SphereHMDSequence::SphereHMDSequence()
 	//billboard를 사용해서 sphere 효과를 낼수 있을거같은데...
 	auto tex = Lib::driver->getTexture(res::texture::SORA2_PNG.c_str());
 
+	auto hmdNode = Lib::smgr->addEmptySceneNode(cam);
+	hmdNode->setRotation(core::vector3df(0, 180, 0));
+
 	for(auto &data : dataList) {
-		auto node = Lib::smgr->addEmptySceneNode(cam);
+		auto node = Lib::smgr->addEmptySceneNode(hmdNode);
 		node->setRotation(core::vector3df(data.pitch, data.yaw, 0));
 		auto sprite = new irr::scene::SpriteSceneNode(node, Lib::smgr, 0, tex);
 		sprite->setSize(core::dimension2d<f32>(5, 5));
@@ -71,6 +74,18 @@ SphereHMDSequence::SphereHMDSequence()
 		text->setSize(size);
 		node->addChild(text);
 		text->drop();
+	}
+
+	//처다보는 방향을 그리는데 사용할 간단한 billboard
+	{
+		auto tex = Lib::driver->getTexture("ext/irrlicht/media/particle.bmp");
+		auto node = Lib::smgr->addEmptySceneNode(hmdNode);
+		auto sprite = new irr::scene::SpriteSceneNode(node, Lib::smgr, 0, tex);
+		node->addChild(sprite);
+		sprite->setSize(core::dimension2d<f32>(2, 2));
+		sprite->setPosition(core::vector3df(0, 0, 50));
+		sprite->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
+		sprite->drop();
 	}
 
 	//auto cube = Lib::smgr->addCubeSceneNode();

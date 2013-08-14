@@ -213,5 +213,14 @@ void CameraEventReceiver::update(int ms)
 	auto camPosMsg = (wformat(L"CamPos : %.2f, %.2f, %.2f") % camPos.X % camPos.Y % camPos.Z).str();
 	g_debugDrawMgr->addString(core::vector2di(0, 100 + 14*4), camPosMsg, white);
 
-	//cube->setPosition(cam->getPosition() + 10 * target);
+	/*
+	HMD가 카메라에 비해서 약간 밀리는 느낌인데....
+	auto it = cam->getChildren().begin();
+	auto endit = cam->getChildren().end();
+	for( ; it != endit ; ++it) {
+		irr::scene::ISceneNode *child = *it;
+		//child->updateAbsolutePosition();
+		//child->getAbsoluteTransformation();
+	}
+	*/
 }
