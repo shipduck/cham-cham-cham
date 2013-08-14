@@ -5,6 +5,8 @@
 #include "base/lib.h"
 #include "game/input_event.h"
 
+#include "irr/debug_draw_manager.h"
+
 using namespace irr;
 using namespace std;
 
@@ -16,8 +18,7 @@ inline bool isSetBinaryFlag(const irr::u32& flags, const irr::u32 offset) {
 CameraEventReceiver::CameraEventReceiver(irr::scene::ICameraSceneNode *cam)
 	: cam_(cam),
 	horizontalRotate_(0),
-	verticalRotate_(0),
-	keyMapping_(new KeyMapping())
+	verticalRotate_(0)
 {
 	std::fill(keyDownStatus_, keyDownStatus_ + getArraySize(keyDownStatus_), false);
 }
@@ -85,10 +86,7 @@ void CameraEventReceiver::onEvent(const irr::SEvent::SJoystickEvent &evt)
 
 	float XView = joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_R>();
 	float YView = joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_U>();
-    //printf("%f\n", joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_Z>());
-    //printf("%f\n", joystickDev.getAxisFloatValue<SEvent::SJoystickEvent::AXIS_V>());
-
-	YView = 0.0f;	//위아래 보는거 구현하기전까지는 막아놓기
+	
 	if(fabs(XView) < DEAD_ZONE) {
 		XView = 0.0f;
 	}
@@ -96,7 +94,8 @@ void CameraEventReceiver::onEvent(const irr::SEvent::SJoystickEvent &evt)
 		YView = 0.0f;
 	}
 	lookEvent.horizontalRotation = XView;
-	lookEvent.verticalRotation = YView;
+	//y는 패드 자체에서 방향이 반대로 나온다?
+	lookEvent.verticalRotation = -YView;
 
 	//TODO move가 실제로 발생했을떄만 이동처리하는거 구현할때 살려서 쓴다
 	/*
@@ -106,7 +105,7 @@ void CameraEventReceiver::onEvent(const irr::SEvent::SJoystickEvent &evt)
 		Moved = false;
 	}
 	*/
-    for(const KeyMapping::joystickMap_t::value_type &joystickMapValue : keyMapping_->getJoystickKeyMap()) {
+    for(const KeyMapping::joystickMap_t::value_type &joystickMapValue : Lib::keyMapping->getJoystickKeyMap()) {
         buttonEvent_.setButton(joystickMapValue.second, isSetBinaryFlag(evt.ButtonStates, joystickMapValue.first));
     }
 }
@@ -123,7 +122,7 @@ void CameraEventReceiver::onEvent(const irr::SEvent::SKeyInput &evt)
 	};
     
 	//processing move event
-    for(const KeyMapping::keyMap_t::value_type &keyMapList : keyMapping_->getKeyMap()){
+    for(const KeyMapping::keyMap_t::value_type &keyMapList : Lib::keyMapping->getKeyMap()){
         auto keyItr = keyMapList.second.begin();
         auto keyEndItr = keyMapList.second.end();
         auto keyFound = std::find_if(keyItr, keyEndItr, KeyCompFunctor(evt.Key));
@@ -164,7 +163,7 @@ void CameraEventReceiver::update(int ms)
 
 	horizontalRotate_ += lookEvt.horizontalRotation;
 	verticalRotate_ += lookEvt.verticalRotation;
-	const float maxVerticalRotation = 88.0f;
+	const float maxVerticalRotation = 80.0f;
 	if(verticalRotate_ < -maxVerticalRotation) {
 		verticalRotate_ = -maxVerticalRotation;
 	} else if(verticalRotate_ > maxVerticalRotation) {
@@ -174,12 +173,31 @@ void CameraEventReceiver::update(int ms)
 	//그냥 생각없이 카메라를 돌리자. 오큘러스 대응은 렌더리쪽에서 알아서 처리될거다
 	cam->setRotation(core::vector3df(verticalRotate_, horizontalRotate_, 0));
 	
-	irr::core::vector3df pos = cam->getPosition();
-	irr::core::vector3df target = cam->getTarget() - pos;
-	irr::core::vector3df up = cam->getUpVector();
-	//irr::core::vector3df side = target.crossProduct(up);
-	irr::core::vector3df side = up.crossProduct(target);
+	//카메라 처다보는 방향으로 로직을 구현하면 오큘러스에서 설정한 값하고 꼬인다
+	//v/h 값으로 따로 계산해야될듯
+	core::vector3df pos = cam->getPosition();
+	core::vector3df up(0, 1, 0);
+	float targetX = cos(core::degToRad(verticalRotate_)) * sin(core::degToRad(horizontalRotate_));
+	float targetY = sin(core::degToRad(verticalRotate_));
+	float targetZ = cos(core::degToRad(verticalRotate_)) * cos(core::degToRad(horizontalRotate_));
+	core::vector3df target(targetX, targetY, targetZ);
+	irr::core::vector3df side = target.crossProduct(up);
 
 	const float moveFactor = ((irr::f32)ms) / 10.0f;
 	cam->setPosition(pos + moveFactor * moveEvt.forwardBackward * target + moveFactor * moveEvt.leftRight * side);
+
+	using boost::wformat;
+
+	irr::video::SColor white(255, 255, 255, 255);
+	auto camPosMsg = (wformat(L"Cam : h=%.2f, v=%.2f") % horizontalRotate_ % verticalRotate_).str();
+	g_debugDrawMgr->addString(core::vector2di(0, 100), camPosMsg, white);
+
+	auto evtMsg = (wformat(L"evt : fb=%.2f, lr=%.2f") % moveEvt.forwardBackward % moveEvt.leftRight).str();
+	g_debugDrawMgr->addString(core::vector2di(0, 100 + 14*1), evtMsg, white);
+
+	auto targetMsg = (wformat(L"target : %.2f, %.2f, %.2f") % targetX % targetY % targetZ).str();
+	g_debugDrawMgr->addString(core::vector2di(0, 100 + 14*2), targetMsg, white);
+
+	auto sideMsg = (wformat(L"side : %.2f, %.2f, %.2f") % side.X % side.Y % side.Z).str();
+	g_debugDrawMgr->addString(core::vector2di(0, 100 + 14*3), sideMsg, white);
 }

@@ -1,6 +1,7 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
 #include "key_mapping.h"
+#include "util/console_func.h"
 
 using namespace irr;
 
@@ -64,7 +65,11 @@ std::istream &operator>>( std::istream &stream, KeyMapping::eKeyType& keyType) {
 
 KeyMapping::KeyMapping()
 {
-    // keyboard
+}
+
+void KeyMapping::startUp()
+{
+	// keyboard
     
 	//forward
 	keyMapList_t forwardKeyMap;
@@ -123,4 +128,12 @@ KeyMapping::KeyMapping()
     CVarUtils::AttachCVar("input.joystick.button_4", &joystickKeyMap_[kButton4]);
     CVarUtils::AttachCVar("input.joystick.startButton", &joystickKeyMap_[kStart]);
     CVarUtils::AttachCVar("input.joystick.backButton", &joystickKeyMap_[kBack]);
+
+	std::vector<std::string> varLoad;
+	varLoad.push_back("input");
+	console::load(varLoad);
+}
+void KeyMapping::shutDown()
+{
+	//변수 저장은 어차피 console 관련에서 한방에 처리하니까 굳이 따로 할필요없다
 }

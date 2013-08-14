@@ -68,6 +68,10 @@ SphereHMDSequence::SphereHMDSequence()
 
 	receiver = new CameraEventReceiver(Lib::smgr->getActiveCamera());
 	Lib::eventReceiver->attachReceiver(receiver);
+
+	auto cam = Lib::smgr->getActiveCamera();
+	cam->setPosition(core::vector3df(0, 0, 0));
+	cam->setTarget(core::vector3df(0, 1, 0));
 }
 SphereHMDSequence::~SphereHMDSequence()
 {

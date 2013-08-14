@@ -35,7 +35,6 @@ private:
 	LookEvent joystickLookEvent_;
     
     ButtonEvent buttonEvent_;
-	std::unique_ptr<KeyMapping> keyMapping_;
     //keyboard down/up 추적. 이벤트 들어올때마다 계속 저장해서 이벤트 재구성하기
     bool keyDownStatus_[KeyMapping::kKeyTypeCount];
 

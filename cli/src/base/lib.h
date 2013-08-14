@@ -7,6 +7,7 @@ class HeadTracker;
 class EventReceiverManager;
 class HMDEventReceiver;
 class HMDStereoRender;
+class KeyMapping;
 
 /*
 전역변수로 존재하는 대부분의 항목에 직접 접근하는것 괜찮겟지만
@@ -64,4 +65,6 @@ public:
 	//임시로 때려박은 렌더링 기본색
 	//콘솔에서 바꾸게 하는게 있을필요가 있나?
 	static irr::video::SColor backgroundColor;
+
+	static KeyMapping *keyMapping;
 };

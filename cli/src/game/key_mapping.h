@@ -68,6 +68,9 @@ public:
 public:
 	KeyMapping();
 
+	void startUp();
+	void shutDown();
+
 public:
     const keyMapList_t &getKeyList(const eKeyType keyType) const { return keyBoardKeyMapList_.at(keyType); }
     const keyMap_t &getKeyMap(void) const { return keyBoardKeyMapList_; }

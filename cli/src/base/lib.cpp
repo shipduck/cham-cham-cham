@@ -12,6 +12,7 @@
 #include "util/event_receiver_manager.h"
 #include "util/console_func.h"
 #include "util/cvar_key.h"
+#include "game/key_mapping.h"
 
 using namespace std;
 using namespace irr;
@@ -40,6 +41,13 @@ HMDEventReceiver *Lib::hmdEventReceiver = nullptr;
 
 std::unique_ptr<HMDDescriptorBind> hmdDescriptorBind;
 HMDStereoRender *Lib::stereoRenderer = nullptr;
+
+//내부에서 CVar로 변수 연결하는게 AttachCVar로 되어있어서
+//CVar저장하기 전까지 keyMappingLocal이 뒤지면 안된다
+//게다가 key mapping은 싱글턴
+//그래서 전역변수로 선언해서 포인터만 연결해놧다
+KeyMapping keyMappingLocal;
+KeyMapping *Lib::keyMapping = &keyMappingLocal;
 
 irr::video::SColor Lib::backgroundColor = video::SColor(255, 10, 10, 10);
 
@@ -101,6 +109,9 @@ bool Lib::startUp(const EngineParam &param)
 	console = g_console;
 	setUpConsole(device);
 
+	//key mapping 로딩. 키매핑은 1개로 충분하니까 싱글턴
+	keyMapping->startUp();
+
 	//이벤트 시스템을 엔진에 장착
 	//이것이 제대로 달라붙어야 일리히트에서 발생한 로그 이벤트가 콘솔에 뜬다
 	eventReceiver->startUp(device);
@@ -139,7 +150,7 @@ bool Lib::startUp(const EngineParam &param)
 void Lib::shutDown()
 {
 	safeDelete(stereoRenderer);
-
+	keyMapping->shutDown();
 	audio->shutDown();
 	headTracker->shutDown();
 	eventReceiver->shutDown();

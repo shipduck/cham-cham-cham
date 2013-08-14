@@ -59,5 +59,6 @@ void shutDownCVar()
 	cvarNamespaceList.push_back("hmd");
 	cvarNamespaceList.push_back("engine");
 	cvarNamespaceList.push_back("script");
+	cvarNamespaceList.push_back("input");
 	console::save(cvarNamespaceList);
 }
