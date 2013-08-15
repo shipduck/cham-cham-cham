@@ -13,8 +13,6 @@ SpriteSceneNode::SpriteSceneNode(irr::scene::ISceneNode* parent,
 	irr::video::ITexture *tex)
 	: ISceneNode(parent, mgr, id)
 {
-	//aabb구현 귀찮으니까 일단 culling을 안하는 객체로
-	setAutomaticCulling(false);
 	box_.reset(core::vector3df(0, 0, 0));
 
 	video::SColor white(255, 255, 255, 255);
@@ -46,10 +44,36 @@ SpriteSceneNode::SpriteSceneNode(irr::scene::ISceneNode* parent,
 
 	setMaterialFlag(video::EMF_LIGHTING, false);
 	setMaterialFlag(video::EMF_ZBUFFER, false);
+
+	core::dimension2d<f32> size(1, 1);
+	setSize(size);
 }
+
 SpriteSceneNode::~SpriteSceneNode()
 {
 
+}
+
+void SpriteSceneNode::setSize(const core::dimension2d<f32>& size)
+{
+	size_ = size;
+
+	core::vector3df horizontal(size_.Width, 0, 0);
+	core::vector3df vertical(0, size_.Height, 0);
+
+	std::array<core::vector3df, 4> posList;
+	posList[0] = horizontal - vertical;
+	posList[1] = horizontal + vertical;
+	posList[2] = -horizontal + vertical;
+	posList[3] = -horizontal - vertical;
+
+	box_.reset(core::vector3df(0, 0, 0));
+	for(auto pos : posList) {
+		core::vector3df p1(pos.X, pos.Y, 0.1f);
+		core::vector3df p2(pos.X, pos.Y, -0.1f);
+		box_.addInternalPoint(p1);
+		box_.addInternalPoint(p2);
+	}
 }
 
 void SpriteSceneNode::OnRegisterSceneNode()
@@ -84,6 +108,14 @@ void SpriteSceneNode::render()
 	vertices_[1].Pos = horizontal + vertical;
 	vertices_[2].Pos = -horizontal + vertical;
 	vertices_[3].Pos = -horizontal - vertical;
+
+	if (DebugDataVisible & scene::EDS_BBOX) {
+		driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
+		video::SMaterial m;
+		m.Lighting = false;
+		driver->setMaterial(m);
+		driver->draw3DBox(box_, video::SColor(0,208,195,152));
+	}
 
 	driver->setMaterial(material_);
 	driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);	

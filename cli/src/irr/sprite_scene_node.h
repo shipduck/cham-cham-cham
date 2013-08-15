@@ -18,7 +18,7 @@ public:
 	virtual irr::u32 getMaterialCount() const { return 1; }
 	virtual irr::video::SMaterial &getMaterial(irr::u32 i) { return material_; }
 
-	void setSize(const core::dimension2d<f32>& size) { size_ = size; }
+	void setSize(const core::dimension2d<f32>& size);
 	const core::dimension2d<f32> &getSize() const { return size_; }
 
 private:

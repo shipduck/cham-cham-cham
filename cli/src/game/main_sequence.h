@@ -4,6 +4,7 @@
 #include "sequence.h"
 
 class ScoreBoard;
+class RockScissorPaper;
 class AbstractHMDCameraEventReceiver;
 
 enum {
@@ -26,4 +27,5 @@ private:
 	AbstractHMDCameraEventReceiver *receiver_;
 	irr::scene::IAnimatedMeshSceneNode *reinaNode_;
 	std::unique_ptr<ScoreBoard> scoreBoard_;
+	std::unique_ptr<RockScissorPaper> rsp_;
 };
