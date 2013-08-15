@@ -8,6 +8,7 @@
 #include "irr/text_3d_scene_node.h"
 #include "util/event_receiver_manager.h"
 #include "irr/hmd_camera.h"
+#include "res.h"
 
 using namespace std;
 using namespace irr;
