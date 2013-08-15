@@ -1,15 +1,15 @@
 ﻿// Ŭnicode please 
 #pragma once
 
-class RockScissorPaper {
+class RockPaperScissor {
 public:
-	RockScissorPaper(irr::scene::ICameraSceneNode *cam);
-	virtual ~RockScissorPaper();
+	RockPaperScissor(irr::scene::ICameraSceneNode *cam);
+	virtual ~RockPaperScissor();
 
 private:
 	irr::scene::ISceneNode *root_;
 
 	irr::scene::ISceneNode *rock_;
-	irr::scene::ISceneNode *scissor_;
 	irr::scene::ISceneNode *paper_;
+	irr::scene::ISceneNode *scissor_;
 };

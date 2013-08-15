@@ -7,7 +7,7 @@
 #include "cvars/CVar.h"
 #include "util/cvar_key.h"
 #include "game/score_board.h"
-#include "game/rock_scissor_paper.h"
+#include "game/rock_paper_scissor.h"
 #include "res.h"
 
 using namespace std;
@@ -30,7 +30,7 @@ MainSequence::MainSequence()
 	reinaNode_->setDebugDataVisible(scene::EDS_BBOX);
 
 	scoreBoard_.reset(new ScoreBoard(cam));
-	rsp_.reset(new RockScissorPaper(cam));
+	rps_.reset(new RockPaperScissor(cam));
 }
 
 MainSequence::~MainSequence()
