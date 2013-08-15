@@ -13,6 +13,7 @@
 #include "util/console_func.h"
 #include "util/cvar_key.h"
 #include "game/key_mapping.h"
+#include "game/sequence.h"
 
 using namespace std;
 using namespace irr;
@@ -50,6 +51,8 @@ KeyMapping keyMappingLocal;
 KeyMapping *Lib::keyMapping = &keyMappingLocal;
 
 irr::video::SColor Lib::backgroundColor = video::SColor(255, 10, 10, 10);
+
+std::unique_ptr<Sequence> Lib::sequence;
 
 // 게임에서 사용할 특수 기능을 그래픽카드에서 지원하는지 미리 검증하는 함수
 // 최초에 미리 검증하면 실제 게임작동중에는 기능을 지원하는지 신경쓰지 않고 막써도 된다
@@ -149,6 +152,7 @@ bool Lib::startUp(const EngineParam &param)
 
 void Lib::shutDown()
 {
+	sequence.reset(nullptr);
 	safeDelete(stereoRenderer);
 	keyMapping->shutDown();
 	audio->shutDown();

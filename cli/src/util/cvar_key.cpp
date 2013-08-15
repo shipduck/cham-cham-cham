@@ -11,6 +11,7 @@ void initConsoleFunction()
 	CVarUtils::CreateCVar("play_bgm", console::playBGM, "Play test bgm");
 	CVarUtils::CreateCVar("save", console::save, "Save the CVars to a file");
 	CVarUtils::CreateCVar("load", console::load, "Load CVars from a file");
+	CVarUtils::CreateCVar("restart_game", console::restartGame, "restart game");
 }
 
 void initConsoleVar()

@@ -15,7 +15,7 @@
 
 using namespace std;
 
-std::unique_ptr<Sequence> SequenceFactory::create(SequenceType type) const
+Sequence *SequenceFactory::createRaw(SequenceType type) const
 {
 	Sequence *seq = nullptr;
 	switch(type) {
@@ -47,6 +47,11 @@ std::unique_ptr<Sequence> SequenceFactory::create(SequenceType type) const
 		break;
 	}
 	SR_ASSERT(seq != nullptr);
+	return seq;
+}
+std::unique_ptr<Sequence> SequenceFactory::create(SequenceType type) const
+{
+	auto seq = createRaw(type);
 	return unique_ptr<Sequence>(seq);
 }
 

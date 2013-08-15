@@ -23,6 +23,7 @@ class Sequence;
 
 class SequenceFactory {
 public:
+	Sequence *createRaw(SequenceType type) const;
 	std::unique_ptr<Sequence> create(SequenceType type) const;
 	SequenceType select(DisplayType *displayType) const;
 };

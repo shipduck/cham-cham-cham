@@ -8,6 +8,7 @@ class EventReceiverManager;
 class HMDEventReceiver;
 class HMDStereoRender;
 class KeyMapping;
+class Sequence;
 
 /*
 전역변수로 존재하는 대부분의 항목에 직접 접근하는것 괜찮겟지만
@@ -67,4 +68,8 @@ public:
 	static irr::video::SColor backgroundColor;
 
 	static KeyMapping *keyMapping;
+
+	//현재 실행중인 시퀀스. 외부에서 접근해서 바꿀수 있어야해서 추가
+	//일단은 여기에 넣지만 나중에 SequenceManager같은클래스 하나 추가해서 작업하는거 검토하기
+	static std::unique_ptr<Sequence> sequence;
 };

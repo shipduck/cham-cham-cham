@@ -6,6 +6,13 @@
 class ScoreBoard;
 class AbstractHMDCameraEventReceiver;
 
+enum {
+	kStateRockScissorPaper,
+	kStateChamChamCham,
+	kStateGameWin,
+	kStateGameLose,
+};
+
 class MainSequence : public Sequence {
 public:
 	MainSequence();

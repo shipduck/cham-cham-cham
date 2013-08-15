@@ -71,5 +71,10 @@ bool load(const std::vector<std::string> &args)
 	return true;
 }
 
+bool restartGame(const std::vector<std::string> &args)
+{
+	
+	return true;
+}
 
 }	// namespace console

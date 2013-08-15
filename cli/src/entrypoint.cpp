@@ -29,7 +29,7 @@ using namespace gui;
 int entrypoint(int argc, char* argv[])
 {	
 	//detect memory leak
-	//_CrtSetBreakAlloc(27254);
+	//_CrtSetBreakAlloc(132879);
 
 	//var 관련 내용 로딩을 미리 해놓는다
 	startUpCVar();
@@ -59,8 +59,7 @@ int entrypoint(int argc, char* argv[])
 	IGUIEnvironment* guienv = device->getGUIEnvironment();
 	ISceneManager* smgr = device->getSceneManager();
 
-	
-	std::unique_ptr<Sequence> sequence = seqFactory.create(seqType);
+	Lib::sequence = std::move(seqFactory.create(seqType));
 
 	DebugDrawer debugDrawer;
 	FPSCounter fpsCounter;
@@ -80,10 +79,10 @@ int entrypoint(int argc, char* argv[])
 			Lib::eventReceiver->OnEvent(evt);
 		}
 
-		sequence->update(frameDeltaTime);
+		Lib::sequence->update(frameDeltaTime);
 		{
 			driver->beginScene(true, true, Lib::backgroundColor);
-			sequence->draw();
+			Lib::sequence->draw();
 			
 			// debug render. 실제 렌더링 이후에 그려야됨
 			debugDrawer.drawAll(*g_debugDrawMgr);
@@ -100,9 +99,6 @@ int entrypoint(int argc, char* argv[])
 		// fps는 다음프레임에 보여주면 될듯
 		fpsCounter.draw();
 	}
-	//shut down scene before device drop!
-	sequence.reset(nullptr);
-
 	Lib::shutDown();
 	
 	device->drop();	
