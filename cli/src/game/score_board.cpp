@@ -16,6 +16,9 @@ struct HMDInitData {
 };
 
 ScoreBoard::ScoreBoard(irr::scene::ICameraSceneNode *cam)
+	: playerScore_(0),
+	aiScore_(0),
+	hmdNode_(nullptr)
 {
 	//hmd
 	auto reinaTex = Lib::driver->getTexture(res::texture::FACE_REINA_PNG);
@@ -57,11 +60,12 @@ ScoreBoard::ScoreBoard(irr::scene::ICameraSceneNode *cam)
 		}
 	}
 
-	auto hmdNode = Lib::smgr->addEmptySceneNode(cam);
-	hmdNode->setRotation(core::vector3df(0, 180, 0));
+	hmdNode_ = Lib::smgr->addEmptySceneNode(cam);
+	hmdNode_->grab();
+	hmdNode_->setRotation(core::vector3df(0, 180, 0));
 
 	for(auto data : dataList) {
-		auto node = Lib::smgr->addEmptySceneNode(hmdNode);
+		auto node = Lib::smgr->addEmptySceneNode(hmdNode_);
 		node->setRotation(core::vector3df(data.pitch, data.yaw, 0));
 		auto sprite = new irr::scene::SpriteSceneNode(node, Lib::smgr, 0, data.tex);
 		sprite->setSize(core::dimension2d<f32>(data.sizeX, data.sizeY));
@@ -74,4 +78,6 @@ ScoreBoard::ScoreBoard(irr::scene::ICameraSceneNode *cam)
 
 ScoreBoard::~ScoreBoard()
 {
+	hmdNode_->drop();
+	hmdNode_ = nullptr;
 }

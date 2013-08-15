@@ -13,4 +13,6 @@ public:
 private:
 	int playerScore_;
 	int aiScore_;
+
+	irr::scene::ISceneNode *hmdNode_;
 };
