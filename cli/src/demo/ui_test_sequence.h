@@ -1,12 +1,12 @@
 ﻿// Ŭnicode please 
 #pragma once
 
-#include "sequence.h"
+#include "game/sequence.h"
 
-class TitleSequence : public Sequence {
+class UiTestSequence : public Sequence {
 public:
-	TitleSequence();
-	virtual ~TitleSequence();
+	UiTestSequence();
+	virtual ~UiTestSequence();
 
 	virtual void update(int ms);
 	virtual void preDraw();

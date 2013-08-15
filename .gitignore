@@ -56,6 +56,8 @@ cli/boost
 # CVars
 cli/ext/CVars/CVarVersion.h
 
+cli/ext/*
+
 .cvar_history
 .console_settings
 cvars.xml

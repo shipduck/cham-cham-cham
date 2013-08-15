@@ -5,12 +5,12 @@
 #include "game_sequence.h"
 #include "debug_draw_sequence.h"
 #include "game_loading_sequence.h"
-#include "title_sequence.h"
 
 // demo
 #include "demo/cylinder_hmd_sequence.h"
 #include "demo/sphere_hmd_sequence.h"
 #include "demo/color_sequence.h"
+#include "demo/ui_test_sequence.h"
 
 using namespace std;
 
@@ -19,7 +19,6 @@ std::unique_ptr<Sequence> SequenceFactory::create(SequenceType type) const
 	Sequence *seq = nullptr;
 	switch(type) {
 	case kSequenceTitle:
-		seq = new TitleSequence();
 		break;
 	case kSequenceDebugDraw:
 		seq = new DebugDrawSequence();
