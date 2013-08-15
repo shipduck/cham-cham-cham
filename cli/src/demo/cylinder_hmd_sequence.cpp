@@ -4,6 +4,7 @@
 #include "irr/cylinder_mapping_node.h"
 #include "base/lib.h"
 #include "irr/head_tracker.h"
+#include "res.h"
 
 using namespace std;
 using namespace irr;

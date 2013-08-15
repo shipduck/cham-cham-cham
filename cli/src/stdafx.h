@@ -75,7 +75,6 @@
 // for unit test
 #include <gtest/gtest.h>
 
-#include "res.h"
 #else
 #error "NEED PCH"
 #endif

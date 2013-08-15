@@ -3,6 +3,7 @@
 #include "score_board.h"
 #include "base/lib.h"
 #include "irr/sprite_scene_node.h"
+#include "res.h"
 
 using namespace std;
 using namespace irr;

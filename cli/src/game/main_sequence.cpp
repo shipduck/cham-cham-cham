@@ -7,6 +7,7 @@
 #include "cvars/CVar.h"
 #include "util/cvar_key.h"
 #include "game/score_board.h"
+#include "res.h"
 
 using namespace std;
 using namespace irr;
