@@ -81,3 +81,7 @@ ScoreBoard::~ScoreBoard()
 	hmdNode_->drop();
 	hmdNode_ = nullptr;
 }
+
+void ScoreBoard::update()
+{
+}

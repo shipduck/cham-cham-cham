@@ -3,6 +3,9 @@
 
 #include "sequence.h"
 
+class ScoreBoard;
+class AbstractHMDCameraEventReceiver;
+
 class MainSequence : public Sequence {
 public:
 	MainSequence();
@@ -11,4 +14,9 @@ public:
 	virtual void update(int ms);
 	virtual void preDraw() {}
 	virtual void postDraw() {}
+
+private:
+	AbstractHMDCameraEventReceiver *receiver_;
+	irr::scene::IAnimatedMeshSceneNode *reinaNode_;
+	std::unique_ptr<ScoreBoard> scoreBoard_;
 };

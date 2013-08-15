@@ -11,31 +11,28 @@
 using namespace std;
 using namespace irr;
 
-AbstractHMDCameraEventReceiver *receiver = nullptr;
-irr::scene::IAnimatedMeshSceneNode *reinaNode = nullptr;
-std::unique_ptr<ScoreBoard> scoreBoard;
-
-
 MainSequence::MainSequence()
+	: receiver_(nullptr),
+	reinaNode_(nullptr)
 {
 	auto cam = Lib::smgr->addCameraSceneNode();
-	receiver = new HeadFreeCameraEventReceiver(cam, 0.1f, 0.1f);
-	Lib::eventReceiver->attachReceiver(receiver);
+	receiver_ = new HeadFreeCameraEventReceiver(cam, 0.1f, 0.1f);
+	Lib::eventReceiver->attachReceiver(receiver_);
 
 	Lib::device->getCursorControl()->setVisible(false);
 
 	irr::scene::IAnimatedMesh *reina = Lib::smgr->getMesh(res::modeldata::reira::G02T02_X);
-	reinaNode = Lib::smgr->addAnimatedMeshSceneNode(reina);
-	reinaNode->setPosition(irr::core::vector3df(0, 0, 0));
-	reinaNode->setMaterialFlag(video::EMF_LIGHTING, false);
-	reinaNode->setDebugDataVisible(scene::EDS_BBOX);
+	reinaNode_ = Lib::smgr->addAnimatedMeshSceneNode(reina);
+	reinaNode_->setPosition(irr::core::vector3df(0, 0, 0));
+	reinaNode_->setMaterialFlag(video::EMF_LIGHTING, false);
+	reinaNode_->setDebugDataVisible(scene::EDS_BBOX);
 
-	scoreBoard.reset(new ScoreBoard(cam));
+	scoreBoard_.reset(new ScoreBoard(cam));
 }
 
 MainSequence::~MainSequence()
 {
-	Lib::eventReceiver->detachReceiver(receiver);
+	Lib::eventReceiver->detachReceiver(receiver_);
 }
 
 void MainSequence::update(int ms)
@@ -46,14 +43,15 @@ void MainSequence::update(int ms)
 	//카메라 속도 관련
 	float &moveSpeed = CVarUtils::GetCVarRef<float>(CVAR_GAME_CAM_MOVE_SPEED);
 	float &rotateSpeed = CVarUtils::GetCVarRef<float>(CVAR_GAME_CAM_ROTATE_SPEED);
-	receiver->moveSpeed = moveSpeed;
-	receiver->rotateSpeed = rotateSpeed;
+	receiver_->moveSpeed = moveSpeed;
+	receiver_->rotateSpeed = rotateSpeed;
 
 	//캐릭터 위치 설정
 	float &posX = CVarUtils::GetCVarRef<float>(CVAR_GAME_CHARACTER_POS_X);
 	float &posY = CVarUtils::GetCVarRef<float>(CVAR_GAME_CHARACTER_POS_Y);
 	float &posZ = CVarUtils::GetCVarRef<float>(CVAR_GAME_CHARACTER_POS_Z);
-	reinaNode->setPosition(irr::core::vector3df(posX, posY, posZ));
+	reinaNode_->setPosition(irr::core::vector3df(posX, posY, posZ));
 
-	receiver->update(ms);
+	receiver_->update(ms);
+	scoreBoard_->update();
 }
