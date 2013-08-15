@@ -39,11 +39,20 @@ void initConsoleVar()
 	CVarUtils::CreateCVar<float>(CVAR_HMD_DISTORTION_K_3, 0.24f);
 	CVarUtils::CreateCVar<float>(CVAR_HMD_DISTORTION_K_4, 0.0f);
 
+	//game
+	CVarUtils::CreateCVar<float>(CVAR_GAME_CAM_MOVE_SPEED, 0.1f);
+	CVarUtils::CreateCVar<float>(CVAR_GAME_CAM_ROTATE_SPEED, 0.1f);
+
+	CVarUtils::CreateCVar<float>(CVAR_GAME_CHARACTER_POS_X, 0.0f);
+	CVarUtils::CreateCVar<float>(CVAR_GAME_CHARACTER_POS_Y, -100.0f);
+	CVarUtils::CreateCVar<float>(CVAR_GAME_CHARACTER_POS_Z, 150.0f);
+
 	//console, engine는 내가 직접 개입할거같지 않으니까 그냥 해당 클래스에서 선언한거 갖다쓰자
 
 	std::vector<std::string> varLoad;
 	varLoad.push_back("hmd");
 	varLoad.push_back("engine");
+	varLoad.push_back("game");
 	console::load(varLoad);
 }
 
@@ -60,5 +69,6 @@ void shutDownCVar()
 	cvarNamespaceList.push_back("engine");
 	cvarNamespaceList.push_back("script");
 	cvarNamespaceList.push_back("input");
+	cvarNamespaceList.push_back("game");
 	console::save(cvarNamespaceList);
 }

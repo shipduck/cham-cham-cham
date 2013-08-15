@@ -5,6 +5,7 @@
 #include "game_sequence.h"
 #include "debug_draw_sequence.h"
 #include "game_loading_sequence.h"
+#include "main_sequence.h"
 
 // demo
 #include "demo/cylinder_hmd_sequence.h"
@@ -18,7 +19,11 @@ std::unique_ptr<Sequence> SequenceFactory::create(SequenceType type) const
 {
 	Sequence *seq = nullptr;
 	switch(type) {
-	case kSequenceTitle:
+	//case kSequenceTitle:
+	//	seq = new TitleSequence();
+	//	break;
+	case kSequenceMain:
+		seq = new MainSequence();
 		break;
 	case kSequenceDebugDraw:
 		seq = new DebugDrawSequence();
@@ -63,7 +68,7 @@ SequenceType SequenceFactory::select(DisplayType *displayType) const
 	oss << "(etc) Title" << endl;
 	cout << oss.str();
 
-	std:string input;
+	string input;
 	std::cin >> input;
 
 	char code = '\0';
@@ -87,7 +92,7 @@ SequenceType SequenceFactory::select(DisplayType *displayType) const
 	sequenceCodeTable['4'] = kSequenceDemoColor;
 	auto found = sequenceCodeTable.find(code);
 	if(found == sequenceCodeTable.end()) {
-		return kSequenceTitle;
+		return kSequenceMain;
 	}
 	return found->second;
 }

@@ -15,32 +15,29 @@ inline bool isSetBinaryFlag(const irr::u32& flags, const irr::u32 offset) {
     return (flags & offset) == offset;
 }
 
-
-CameraEventReceiver::CameraEventReceiver(irr::scene::ICameraSceneNode *cam)
+AbstractHMDCameraEventReceiver::AbstractHMDCameraEventReceiver(irr::scene::ICameraSceneNode *cam, float rotateSpeed, float moveSpeed)
 	: cam_(cam),
-	horizontalRotate_(180),
-	verticalRotate_(0)
+	rotateSpeed(rotateSpeed),
+	moveSpeed(moveSpeed)
 {
 	std::fill(keyDownStatus_, keyDownStatus_ + getArraySize(keyDownStatus_), false);
 }
-
-CameraEventReceiver::~CameraEventReceiver()
+AbstractHMDCameraEventReceiver::~AbstractHMDCameraEventReceiver()
 {
 }
 
-MoveEvent CameraEventReceiver::getMoveEvent() const
+MoveEvent AbstractHMDCameraEventReceiver::getMoveEvent() const
 {
 	MoveEvent evt = keyboardMoveEvent_.merge(joystickMoveEvent_);
 	return evt;
 }
-LookEvent CameraEventReceiver::getLookEvent() const
+LookEvent AbstractHMDCameraEventReceiver::getLookEvent() const
 {
 	LookEvent evt = mouseLookEvent_.merge(joystickLookEvent_);
 	return evt;
 }
 
-
-bool CameraEventReceiver::OnEvent(const irr::SEvent &evt) 
+bool AbstractHMDCameraEventReceiver::OnEvent(const irr::SEvent &evt) 
 {
 	switch(evt.EventType) {
 	case EET_JOYSTICK_INPUT_EVENT:
@@ -56,7 +53,7 @@ bool CameraEventReceiver::OnEvent(const irr::SEvent &evt)
 	return false;
 }
 
-void CameraEventReceiver::onEvent(const irr::SEvent::SJoystickEvent &evt) 
+void AbstractHMDCameraEventReceiver::onEvent(const irr::SEvent::SJoystickEvent &evt) 
 {
 	const float DEAD_ZONE = 0.20f;
 
@@ -111,7 +108,7 @@ void CameraEventReceiver::onEvent(const irr::SEvent::SJoystickEvent &evt)
     }
 }
 
-void CameraEventReceiver::onEvent(const irr::SEvent::SKeyInput &evt) 
+void AbstractHMDCameraEventReceiver::onEvent(const irr::SEvent::SKeyInput &evt) 
 {
 	struct KeyCompFunctor {
 		KeyCompFunctor(irr::EKEY_CODE key) : key(key) {}
@@ -148,28 +145,41 @@ void CameraEventReceiver::onEvent(const irr::SEvent::SKeyInput &evt)
 	keyboardMoveEvent_ = moveEvt;
 }
 
-void CameraEventReceiver::onEvent(const irr::SEvent::SMouseInput &evt)
+void AbstractHMDCameraEventReceiver::onEvent(const irr::SEvent::SMouseInput &evt)
 {
 	//printf("mouse\n");
 	//TODO
 	//마우스구현을 집어넣으면 게임 디버깅이 심히 힘들다
 }
 
-void CameraEventReceiver::update(int ms)
+//////////////////////////////////////////////////////////////////////
+
+HeadFreeCameraEventReceiver::HeadFreeCameraEventReceiver(irr::scene::ICameraSceneNode *cam, float rotateSpeed, float moveSpeed)
+	: AbstractHMDCameraEventReceiver(cam, rotateSpeed, moveSpeed),
+	horizontalRotate_(180),
+	verticalRotate_(0)
+{	
+}
+
+HeadFreeCameraEventReceiver::~HeadFreeCameraEventReceiver()
+{
+}
+
+void HeadFreeCameraEventReceiver::update(int ms)
 {
 	auto cam = this->getCamera();
 
 	MoveEvent moveEvt = getMoveEvent();
 	LookEvent lookEvt = getLookEvent();
 
-	horizontalRotate_ += lookEvt.horizontalRotation;
+	horizontalRotate_ += lookEvt.horizontalRotation * rotateSpeed * ms;
 	if(horizontalRotate_ > 180.0f) {
 		horizontalRotate_ -= 360.0f;
 	} else if(horizontalRotate_ < -180.0f) {
 		horizontalRotate_ += 360.0f;
 	}
 
-	verticalRotate_ += lookEvt.verticalRotation;
+	verticalRotate_ += lookEvt.verticalRotation * rotateSpeed * ms;
 	const float maxVerticalRotation = 80.0f;
 	if(verticalRotate_ < -maxVerticalRotation) {
 		verticalRotate_ = -maxVerticalRotation;
@@ -189,38 +199,79 @@ void CameraEventReceiver::update(int ms)
 	float targetZ = -cos(core::degToRad(verticalRotate_)) * cos(core::degToRad(horizontalRotate_));
 	core::vector3df target(targetX, targetY, targetZ);
 	irr::core::vector3df side = up.crossProduct(target);
+	up = target.crossProduct(side);
+	cam->setUpVector(up);
 
-	const float moveFactor = ((irr::f32)ms) / 10.0f;
+	const float moveFactor = moveSpeed * ms;
 	auto moveDelta = moveFactor * moveEvt.forwardBackward * target;
 	auto sideDelta = moveFactor * moveEvt.leftRight * side;
 	auto nextPos = pos + moveDelta + sideDelta;
 	cam->setPosition(nextPos);
 
-	irr::video::SColor white(255, 255, 255, 255);
-	auto rotateMsg = (wformat(L"rotate : h=%.2f, v=%.2f") % horizontalRotate_ % verticalRotate_).str();
-	g_debugDrawMgr->addString(core::vector2di(0, 100), rotateMsg, white);
+	bool displayInfo = true;
+	if(displayInfo) {
+		irr::video::SColor white(255, 255, 255, 255);
+		auto rotateMsg = (wformat(L"rotate : h=%.2f, v=%.2f") % horizontalRotate_ % verticalRotate_).str();
+		g_debugDrawMgr->addString(core::vector2di(0, 100), rotateMsg, white);
 
-	auto evtMsg = (wformat(L"evt : fb=%.2f, lr=%.2f") % moveEvt.forwardBackward % moveEvt.leftRight).str();
-	g_debugDrawMgr->addString(core::vector2di(0, 100 + 14*1), evtMsg, white);
+		auto evtMsg = (wformat(L"evt : fb=%.2f, lr=%.2f") % moveEvt.forwardBackward % moveEvt.leftRight).str();
+		g_debugDrawMgr->addString(core::vector2di(0, 100 + 14*1), evtMsg, white);
 
-	auto targetMsg = (wformat(L"target : %.2f, %.2f, %.2f") % targetX % targetY % targetZ).str();
-	g_debugDrawMgr->addString(core::vector2di(0, 100 + 14*2), targetMsg, white);
+		auto targetMsg = (wformat(L"target : %.2f, %.2f, %.2f") % targetX % targetY % targetZ).str();
+		g_debugDrawMgr->addString(core::vector2di(0, 100 + 14*2), targetMsg, white);
 
-	auto sideMsg = (wformat(L"side : %.2f, %.2f, %.2f") % side.X % side.Y % side.Z).str();
-	g_debugDrawMgr->addString(core::vector2di(0, 100 + 14*3), sideMsg, white);
+		auto sideMsg = (wformat(L"side : %.2f, %.2f, %.2f") % side.X % side.Y % side.Z).str();
+		g_debugDrawMgr->addString(core::vector2di(0, 100 + 14*3), sideMsg, white);
 
-	auto camPos = cam->getPosition();
-	auto camPosMsg = (wformat(L"CamPos : %.2f, %.2f, %.2f") % camPos.X % camPos.Y % camPos.Z).str();
-	g_debugDrawMgr->addString(core::vector2di(0, 100 + 14*4), camPosMsg, white);
+		auto camPos = cam->getPosition();
+		auto camPosMsg = (wformat(L"CamPos : %.2f, %.2f, %.2f") % camPos.X % camPos.Y % camPos.Z).str();
+		g_debugDrawMgr->addString(core::vector2di(0, 100 + 14*4), camPosMsg, white);
 
-	/*
-	HMD가 카메라에 비해서 약간 밀리는 느낌인데....
-	auto it = cam->getChildren().begin();
-	auto endit = cam->getChildren().end();
-	for( ; it != endit ; ++it) {
-		irr::scene::ISceneNode *child = *it;
-		//child->updateAbsolutePosition();
-		//child->getAbsoluteTransformation();
+		auto upVecMsg = (wformat(L"UpVec : %.2f, %.2f, %.2f") % up.X % up.Y % up.Z).str();
+		g_debugDrawMgr->addString(core::vector2di(0, 100 + 14*5), upVecMsg, white);
+
 	}
-	*/
+}
+
+/////////////////////////////////////////////////////////////////////
+HeadAttachCameraEventReceiver::HeadAttachCameraEventReceiver(irr::scene::ICameraSceneNode *cam, float rotateSpeed, float moveSpeed)
+	: AbstractHMDCameraEventReceiver(cam, rotateSpeed, moveSpeed),
+	rot_(0)
+{
+}
+
+HeadAttachCameraEventReceiver::~HeadAttachCameraEventReceiver()
+{
+}
+
+void HeadAttachCameraEventReceiver::update(int ms)
+{
+	auto cam = this->getCamera();
+	auto cursor = Lib::device->getCursorControl();
+
+	MoveEvent moveEvt = getMoveEvent();
+	LookEvent lookEvt = getLookEvent();
+
+	auto screenSize = Lib::driver->getScreenSize();
+	int screenWidth = screenSize.Width;
+	int screenHeight = screenSize.Height;
+
+	float mouseX = (float)((screenWidth / 2) - cursor->getPosition().X);
+	float mouseY = (float)((screenHeight / 2) - cursor->getPosition().Y);
+	float moveFactor = moveSpeed * ms;
+
+	cursor->setPosition((screenWidth/2), (screenHeight/2));
+	cursor->setPosition(640, 400);
+	irr::core::vector3df pos = cam->getPosition();
+	irr::core::vector3df target = cam->getTarget() - pos;
+	irr::core::vector3df up = cam->getUpVector();
+	irr::core::vector3df side = target.crossProduct(up);
+	irr::core::vector3df rotation = cam->getRotation();
+
+	auto moveDelta = moveFactor * moveEvt.forwardBackward * target;
+	auto sideDelta = moveFactor * moveEvt.leftRight * side;
+	auto nextPos = pos + moveDelta + sideDelta;
+
+	cam->setPosition(nextPos);
+	cam->setRotation(irr::core::vector3df(rotation.X, rotation.Y - mouseX / 15.0f, rotation.Z + rot_));
 }

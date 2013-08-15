@@ -61,7 +61,7 @@ CylinderHMDSequence::CylinderHMDSequence()
 		dataList.push_back(data);
 	}
 
-	auto tex = Lib::driver->getTexture(res::texture::SORA2_PNG.c_str());
+	auto tex = Lib::driver->getTexture(res::texture::SORA2_PNG);
 	for(auto &data : dataList) {
 		auto cylinderNode = new CylinderMappingNode(node, Lib::smgr, 0, tex);
 		cylinderNode->setPosition(core::vector3df(0, data.posY, 0));

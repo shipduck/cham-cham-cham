@@ -23,7 +23,7 @@ struct SphereSpriteInitData {
 irr::video::ITexture *rt = nullptr;
 
 
-CameraEventReceiver *receiver = nullptr;
+AbstractHMDCameraEventReceiver *receiver = nullptr;
 
 SphereHMDSequence::SphereHMDSequence()
 {
@@ -32,7 +32,8 @@ SphereHMDSequence::SphereHMDSequence()
 	enableCollision();
 
 	auto cam = Lib::smgr->getActiveCamera();
-	receiver = new CameraEventReceiver(cam);
+	receiver = new HeadFreeCameraEventReceiver(cam, 0.1f, 0.1f);
+	//receiver = new HeadAttachCameraEventReceiver(cam, 0.1f, 0.1f);
 	Lib::eventReceiver->attachReceiver(receiver);
 	//cam->bindTargetAndRotation(true);
 	//cam->setPosition(core::vector3df(0, 0, 0));
@@ -54,7 +55,7 @@ SphereHMDSequence::SphereHMDSequence()
 
 
 	//billboard를 사용해서 sphere 효과를 낼수 있을거같은데...
-	auto tex = Lib::driver->getTexture(res::texture::SORA2_PNG.c_str());
+	auto tex = Lib::driver->getTexture(res::texture::SORA2_PNG);
 
 	auto hmdNode = Lib::smgr->addEmptySceneNode(cam);
 	hmdNode->setRotation(core::vector3df(0, 180, 0));

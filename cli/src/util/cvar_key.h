@@ -21,5 +21,13 @@ static const char *CVAR_HMD_DISTORTION_K_2 = "hmd.distortionK_2";
 static const char *CVAR_HMD_DISTORTION_K_3 = "hmd.distortionK_3";
 static const char *CVAR_HMD_DISTORTION_K_4 = "hmd.distortionK_4";
 
+// camera
+static const char *CVAR_GAME_CAM_MOVE_SPEED = "game.cam.moveSpeed";
+static const char *CVAR_GAME_CAM_ROTATE_SPEED = "game.cam.rotateSpeed";
+
+static const char *CVAR_GAME_CHARACTER_POS_X = "game.character.posX";
+static const char *CVAR_GAME_CHARACTER_POS_Y = "game.character.posY";
+static const char *CVAR_GAME_CHARACTER_POS_Z = "game.character.posZ";
+
 void startUpCVar();
 void shutDownCVar();

@@ -2,7 +2,8 @@
 #pragma once
 
 typedef enum {
-	kSequenceTitle,
+	//kSequenceTitle,
+	kSequenceMain,
 	kSequenceDebugDraw,
 	kSequenceGame,
 	kSequenceGameLoading,

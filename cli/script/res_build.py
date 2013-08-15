@@ -38,7 +38,7 @@ class ResourceFile(object):
 
         token_list = token_list[:-1] + token_list[-1].split('__')
         self.package = token_list[:-1]
-        self.name = token_list[-1].replace('.', '_').replace('-', '_').upper()
+        self.name = token_list[-1].replace('.', '_').replace('-', '_').replace(' ', '_').upper()
 
     def __repr__(self):
         return unicode(self).encode('utf-8')
@@ -90,8 +90,8 @@ class Package(object):
         print indent + 'namespace %s {' % (self.package[-1],)
 
         for x in self.res_list:
-            #print indent + '\tconst char *%s = "%s";' % (x.name, x.filename.replace('\\', '\\\\'))
-            print indent + '\tstatic const std::string %s = "%s";' % (x.name, x.filename.replace('\\', '\\\\'))
+            print indent + '\tstatic const char *%s = "%s";' % (x.name, x.filename.replace('\\', '\\\\'))
+            #print indent + '\tstatic const std::string %s = "%s";' % (x.name, x.filename.replace('\\', '\\\\'))
 
         for x in self.child_list:
             x.render_stdout()
@@ -116,7 +116,7 @@ def get_res_header_content():
 
     sys.stdout = StringIO()     # capture output
     print '#pragma once'
-    print '#include <string>'
+    #print '#include <string>'
     root.render_stdout()
     out = sys.stdout.getvalue() # release output
 

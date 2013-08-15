@@ -25,7 +25,8 @@ HeadTracker::~HeadTracker()
 
 bool HeadTracker::startUp()
 {
-	OVR::System::Init(OVR::Log::ConfigureDefaultLog(OVR::LogMask_All));
+	//OVR::System::Init(OVR::Log::ConfigureDefaultLog(OVR::LogMask_All));
+	OVR::System::Init();
 
 	// *** Initialization - Create the first available HMD Device
     manager_ = *DeviceManager::Create();
