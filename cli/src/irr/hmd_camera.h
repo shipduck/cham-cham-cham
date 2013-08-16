@@ -29,6 +29,8 @@ public:
 	float rotateSpeed;
 	float moveSpeed;
 
+	bool enableCamMove;
+
 private:
 	irr::scene::ICameraSceneNode *cam_;
 

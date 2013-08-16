@@ -18,7 +18,8 @@ inline bool isSetBinaryFlag(const irr::u32& flags, const irr::u32 offset) {
 AbstractHMDCameraEventReceiver::AbstractHMDCameraEventReceiver(irr::scene::ICameraSceneNode *cam, float rotateSpeed, float moveSpeed)
 	: cam_(cam),
 	rotateSpeed(rotateSpeed),
-	moveSpeed(moveSpeed)
+	moveSpeed(moveSpeed),
+	enableCamMove(true)
 {
 	std::fill(keyDownStatus_, keyDownStatus_ + getArraySize(keyDownStatus_), false);
 }
@@ -28,8 +29,13 @@ AbstractHMDCameraEventReceiver::~AbstractHMDCameraEventReceiver()
 
 MoveEvent AbstractHMDCameraEventReceiver::getMoveEvent() const
 {
-	MoveEvent evt = keyboardMoveEvent_.merge(joystickMoveEvent_);
-	return evt;
+	if(enableCamMove) {
+		MoveEvent evt = keyboardMoveEvent_.merge(joystickMoveEvent_);
+		return evt;
+	} else {
+		MoveEvent evt;
+		return evt;
+	}
 }
 LookEvent AbstractHMDCameraEventReceiver::getLookEvent() const
 {

@@ -9,6 +9,7 @@ struct SHeadTrackingEvent;
 // HMD로 얻은 값까지 동일한 구조로 처리하기 위해서 도입함
 class ICustomEventReceiver : public irr::IEventReceiver {
 public:
+	ICustomEventReceiver() {}
 	virtual ~ICustomEventReceiver() {}
 	virtual bool OnEvent(const irr::SEvent &evt) = 0;
 	virtual bool OnEvent(const SHeadTrackingEvent &evt) = 0;

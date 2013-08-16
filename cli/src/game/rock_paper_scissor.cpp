@@ -4,12 +4,107 @@
 #include "base/lib.h"
 #include "irr/sprite_scene_node.h"
 #include "res.h"
+#include "util/event_receiver_manager.h"
 
 using namespace std;
 using namespace irr;
 
+bool RPSEvent::operator==(const RPSEvent &o) const
+{
+	SR_ASSERT(o.value != kNone);
+	SR_ASSERT(this->value != kNone);
+	return this->value == o.value;
+}
+
+bool RPSEvent::operator>(const RPSEvent &o) const
+{
+	SR_ASSERT(o.value != kNone);
+	SR_ASSERT(this->value != kNone);
+	if(this->value == kRock && o.value == kScissor) {
+		return true;
+	}
+	if(this->value == kScissor && o.value == kPaper) {
+		return true;
+	}
+	if(this->value == kPaper && o.value == kRock) {
+		return true;
+	}
+	return false;
+}
+
+bool RPSEvent::operator>=(const RPSEvent &o) const
+{
+	if(*this == o) {
+		return true;
+	}
+	return (*this > o);
+}
+
+bool RPSEvent::operator<(const RPSEvent &o) const
+{
+	SR_ASSERT(o.value != kNone);
+	SR_ASSERT(this->value != kNone);
+	if(this->value == kScissor && o.value == kRock) {
+		return true;
+	}
+	if(this->value == kPaper && o.value == kScissor) {
+		return true;
+	}
+	if(this->value == kRock && o.value == kPaper) {
+		return true;
+	}
+	return false;
+}
+bool RPSEvent::operator<=(const RPSEvent &o) const
+{
+	if(*this == o) {
+		return true;
+	}
+	return (*this < o);
+}
+
+class RPSEventReceiver : public ICustomEventReceiver {
+public:
+	RPSEventReceiver() {
+	}
+	virtual ~RPSEventReceiver() {
+	}
+
+	virtual bool OnEvent(const irr::SEvent &evt) {
+		if(evt.EventType == irr::EET_KEY_INPUT_EVENT) {
+			if(evt.KeyInput.PressedDown) {
+				switch(evt.KeyInput.Key) {
+				case KEY_LEFT:
+					rpsEvent.value = RPSEvent::kRock;
+					return true;
+					break;
+				case KEY_UP:
+					rpsEvent.value = RPSEvent::kPaper;
+					return true;
+					break;
+				case KEY_RIGHT:
+					rpsEvent.value = RPSEvent::kScissor;
+					return true;
+					break;
+				default:
+					return false;
+				}
+			} else {
+				rpsEvent.value = RPSEvent::kNone;
+			}
+		}
+		return false;
+	}
+	virtual bool OnEvent(const SHeadTrackingEvent &evt) {
+		return false;
+	}
+
+	RPSEvent rpsEvent;
+};
+
 RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam)
-	: root_(nullptr)
+	: root_(nullptr),
+	evtReceiver_(nullptr)
 {
 	root_ = Lib::smgr->addEmptySceneNode(cam);
 	root_->grab();
@@ -66,12 +161,81 @@ RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam)
 		icon->setPosition(core::vector3df(0, -3, -0.5));
 		icon->drop();
 	}
+
+	attachEventReceiver();
 }
 
 RockPaperScissor::~RockPaperScissor()
 {
+	if(evtReceiver_ != nullptr) {
+		detachEventReceiver();
+	}
+
 	root_->drop();
 	root_ = nullptr;
 }
 
+void RockPaperScissor::attachEventReceiver()
+{
+	SR_ASSERT(evtReceiver_ == nullptr);
+	evtReceiver_ = new RPSEventReceiver();
+	Lib::eventReceiver->attachReceiver(evtReceiver_);
+}
+void RockPaperScissor::detachEventReceiver()
+{
+	SR_ASSERT(evtReceiver_ != nullptr);
+	Lib::eventReceiver->detachReceiver(evtReceiver_);
+	evtReceiver_ = nullptr;
+}
+
 	
+void RockPaperScissor::setEnable(bool b)
+{
+	if(isEnable() == b) {
+		return;
+	}
+
+	root_->setVisible(b);
+	if(b == true) {
+		attachEventReceiver();
+	} else {
+		detachEventReceiver();
+	}
+}
+
+bool RockPaperScissor::isEnable() const
+{
+	return root_->isVisible();
+}
+
+void RockPaperScissor::update(int ms)
+{
+	if(evtReceiver_ == nullptr) {
+		return;
+	}
+
+	auto evt = evtReceiver_->rpsEvent;
+	if(evt.value == RPSEvent::kNone) {
+		return;
+	}
+
+
+	auto aiEvt = selectAIEvent();
+
+
+	if(evt.value == RPSEvent::kRock) {
+		printf("rock\n");
+	} else if(evt.value == RPSEvent::kPaper) {
+		printf("paper\n");
+	} else if(evt.value == RPSEvent::kScissor) {
+		printf("scissor\n");
+	}
+}
+
+RPSEvent RockPaperScissor::selectAIEvent() const
+{
+	std::default_random_engine e1;
+	std::uniform_int_distribution<int> randGen(RPSEvent::kRock, RPSEvent::kScissor);
+	auto value = randGen(e1);
+	return RPSEvent(value);
+}

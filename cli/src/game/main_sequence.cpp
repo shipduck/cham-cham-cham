@@ -20,6 +20,7 @@ MainSequence::MainSequence()
 	//init camera
 	auto cam = Lib::smgr->addCameraSceneNode();
 	receiver_ = new HeadFreeCameraEventReceiver(cam, 0.1f, 0.1f);
+	receiver_->enableCamMove = false;
 	Lib::eventReceiver->attachReceiver(receiver_);
 	Lib::device->getCursorControl()->setVisible(false);
 
@@ -80,5 +81,6 @@ void MainSequence::update(int ms)
 	reinaNode_->setPosition(irr::core::vector3df(posX, posY, posZ));
 
 	receiver_->update(ms);
+	rps_->update(ms);
 	scoreBoard_->update();
 }
