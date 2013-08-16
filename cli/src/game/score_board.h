@@ -14,8 +14,14 @@ public:
 	void update();
 
 private:
+	void updateScoreNode(int playerScore, int aiScore);
+
+private:
 	int playerScore_;
 	int aiScore_;
 
 	irr::scene::ISceneNode *hmdNode_;
+
+	std::vector<irr::scene::ISceneNode*> playerScoreNodeList_;
+	std::vector<irr::scene::ISceneNode*> aiScoreNodeList_;
 };

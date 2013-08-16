@@ -24,6 +24,9 @@ public:
 	virtual void postDraw() {}
 
 private:
+	irr::scene::ISceneNode *initSkybox();
+
+private:
 	AbstractHMDCameraEventReceiver *receiver_;
 	irr::scene::IAnimatedMeshSceneNode *reinaNode_;
 	std::unique_ptr<ScoreBoard> scoreBoard_;

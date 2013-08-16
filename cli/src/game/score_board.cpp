@@ -8,11 +8,27 @@
 using namespace std;
 using namespace irr;
 
-struct HMDInitData {
+struct ScoreBoardSpriteData {
+	ScoreBoardSpriteData(float yaw=0.0f, 
+		float pitch=0.0f, 
+		float sizeX=1.0f, 
+		float sizeY=1.0f, 
+		float radius=1.0f, 
+		irr::video::ITexture *tex=nullptr)
+		: yaw(yaw),
+		pitch(pitch),
+		sizeX(sizeX),
+		sizeY(sizeY),
+		radius(radius),
+		tex(tex)
+	{
+	}
+
 	float yaw;	//y축 기준. 좌우회전
 	float pitch;	//x축 기준 회전. 위아래
 	float sizeX;
 	float sizeY;
+	float radius;
 	irr::video::ITexture *tex;
 };
 
@@ -21,42 +37,51 @@ ScoreBoard::ScoreBoard(irr::scene::ICameraSceneNode *cam)
 	aiScore_(0),
 	hmdNode_(nullptr)
 {
-	//hmd
 	auto reinaTex = Lib::driver->getTexture(res::texture::FACE_REINA_PNG);
 	auto playerTex = Lib::driver->getTexture(res::texture::FACE_PLAYER_PNG);
 	auto circleGreen = Lib::driver->getTexture(res::texture::CIRCLE_GREEN_PNG);
 	auto circleRed = Lib::driver->getTexture(res::texture::CIRCLE_RED_PNG);
 	auto circleGray = Lib::driver->getTexture(res::texture::CIRCLE_GRAY_PNG);
 
-	vector<HMDInitData> dataList;
-	{
-		HMDInitData reina;
-		reina.yaw = 20;
-		reina.pitch = -30;
-		reina.tex = reinaTex;
-		reina.sizeX = 2;
-		reina.sizeY = 2;
-		dataList.push_back(reina);
-	}
-	{
-		HMDInitData player;
-		player.yaw = 20;
-		player.pitch = -20;
-		player.tex = playerTex;
-		player.sizeX = 2;
-		player.sizeY = 2;
-		dataList.push_back(player);
-	}
-	{
-		for(int i = 0 ; i < 3 ; i++) {
-			for(int j = 0 ; j < 2 ; j++) {
-				HMDInitData baseCircle;
-				baseCircle.yaw = 30 + 10.0f * i;
-				baseCircle.pitch = -30 + 10.0f * j;
-				baseCircle.tex = circleGray;
-				baseCircle.sizeX = 2;
-				baseCircle.sizeY = 2;
-				dataList.push_back(baseCircle);
+	const float yawSeperation = 10.0f;
+	const float pitchSeperation = 10.0f;
+	const float scoreboardYaw = 20.0f;
+	const float scoreboardPitch = -25.0f;
+
+	vector<ScoreBoardSpriteData> dataList;
+	const ScoreBoardSpriteData reina(scoreboardYaw, scoreboardPitch, 2, 2, 30, reinaTex);
+	dataList.push_back(reina);
+	
+	const ScoreBoardSpriteData player(scoreboardYaw, scoreboardPitch + pitchSeperation, 2, 2, 30, playerTex);
+	dataList.push_back(player);
+	
+	const ScoreBoardSpriteData bgCircle(0, 0, 2.0f, 2.0f, 30.0f, circleGray);
+	const ScoreBoardSpriteData reinaWinCircle(0, 0, 1.5f, 1.5f, 25.0f, circleRed);
+	const ScoreBoardSpriteData playerWinCircle(0, 0, 1.5f, 1.5f, 25.0f, circleGreen);
+
+	for(int i = 0 ; i < 3 ; i++) {
+		for(int j = 0 ; j < 2 ; j++) {
+			float yaw = scoreboardYaw + yawSeperation * (i + 1);
+			float pitch = scoreboardPitch + pitchSeperation * j;
+
+			auto baseCircle = bgCircle;
+			baseCircle.yaw = yaw;
+			baseCircle.pitch = pitch;
+			//gray는 항상 찍힌다
+			dataList.push_back(baseCircle);
+
+			if(j == 0) {
+				//ai
+				auto reinaWinData = reinaWinCircle;
+				reinaWinData.yaw = yaw;
+				reinaWinData.pitch = pitch;
+				dataList.push_back(reinaWinData);
+			} else {
+				//player
+				auto playerWinData = playerWinCircle;
+				playerWinData.yaw = yaw;
+				playerWinData.pitch = pitch;
+				dataList.push_back(playerWinData);
 			}
 		}
 	}
@@ -70,11 +95,18 @@ ScoreBoard::ScoreBoard(irr::scene::ICameraSceneNode *cam)
 		node->setRotation(core::vector3df(data.pitch, data.yaw, 0));
 		auto sprite = new irr::scene::SpriteSceneNode(node, Lib::smgr, 0, data.tex);
 		sprite->setSize(core::dimension2d<f32>(data.sizeX, data.sizeY));
-		float radius = 30;
-		sprite->setPosition(core::vector3df(0, 0, radius));
+		sprite->setPosition(core::vector3df(0, 0, data.radius));
 		node->addChild(sprite);
 		sprite->drop();
+
+		if(data.tex == circleGreen) {
+			playerScoreNodeList_.push_back(node);
+		} else if(data.tex == circleRed) {
+			aiScoreNodeList_.push_back(node);
+		}
 	}
+
+	updateScoreNode(0, 0);
 }
 
 ScoreBoard::~ScoreBoard()
@@ -83,6 +115,27 @@ ScoreBoard::~ScoreBoard()
 	hmdNode_ = nullptr;
 }
 
+void ScoreBoard::updateScoreNode(int playerScore, int aiScore)
+{
+	SR_ASSERT(playerScore >= 0 && playerScore <= playerScoreNodeList_.size());
+	SR_ASSERT(aiScore >= 0 && aiScore <= aiScoreNodeList_.size());
+
+	for(auto node : playerScoreNodeList_) {
+		node->setVisible(false);
+	}
+	for(auto node : aiScoreNodeList_) {
+		node->setVisible(false);
+	}
+
+	for(int i = 0 ; i < playerScore ; ++i) {
+		playerScoreNodeList_[i]->setVisible(true);
+	}
+	for(int i = 0 ; i < aiScore ; ++i) {
+		aiScoreNodeList_[i]->setVisible(true);
+	}
+}
+
 void ScoreBoard::update()
 {
+	updateScoreNode(playerScore_, aiScore_);
 }

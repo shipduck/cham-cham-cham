@@ -1,6 +1,17 @@
 ﻿// Ŭnicode please 
 #pragma once
 
+class RPSEvent {
+public:
+	typedef enum {
+		kRock,
+		kPaper,
+		kScissor
+	} value_type;
+
+	value_type value;
+};
+
 class RockPaperScissor {
 public:
 	RockPaperScissor(irr::scene::ICameraSceneNode *cam);
