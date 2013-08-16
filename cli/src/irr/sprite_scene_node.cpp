@@ -84,6 +84,10 @@ void SpriteSceneNode::OnRegisterSceneNode()
 }
 void SpriteSceneNode::render()
 {
+	if(material_.getTexture(0) == nullptr) {
+		return;
+	}
+
 	video::IVideoDriver* driver = SceneManager->getVideoDriver();
 	ICameraSceneNode* camera = SceneManager->getActiveCamera();
 

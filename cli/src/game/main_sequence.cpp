@@ -8,6 +8,7 @@
 #include "util/cvar_key.h"
 #include "game/score_board.h"
 #include "game/rock_paper_scissor.h"
+#include "game/game_result.h"
 #include "game/chamchamcham.h"
 #include "res.h"
 
@@ -123,8 +124,7 @@ void MainSequence::update(int ms)
 			} else if(ai > player) {
 				cccDefense_.reset(new ChamChamChamDefense(cam));
 			} else if(ai < player) {
-				cccDefense_.reset(new ChamChamChamDefense(cam));
-				//cccAttack_.reset(new ChamChamChamAttack(cam));
+				cccAttack_.reset(new ChamChamChamAttack(cam));
 			} else {
 				SR_ASSERT(!"do not reach");
 			}

@@ -20,12 +20,51 @@ bool ChamChamChamEvent::operator!=(const ChamChamChamEvent &o) const
 	return !(*this == o);
 }
 
+class LRUDEventReceiver : public ICustomEventReceiver {
+public:
+	virtual bool OnEvent(const irr::SEvent &evt) {
+		if(evt.EventType == irr::EET_KEY_INPUT_EVENT) {
+			if(evt.KeyInput.PressedDown) {
+				switch(evt.KeyInput.Key) {
+				case KEY_LEFT:
+					inputEvt = ChamChamChamEvent::left();
+					return true;
+					break;
+				case KEY_UP:
+					inputEvt = ChamChamChamEvent::up();
+					return true;
+					break;
+				case KEY_RIGHT:
+					inputEvt = ChamChamChamEvent::right();
+					return true;
+					break;
+				case KEY_DOWN:
+					inputEvt = ChamChamChamEvent::down();
+					return true;
+					break;
+				default:
+					return false;
+				}
+			} else {
+				inputEvt.value = ChamChamChamEvent::kNone;
+			}
+		}
+		return false;
+	}
+
+	virtual bool OnEvent(const SHeadTrackingEvent &evt) {
+		return false;
+	}
+	ChamChamChamEvent inputEvt;
+};
+
 ///////////////////////////////////////
 
 BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 	: end_(false),
 	root_(nullptr),
-	centerText_(nullptr)
+	centerText_(nullptr),
+	evtReceiver_(nullptr)
 {
 	root_ = Lib::smgr->addEmptySceneNode(cam);
 	root_->grab();
@@ -95,23 +134,56 @@ BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 		sprite->setPosition(spritePos);
 		sprite->drop();
 	}
+
+	evtReceiver_ = new LRUDEventReceiver();
+	Lib::eventReceiver->attachReceiver(evtReceiver_);
 }
 
 BaseChamChamCham::~BaseChamChamCham()
 {
+	Lib::eventReceiver->detachReceiver(evtReceiver_);
+	evtReceiver_ = nullptr;
+
 	root_->remove();
 	root_->drop();
 	root_ = nullptr;
 }
 
+ChamChamChamEvent BaseChamChamCham::choiceAIEvent() const
+{
+	static std::default_random_engine e1;
+	std::uniform_int_distribution<int> randGen(1, 4);
+	auto value = randGen(e1);
+	return ChamChamChamEvent(value);
+}
+
+const ChamChamChamEvent &BaseChamChamCham::getPlayerChoice() const
+{
+	return evtReceiver_->inputEvt;
+}
+
+
 ///////////////////////////////////////
+
 ChamChamChamAttack::ChamChamChamAttack(irr::scene::ICameraSceneNode *cam)
 	: BaseChamChamCham(cam)
 {
 	centerText_->setText(L"Attack");
 }
+ChamChamChamAttack::~ChamChamChamAttack()
+{
+	
+}
 void ChamChamChamAttack::update(int ms)
 {
+	if(isEnd() == true) {
+		return;
+	}
+	if(evtReceiver_->inputEvt.isValid() == false) {
+		return;
+	}
+
+	end_ = true;
 }
 
 ///////////////////////////////////////
@@ -121,7 +193,19 @@ ChamChamChamDefense::ChamChamChamDefense(irr::scene::ICameraSceneNode *cam)
 {
 	centerText_->setText(L"Defense");
 }
-void ChamChamChamDefense::update(int ms)
+
+ChamChamChamDefense::~ChamChamChamDefense()
 {
 }
 
+void ChamChamChamDefense::update(int ms)
+{
+	if(isEnd() == true) {
+		return;
+	}
+	if(evtReceiver_->inputEvt.isValid() == false) {
+		return;
+	}
+
+	end_ = true;
+}

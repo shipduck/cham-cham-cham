@@ -71,24 +71,3 @@ private:
 
 	bool enable_;
 };
-
-class RockPaperScissorResult {
-public:
-	RockPaperScissorResult(irr::scene::ICameraSceneNode *cam,
-		const RPSEvent &playerChoice,
-		const RPSEvent &aiChoice);
-	~RockPaperScissorResult();
-
-	const RPSEvent &getAiChoice() const { return aiChoice_; }
-	const RPSEvent &getPlayerChoice() const { return playerChoice_; }
-
-private:
-	irr::scene::ISceneNode *resultNode_;
-	irr::scene::SpriteSceneNode *aiNode_;
-	irr::scene::SpriteSceneNode *playerNode_;
-
-	irr::video::ITexture *getRPSTexture(int rps);
-
-	RPSEvent aiChoice_;
-	RPSEvent playerChoice_;
-};

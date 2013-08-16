@@ -7,6 +7,8 @@ class Text3dSceneNode;
 }	// namespace scene
 }	// namespace irr
 
+class LRUDEventReceiver;
+
 class ChamChamChamEvent {
 public:
 	enum {
@@ -28,6 +30,8 @@ public:
 	bool operator==(const ChamChamChamEvent &o) const;
 	bool operator!=(const ChamChamChamEvent &o) const;
 
+	bool isValid() const { return value != kNone; }
+
 	int value;
 };
 
@@ -40,25 +44,36 @@ public:
 
 	bool isEnd() const { return end_; }
 
+	const ChamChamChamEvent &getAiChoice() const { return aiChoice_; }
+	const ChamChamChamEvent &getPlayerChoice() const;
+
 protected:
 	bool end_;
 	
 	irr::scene::ISceneNode *root_;
 	irr::scene::Text3dSceneNode *centerText_;
+
+	ChamChamChamEvent choiceAIEvent() const;
+	ChamChamChamEvent aiChoice_;
+
+	LRUDEventReceiver *evtReceiver_;
 };
 
 class ChamChamChamAttack : public BaseChamChamCham {
 public:
 	ChamChamChamAttack(irr::scene::ICameraSceneNode *cam);
-	virtual ~ChamChamChamAttack() {}
+	virtual ~ChamChamChamAttack();
 
 	void update(int ms);
+
 };
 
 class ChamChamChamDefense : public BaseChamChamCham {
 public:
 	ChamChamChamDefense(irr::scene::ICameraSceneNode *cam);
-	virtual ~ChamChamChamDefense() {}
+	virtual ~ChamChamChamDefense();
 
 	void update(int ms);
+private:
+	
 };
