@@ -5,6 +5,8 @@
 #include "irr/sprite_scene_node.h"
 #include "res.h"
 #include "util/event_receiver_manager.h"
+#include "irr/text_3d_scene_node.h"
+#include "irr/debug_drawer.h"
 
 using namespace std;
 using namespace irr;
@@ -105,7 +107,8 @@ public:
 RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam)
 	: root_(nullptr),
 	evtReceiver_(nullptr),
-	end_(false)
+	end_(false),
+	enable_(true)
 {
 	root_ = Lib::smgr->addEmptySceneNode(cam);
 	root_->grab();
@@ -172,6 +175,7 @@ RockPaperScissor::~RockPaperScissor()
 		detachEventReceiver();
 	}
 
+	root_->remove();
 	root_->drop();
 	root_ = nullptr;
 }
@@ -196,17 +200,12 @@ void RockPaperScissor::setEnable(bool b)
 		return;
 	}
 
-	root_->setVisible(b);
+	enable_ = b;
 	if(b == true) {
 		attachEventReceiver();
 	} else {
 		detachEventReceiver();
 	}
-}
-
-bool RockPaperScissor::isEnable() const
-{
-	return root_->isVisible();
 }
 
 void RockPaperScissor::update(int ms)
@@ -236,4 +235,104 @@ RPSEvent RockPaperScissor::selectAIEvent() const
 	std::uniform_int_distribution<int> randGen(RPSEvent::kRock, RPSEvent::kScissor);
 	auto value = randGen(e1);
 	return RPSEvent(value);
+}
+
+//////////////////////////////
+
+RockPaperScissorResult::RockPaperScissorResult(irr::scene::ICameraSceneNode *cam,
+											   const RPSEvent &playerChoice,
+											   const RPSEvent &aiChoice)
+	: resultNode_(nullptr),
+	aiChoice_(aiChoice),
+	playerChoice_(playerChoice),
+	aiNode_(nullptr),
+	playerNode_(nullptr)
+{
+	//게임 끝난다음에 결과 보여주는 용도로 사용할 node
+	resultNode_ = Lib::smgr->addEmptySceneNode(cam);
+	resultNode_->grab();
+	resultNode_->setRotation(core::vector3df(0, 180, 0));
+	//resultNode_->setVisible(false);
+
+	const core::dimension2d<float> rpsSize(3, 3);
+	const core::dimension2d<float> faceSize(2, 2);
+	const float radius = 30.0f;
+	{
+		//left=ai
+		auto tex = getRPSTexture(aiChoice.value);
+
+		auto leftNode = Lib::smgr->addEmptySceneNode(resultNode_);
+		leftNode->setRotation(core::vector3df(10, -20, 0));
+		aiNode_ = new irr::scene::SpriteSceneNode(leftNode, Lib::smgr, 0, tex);
+		aiNode_->setPosition(core::vector3df(0, 0, radius));
+		aiNode_->setSize(rpsSize);
+		aiNode_->drop();
+
+		auto faceTex = Lib::driver->getTexture(res::texture::FACE_REINA_PNG);
+		auto face = new irr::scene::SpriteSceneNode(aiNode_, Lib::smgr, 0, faceTex);
+		face->setPosition(core::vector3df(0, 5, -0.5));
+		face->setSize(faceSize);
+		face->drop();
+	}
+
+	{
+		//right=player
+		auto tex = getRPSTexture(playerChoice.value);
+
+		auto rightNode = Lib::smgr->addEmptySceneNode(resultNode_);
+		rightNode->setRotation(core::vector3df(10, 20, 0));
+		playerNode_ = new irr::scene::SpriteSceneNode(rightNode, Lib::smgr, 0, tex);
+		playerNode_->setPosition(core::vector3df(0, 0, radius));
+		playerNode_->setSize(rpsSize);
+		playerNode_->drop();
+		
+		auto faceTex = Lib::driver->getTexture(res::texture::FACE_PLAYER_PNG);
+		auto face = new irr::scene::SpriteSceneNode(playerNode_, Lib::smgr, 0, faceTex);
+		face->setPosition(core::vector3df(0, 5, -0.5));
+		face->setSize(faceSize);
+		face->drop();
+	}
+
+	std::wstring msg;
+	if(aiChoice == playerChoice) {
+		msg = L"Draw";
+	} else if(aiChoice > playerChoice) {
+		msg = L"Lose";
+	} else if(aiChoice < playerChoice) {
+		msg = L"Win";
+	} else {
+		SR_ASSERT(!"do not reach");
+	}
+
+	auto text = new irr::scene::Text3dSceneNode(resultNode_, Lib::smgr, 0, getNormalFont14(), msg.c_str()); 
+	text->setPosition(core::vector3df(0, 0, 30.0f));
+	auto size = core::dimension2d<f32>(5.0f, 5.0f);
+	text->setSize(size);
+	text->drop();
+}
+
+RockPaperScissorResult::~RockPaperScissorResult()
+{
+	resultNode_->remove();
+	resultNode_->drop();
+	resultNode_ = nullptr;
+}
+
+irr::video::ITexture *RockPaperScissorResult::getRPSTexture(int rps)
+{
+	switch(rps) {
+	case RPSEvent::kRock:
+		return Lib::driver->getTexture(res::texture::ICON_ROCK_PNG);
+		break;
+	case RPSEvent::kPaper:
+		return Lib::driver->getTexture(res::texture::ICON_PAPER_PNG);
+		break;
+	case RPSEvent::kScissor:
+		return Lib::driver->getTexture(res::texture::ICON_SCISSOR_PNG);
+		break;
+	default:
+		SR_ASSERT(!"do not reach");
+		break;
+	}
+	return nullptr;
 }

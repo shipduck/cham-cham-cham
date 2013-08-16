@@ -13,6 +13,8 @@
 using namespace std;
 using namespace irr;
 
+int rpsResultElapsed = 0;
+
 MainSequence::MainSequence()
 	: receiver_(nullptr),
 	reinaNode_(nullptr)
@@ -81,25 +83,44 @@ void MainSequence::update(int ms)
 	reinaNode_->setPosition(irr::core::vector3df(posX, posY, posZ));
 
 	receiver_->update(ms);
-	rps_->update(ms);
+	if(rps_.get() != nullptr) {
+		rps_->update(ms);
+	}
 	scoreBoard_->update();
 
 	//가위바위보 끝난 경우, 점수 반영
-	if(rps_->isEnd()) {
+	if(rps_.get() != nullptr && rps_->isEnd() && rpsResult_.get() == nullptr) {
+		auto cam = Lib::smgr->getActiveCamera();
 		auto ai = rps_->getAiChoice();
 		auto player = rps_->getPlayerChoice();
-		if(ai == player) {
-			;
-		} else if(ai > player) {
-			scoreBoard_->aiGetPoint();
-		} else if(ai < player) {
-			scoreBoard_->playerGetPoint();
-		} else {
-			SR_ASSERT(!"do not reach");
-		}
+		rpsResult_.reset(new RockPaperScissorResult(cam, player, ai));
+		rps_.reset(nullptr);
+		//가위바위보 완료후에 결과장면을 보여줄 시간
+		rpsResultElapsed = 1000;
+	}
 
-		//새로운 가위바위보 판 열기
-		auto cam = Lib::smgr->getActiveCamera();
-		rps_.reset(new RockPaperScissor(cam));
+	if(rpsResult_.get() != nullptr) {
+		rpsResultElapsed -= ms;
+		if(rpsResultElapsed < 0) {
+			auto ai = rpsResult_->getAiChoice();
+			auto player = rpsResult_->getPlayerChoice();
+
+			if(ai == player) {
+				auto cam = Lib::smgr->getActiveCamera();
+				rps_.reset(new RockPaperScissor(cam));
+			} else if(ai > player) {
+				//TODO AI가 참참참 공격
+				auto cam = Lib::smgr->getActiveCamera();
+				rps_.reset(new RockPaperScissor(cam));
+			} else if(ai < player) {
+				//TODO 내가 참참참 공격
+				auto cam = Lib::smgr->getActiveCamera();
+				rps_.reset(new RockPaperScissor(cam));
+			} else {
+				SR_ASSERT(!"do not reach");
+			}
+
+			rpsResult_.reset(nullptr);
+		}
 	}
 }

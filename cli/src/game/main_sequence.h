@@ -6,6 +6,7 @@
 class ScoreBoard;
 class RockPaperScissor;
 class AbstractHMDCameraEventReceiver;
+class RockPaperScissorResult;
 
 enum {
 	kStateRockScissorPaper,
@@ -31,4 +32,5 @@ private:
 	irr::scene::IAnimatedMeshSceneNode *reinaNode_;
 	std::unique_ptr<ScoreBoard> scoreBoard_;
 	std::unique_ptr<RockPaperScissor> rps_;
+	std::unique_ptr<RockPaperScissorResult> rpsResult_;
 };

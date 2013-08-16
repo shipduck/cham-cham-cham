@@ -142,7 +142,7 @@ bool Lib::startUp(const EngineParam &param)
 	// 12/14 폰트는 얻는 함수를 따로 만들어놧었다. 그거 쓰면 코드 중복을 제거 가능
 	// 로딩이 느리니까 일단 꺼놓고 필요해지면 살리기
 	//getNormalFont12();
-	//getNormalFont14();
+	getNormalFont14();
 
 	//사운든는 우선순위 가장 낮음
 	audio->startUp();
