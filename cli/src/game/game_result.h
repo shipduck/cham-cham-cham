@@ -2,6 +2,7 @@
 #pragma once
 
 class RPSEvent;
+class ChamChamChamEvent;
 
 namespace irr {;
 namespace scene {;
@@ -51,3 +52,31 @@ private:
 	irr::video::ITexture *getRPSTexture(int rps);
 };
 
+class AttackResult : public AbstractGameResult {
+public:
+	AttackResult(irr::scene::ICameraSceneNode *cam,
+		const ChamChamChamEvent &playerChoice,
+		const ChamChamChamEvent &aiChoice);
+	virtual ~AttackResult();
+
+	const ChamChamChamEvent &getAiChoice() const { return *aiChoice_; }
+	const ChamChamChamEvent &getPlayerChoice() const { return *playerChoice_; }
+
+private:
+	std::unique_ptr<ChamChamChamEvent> aiChoice_;
+	std::unique_ptr<ChamChamChamEvent> playerChoice_;
+};
+
+class DefenseResult : public AbstractGameResult {
+public:
+	DefenseResult(irr::scene::ICameraSceneNode *cam,
+		const ChamChamChamEvent &playerChoice,
+		const ChamChamChamEvent &aiChoice);
+	virtual ~DefenseResult();
+
+	const ChamChamChamEvent &getAiChoice() const { return *aiChoice_; }
+	const ChamChamChamEvent &getPlayerChoice() const { return *playerChoice_; }
+private:
+	std::unique_ptr<ChamChamChamEvent> aiChoice_;
+	std::unique_ptr<ChamChamChamEvent> playerChoice_;
+};

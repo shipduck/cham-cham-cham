@@ -7,9 +7,33 @@
 #include "irr/sprite_scene_node.h"
 #include "irr/text_3d_scene_node.h"
 #include "irr/debug_drawer.h"
+#include "game/chamchamcham.h"
 
 using namespace std;
 using namespace irr;
+
+
+irr::video::ITexture *getChamChamChamTexture(const ChamChamChamEvent &evt)
+{
+	switch(evt.value) {
+	case ChamChamChamEvent::kUp:
+		return Lib::driver->getTexture(res::texture::ARROW_HOLLOW_UP_PNG);
+		break;
+	case ChamChamChamEvent::kDown:
+		return Lib::driver->getTexture(res::texture::ARROW_HOLLOW_DOWN_PNG);
+		break;
+	case ChamChamChamEvent::kLeft:
+		return Lib::driver->getTexture(res::texture::ARROW_HOLLOW_LEFT_PNG);
+		break;
+	case ChamChamChamEvent::kRight:
+		return Lib::driver->getTexture(res::texture::ARROW_HOLLOW_RIGHT_PNG);
+		break;
+	default:
+		SR_ASSERT(!"do not reach");
+		break;
+	}
+	return nullptr;
+}
 
 AbstractGameResult::AbstractGameResult(irr::scene::ICameraSceneNode *cam)
 	: root_(nullptr),
@@ -130,3 +154,48 @@ irr::video::ITexture *RockPaperScissorResult::getRPSTexture(int rps)
 	}
 	return nullptr;
 }
+
+
+AttackResult::AttackResult(irr::scene::ICameraSceneNode *cam,
+		const ChamChamChamEvent &playerChoice,
+		const ChamChamChamEvent &aiChoice)
+	: AbstractGameResult(cam),
+	aiChoice_(new ChamChamChamEvent(aiChoice)),
+	playerChoice_(new ChamChamChamEvent(playerChoice))	
+{
+	std::wstring msg;
+	if(aiChoice == playerChoice) {
+		msg = L"Success";
+	} else {
+		msg = L"Fail";
+	}
+	setText(msg.c_str());
+	setPlayerTexture(getChamChamChamTexture(playerChoice)); 
+	setAiTexture(getChamChamChamTexture(aiChoice));
+}
+AttackResult::~AttackResult()
+{
+}
+
+
+DefenseResult::DefenseResult(irr::scene::ICameraSceneNode *cam,
+		const ChamChamChamEvent &playerChoice,
+		const ChamChamChamEvent &aiChoice)
+	: AbstractGameResult(cam),
+	aiChoice_(new ChamChamChamEvent(aiChoice)),
+	playerChoice_(new ChamChamChamEvent(playerChoice))	
+{
+	std::wstring msg;
+	if(aiChoice == playerChoice) {
+		msg = L"Fail";
+	} else {
+		msg = L"Success";
+	}
+	setText(msg.c_str());
+	setPlayerTexture(getChamChamChamTexture(playerChoice)); 
+	setAiTexture(getChamChamChamTexture(aiChoice));
+}
+DefenseResult::~DefenseResult()
+{
+}
+
