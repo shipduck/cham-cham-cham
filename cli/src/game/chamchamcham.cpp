@@ -7,6 +7,7 @@
 #include "base/lib.h"
 #include "irr/debug_drawer.h"
 #include "util/event_receiver_manager.h"
+#include "irr/head_tracker.h"
 
 using namespace std;
 using namespace irr;
@@ -68,6 +69,27 @@ public:
 	}
 
 	virtual bool OnEvent(const SHeadTrackingEvent &evt) {
+		const float limit = core::PI * 0.25f * 0.5f;
+		if(evt.yaw > limit) {
+			//left
+			inputEvt = ChamChamChamEvent::left();
+			return true;
+		} else if(evt.yaw < -limit) {
+			inputEvt = ChamChamChamEvent::right();
+			//right
+			return true;
+		}
+		if(ChamChamChamEvent::getDirectionCount() > 2) {
+			if(evt.pitch > limit) {
+				//up
+				inputEvt = ChamChamChamEvent::up();
+				return true;
+			} else if(evt.pitch < -limit) {
+				//down
+				inputEvt = ChamChamChamEvent::down();
+				return true;
+			}
+		}
 		return false;
 	}
 	ChamChamChamEvent inputEvt;
