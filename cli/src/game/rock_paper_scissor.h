@@ -38,6 +38,10 @@ public:
 
 	void update(int ms);
 
+	const RPSEvent &getAiChoice() const { return aiChoice_; }
+	const RPSEvent &getPlayerChoice() const { return playerChoice_; }
+	bool isEnd() const { return end_; }
+
 private:
 	void attachEventReceiver();
 	void detachEventReceiver();
@@ -52,4 +56,10 @@ private:
 	irr::scene::ISceneNode *scissor_;
 
 	RPSEventReceiver *evtReceiver_;
+
+private:
+	// 가위바위보 결과를 임시 저장
+	RPSEvent aiChoice_;
+	RPSEvent playerChoice_;
+	bool end_;
 };

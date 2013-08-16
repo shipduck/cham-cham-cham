@@ -83,4 +83,23 @@ void MainSequence::update(int ms)
 	receiver_->update(ms);
 	rps_->update(ms);
 	scoreBoard_->update();
+
+	//가위바위보 끝난 경우, 점수 반영
+	if(rps_->isEnd()) {
+		auto ai = rps_->getAiChoice();
+		auto player = rps_->getPlayerChoice();
+		if(ai == player) {
+			;
+		} else if(ai > player) {
+			scoreBoard_->aiGetPoint();
+		} else if(ai < player) {
+			scoreBoard_->playerGetPoint();
+		} else {
+			SR_ASSERT(!"do not reach");
+		}
+
+		//새로운 가위바위보 판 열기
+		auto cam = Lib::smgr->getActiveCamera();
+		rps_.reset(new RockPaperScissor(cam));
+	}
 }

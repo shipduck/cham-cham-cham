@@ -13,6 +13,9 @@ public:
 	//점수에 따라서 점수 스프라이트를 켜고끄기
 	void update();
 
+	void playerGetPoint() { playerScore_ += 1; }
+	void aiGetPoint() { aiScore_ += 1; }
+
 private:
 	void updateScoreNode(int playerScore, int aiScore);
 

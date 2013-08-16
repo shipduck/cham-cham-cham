@@ -104,7 +104,8 @@ public:
 
 RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam)
 	: root_(nullptr),
-	evtReceiver_(nullptr)
+	evtReceiver_(nullptr),
+	end_(false)
 {
 	root_ = Lib::smgr->addEmptySceneNode(cam);
 	root_->grab();
@@ -210,31 +211,28 @@ bool RockPaperScissor::isEnable() const
 
 void RockPaperScissor::update(int ms)
 {
+	if(end_ == true) {
+		return;
+	}
+
 	if(evtReceiver_ == nullptr) {
 		return;
 	}
 
-	auto evt = evtReceiver_->rpsEvent;
-	if(evt.value == RPSEvent::kNone) {
+	auto playerEvt = evtReceiver_->rpsEvent;
+	if(playerEvt.value == RPSEvent::kNone) {
 		return;
 	}
-
-
 	auto aiEvt = selectAIEvent();
 
-
-	if(evt.value == RPSEvent::kRock) {
-		printf("rock\n");
-	} else if(evt.value == RPSEvent::kPaper) {
-		printf("paper\n");
-	} else if(evt.value == RPSEvent::kScissor) {
-		printf("scissor\n");
-	}
+	end_ = true;
+	aiChoice_ = aiEvt;
+	playerChoice_ = playerEvt;
 }
 
 RPSEvent RockPaperScissor::selectAIEvent() const
 {
-	std::default_random_engine e1;
+	static std::default_random_engine e1;
 	std::uniform_int_distribution<int> randGen(RPSEvent::kRock, RPSEvent::kScissor);
 	auto value = randGen(e1);
 	return RPSEvent(value);
