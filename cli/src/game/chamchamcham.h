@@ -13,8 +13,8 @@ class ChamChamChamEvent {
 public:
 	enum {
 		kNone,
-		kUp,
-		kDown,
+		//kUp,
+		//kDown,
 		kLeft,
 		kRight,
 	};
@@ -22,8 +22,8 @@ public:
 	ChamChamChamEvent() : value(kNone) {}
 	ChamChamChamEvent(int val) : value(val) {}
 
-	static ChamChamChamEvent up() { return ChamChamChamEvent(kUp); }
-	static ChamChamChamEvent down() { return ChamChamChamEvent(kDown); }
+	//static ChamChamChamEvent up() { return ChamChamChamEvent(kUp); }
+	//static ChamChamChamEvent down() { return ChamChamChamEvent(kDown); }
 	static ChamChamChamEvent left() { return ChamChamChamEvent(kLeft); }
 	static ChamChamChamEvent right() { return ChamChamChamEvent(kRight); }
 

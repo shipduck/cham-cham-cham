@@ -30,18 +30,18 @@ public:
 					inputEvt = ChamChamChamEvent::left();
 					return true;
 					break;
-				case KEY_UP:
-					inputEvt = ChamChamChamEvent::up();
-					return true;
-					break;
+				//case KEY_UP:
+				//	inputEvt = ChamChamChamEvent::up();
+				//	return true;
+				//	break;
 				case KEY_RIGHT:
 					inputEvt = ChamChamChamEvent::right();
 					return true;
 					break;
-				case KEY_DOWN:
-					inputEvt = ChamChamChamEvent::down();
-					return true;
-					break;
+				//case KEY_DOWN:
+				//	inputEvt = ChamChamChamEvent::down();
+				//	return true;
+				//	break;
 				default:
 					return false;
 				}
@@ -89,6 +89,7 @@ BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 		icon->setPosition(core::vector3df(0, 0, -0.5));
 		icon->drop();
 	}
+	/*
 	{
 		auto upTex = Lib::driver->getTexture(res::texture::ARROW_HOLLOW_UP_PNG);
 		auto node = Lib::smgr->addEmptySceneNode(root_);
@@ -101,6 +102,7 @@ BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 		icon->setPosition(core::vector3df(0, 0, -0.5));
 		icon->drop();
 	}
+	*/
 	{
 		auto rightTex = Lib::driver->getTexture(res::texture::ARROW_HOLLOW_RIGHT_PNG);
 		auto node = Lib::smgr->addEmptySceneNode(root_);
@@ -113,6 +115,7 @@ BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 		icon->setPosition(core::vector3df(0, 0, -0.5));
 		icon->drop();
 	}
+	/*
 	{
 		auto downTex = Lib::driver->getTexture(res::texture::ARROW_HOLLOW_DOWN_PNG);
 		auto node = Lib::smgr->addEmptySceneNode(root_);
@@ -125,6 +128,7 @@ BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 		icon->setPosition(core::vector3df(0, 0, -0.5));
 		icon->drop();
 	}
+	*/
 
 	for(auto sprite : arrowList) {
 		float radius = 30;
@@ -152,7 +156,11 @@ BaseChamChamCham::~BaseChamChamCham()
 ChamChamChamEvent BaseChamChamCham::choiceAIEvent() const
 {
 	static std::default_random_engine e1;
-	std::uniform_int_distribution<int> randGen(1, 4);
+	//4방향
+	//std::uniform_int_distribution<int> randGen(1, 4);
+
+	//2방향
+	std::uniform_int_distribution<int> randGen(1, 2);
 	auto value = randGen(e1);
 	return ChamChamChamEvent(value);
 }
