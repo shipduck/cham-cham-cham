@@ -327,7 +327,7 @@ irr::gui::IGUIFont *getFont(const char *fontName)
 }
 
 
-irr::gui::IGUIFont *DebugDrawer::getDebugFont()
+irr::gui::IGUIFont *getDebugFont()
 {
 	if(debugFont == nullptr) {
 		const char *fontName = "res/font/console-14.xml";

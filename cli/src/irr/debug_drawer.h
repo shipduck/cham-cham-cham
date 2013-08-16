@@ -25,9 +25,6 @@ public:
 	void drawList(const DrawAttributeList_String3D &cmd);
 
 private:
-	irr::gui::IGUIFont *getDebugFont();
-
-private:
 	// thickness != 1 인 경우도 렌더링 로직은 동일하게 처리하기 위해서 도입
 	LineBatch *getLineBatch3D(float thickness, bool depthEnabled);
 	LineBatch *getLineBatch2D(float thickness);
@@ -48,4 +45,4 @@ private:
 //로딩+return이 결합되어있어서 폰트 사용하기전 로딩단계에서 미리 로딩하는게 좋을거다
 irr::gui::IGUIFont *getNormalFont12();
 irr::gui::IGUIFont *getNormalFont14();
-
+irr::gui::IGUIFont *getDebugFont();

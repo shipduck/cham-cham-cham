@@ -8,6 +8,7 @@
 #include "util/cvar_key.h"
 #include "game/score_board.h"
 #include "game/rock_paper_scissor.h"
+#include "game/chamchamcham.h"
 #include "res.h"
 
 using namespace std;
@@ -16,14 +17,14 @@ using namespace irr;
 int rpsResultElapsed = 0;
 
 MainSequence::MainSequence()
-	: receiver_(nullptr),
+	: camReceiver_(nullptr),
 	reinaNode_(nullptr)
 {
 	//init camera
 	auto cam = Lib::smgr->addCameraSceneNode();
-	receiver_ = new HeadFreeCameraEventReceiver(cam, 0.1f, 0.1f);
-	receiver_->enableCamMove = false;
-	Lib::eventReceiver->attachReceiver(receiver_);
+	camReceiver_ = new HeadFreeCameraEventReceiver(cam, 0.1f, 0.1f);
+	camReceiver_->enableCamMove = false;
+	Lib::eventReceiver->attachReceiver(camReceiver_);
 	Lib::device->getCursorControl()->setVisible(false);
 
 	//init static
@@ -43,8 +44,8 @@ MainSequence::MainSequence()
 
 MainSequence::~MainSequence()
 {
-	Lib::eventReceiver->detachReceiver(receiver_);
-	receiver_ = nullptr;
+	Lib::eventReceiver->detachReceiver(camReceiver_);
+	camReceiver_ = nullptr;
 }
 
 irr::scene::ISceneNode *MainSequence::initSkybox()
@@ -73,8 +74,8 @@ void MainSequence::update(int ms)
 	//카메라 속도 관련
 	float &moveSpeed = CVarUtils::GetCVarRef<float>(CVAR_GAME_CAM_MOVE_SPEED);
 	float &rotateSpeed = CVarUtils::GetCVarRef<float>(CVAR_GAME_CAM_ROTATE_SPEED);
-	receiver_->moveSpeed = moveSpeed;
-	receiver_->rotateSpeed = rotateSpeed;
+	camReceiver_->moveSpeed = moveSpeed;
+	camReceiver_->rotateSpeed = rotateSpeed;
 
 	//캐릭터 위치 설정
 	float &posX = CVarUtils::GetCVarRef<float>(CVAR_GAME_CHARACTER_POS_X);
@@ -82,9 +83,15 @@ void MainSequence::update(int ms)
 	float &posZ = CVarUtils::GetCVarRef<float>(CVAR_GAME_CHARACTER_POS_Z);
 	reinaNode_->setPosition(irr::core::vector3df(posX, posY, posZ));
 
-	receiver_->update(ms);
+	camReceiver_->update(ms);
 	if(rps_.get() != nullptr) {
 		rps_->update(ms);
+	}
+	if(cccAttack_.get() != nullptr) {
+		cccAttack_->update(ms);
+	}
+	if(cccDefense_.get() != nullptr) {
+		cccDefense_->update(ms);
 	}
 	scoreBoard_->update();
 
@@ -98,6 +105,10 @@ void MainSequence::update(int ms)
 		//가위바위보 완료후에 결과장면을 보여줄 시간
 		rpsResultElapsed = 1000;
 	}
+	if(cccAttack_.get() != nullptr) {
+	}
+	if(cccDefense_.get() != nullptr) {
+	}
 
 	if(rpsResult_.get() != nullptr) {
 		rpsResultElapsed -= ms;
@@ -105,17 +116,15 @@ void MainSequence::update(int ms)
 			auto ai = rpsResult_->getAiChoice();
 			auto player = rpsResult_->getPlayerChoice();
 
+			auto cam = Lib::smgr->getActiveCamera();
+
 			if(ai == player) {
-				auto cam = Lib::smgr->getActiveCamera();
 				rps_.reset(new RockPaperScissor(cam));
 			} else if(ai > player) {
-				//TODO AI가 참참참 공격
-				auto cam = Lib::smgr->getActiveCamera();
-				rps_.reset(new RockPaperScissor(cam));
+				cccDefense_.reset(new ChamChamChamDefense(cam));
 			} else if(ai < player) {
-				//TODO 내가 참참참 공격
-				auto cam = Lib::smgr->getActiveCamera();
-				rps_.reset(new RockPaperScissor(cam));
+				cccDefense_.reset(new ChamChamChamDefense(cam));
+				//cccAttack_.reset(new ChamChamChamAttack(cam));
 			} else {
 				SR_ASSERT(!"do not reach");
 			}

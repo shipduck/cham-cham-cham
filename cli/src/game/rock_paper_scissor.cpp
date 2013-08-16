@@ -304,7 +304,7 @@ RockPaperScissorResult::RockPaperScissorResult(irr::scene::ICameraSceneNode *cam
 		SR_ASSERT(!"do not reach");
 	}
 
-	auto text = new irr::scene::Text3dSceneNode(resultNode_, Lib::smgr, 0, getNormalFont14(), msg.c_str()); 
+	auto text = new irr::scene::Text3dSceneNode(resultNode_, Lib::smgr, 0, getDebugFont(), msg.c_str()); 
 	text->setPosition(core::vector3df(0, 0, 30.0f));
 	auto size = core::dimension2d<f32>(5.0f, 5.0f);
 	text->setSize(size);

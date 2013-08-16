@@ -7,6 +7,8 @@ class ScoreBoard;
 class RockPaperScissor;
 class AbstractHMDCameraEventReceiver;
 class RockPaperScissorResult;
+class ChamChamChamAttack;
+class ChamChamChamDefense;
 
 enum {
 	kStateRockScissorPaper,
@@ -28,9 +30,11 @@ private:
 	irr::scene::ISceneNode *initSkybox();
 
 private:
-	AbstractHMDCameraEventReceiver *receiver_;
+	AbstractHMDCameraEventReceiver *camReceiver_;
 	irr::scene::IAnimatedMeshSceneNode *reinaNode_;
 	std::unique_ptr<ScoreBoard> scoreBoard_;
 	std::unique_ptr<RockPaperScissor> rps_;
 	std::unique_ptr<RockPaperScissorResult> rpsResult_;
+	std::unique_ptr<ChamChamChamAttack> cccAttack_;
+	std::unique_ptr<ChamChamChamDefense> cccDefense_;
 };
