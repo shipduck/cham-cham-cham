@@ -183,6 +183,7 @@ void ChamChamChamAttack::update(int ms)
 		return;
 	}
 
+	aiChoice_ = this->choiceAIEvent();
 	end_ = true;
 }
 
@@ -207,5 +208,6 @@ void ChamChamChamDefense::update(int ms)
 		return;
 	}
 
+	aiChoice_ = this->choiceAIEvent();
 	end_ = true;
 }

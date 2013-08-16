@@ -9,6 +9,8 @@ class AbstractHMDCameraEventReceiver;
 class RockPaperScissorResult;
 class ChamChamChamAttack;
 class ChamChamChamDefense;
+class AttackResult;
+class DefenseResult;
 
 enum {
 	kStateRockScissorPaper,
@@ -37,4 +39,6 @@ private:
 	std::unique_ptr<RockPaperScissorResult> rpsResult_;
 	std::unique_ptr<ChamChamChamAttack> cccAttack_;
 	std::unique_ptr<ChamChamChamDefense> cccDefense_;
+	std::unique_ptr<AttackResult> attackResult_;
+	std::unique_ptr<DefenseResult> defenseResult_;
 };

@@ -15,7 +15,7 @@
 using namespace std;
 using namespace irr;
 
-int rpsResultElapsed = 0;
+int resultShowRemain = 0;
 
 MainSequence::MainSequence()
 	: camReceiver_(nullptr),
@@ -85,6 +85,7 @@ void MainSequence::update(int ms)
 	reinaNode_->setPosition(irr::core::vector3df(posX, posY, posZ));
 
 	camReceiver_->update(ms);
+	scoreBoard_->update();
 	if(rps_.get() != nullptr) {
 		rps_->update(ms);
 	}
@@ -94,7 +95,6 @@ void MainSequence::update(int ms)
 	if(cccDefense_.get() != nullptr) {
 		cccDefense_->update(ms);
 	}
-	scoreBoard_->update();
 
 	//가위바위보 끝난 경우, 점수 반영
 	if(rps_.get() != nullptr && rps_->isEnd() && rpsResult_.get() == nullptr) {
@@ -104,16 +104,28 @@ void MainSequence::update(int ms)
 		rpsResult_.reset(new RockPaperScissorResult(cam, player, ai));
 		rps_.reset(nullptr);
 		//가위바위보 완료후에 결과장면을 보여줄 시간
-		rpsResultElapsed = 1000;
+		resultShowRemain = 1000;
 	}
-	if(cccAttack_.get() != nullptr) {
+	if(cccAttack_.get() != nullptr && cccAttack_->isEnd() && attackResult_.get() == nullptr) {
+		auto cam = Lib::smgr->getActiveCamera();
+		auto ai = cccAttack_->getAiChoice();
+		auto player = cccAttack_->getPlayerChoice();
+		attackResult_.reset(new AttackResult(cam, player, ai));
+		cccAttack_.reset(nullptr);
+		resultShowRemain = 1000;
 	}
-	if(cccDefense_.get() != nullptr) {
+	if(cccDefense_.get() != nullptr && cccDefense_->isEnd() && defenseResult_.get() == nullptr) {
+		auto cam = Lib::smgr->getActiveCamera();
+		auto ai = cccDefense_->getAiChoice();
+		auto player = cccDefense_->getPlayerChoice();
+		defenseResult_.reset(new DefenseResult(cam, player, ai));
+		cccDefense_.reset(nullptr);
+		resultShowRemain = 1000;
 	}
 
 	if(rpsResult_.get() != nullptr) {
-		rpsResultElapsed -= ms;
-		if(rpsResultElapsed < 0) {
+		resultShowRemain -= ms;
+		if(resultShowRemain < 0) {
 			auto ai = rpsResult_->getAiChoice();
 			auto player = rpsResult_->getPlayerChoice();
 
@@ -130,6 +142,37 @@ void MainSequence::update(int ms)
 			}
 
 			rpsResult_.reset(nullptr);
+		}
+	}
+
+	if(attackResult_.get() != nullptr) {
+		resultShowRemain -= ms;
+		if(resultShowRemain < 0) {
+			auto ai = attackResult_->getAiChoice();
+			auto player = attackResult_->getPlayerChoice();
+			auto cam = Lib::smgr->getActiveCamera();
+
+			if(ai == player) {
+				//attack success
+				scoreBoard_->playerGetPoint();
+			}
+			rps_.reset(new RockPaperScissor(cam));
+			attackResult_.reset(nullptr);
+		}
+	}
+	if(defenseResult_.get() != nullptr) {
+		resultShowRemain -= ms;
+		if(resultShowRemain < 0) {
+			auto ai = defenseResult_->getAiChoice();
+			auto player = defenseResult_->getPlayerChoice();
+			auto cam = Lib::smgr->getActiveCamera();
+
+			if(ai == player) {
+				//defense fail
+				scoreBoard_->aiGetPoint();	
+			}
+			rps_.reset(new RockPaperScissor(cam));
+			defenseResult_.reset(nullptr);
 		}
 	}
 }
