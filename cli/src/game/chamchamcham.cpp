@@ -11,6 +11,13 @@
 using namespace std;
 using namespace irr;
 
+int ChamChamChamEvent::getDirectionCount() 
+{
+	//좌우/좌우상하 중에서 선택
+	return 2; 
+	//return 4;
+}
+
 bool ChamChamChamEvent::operator==(const ChamChamChamEvent &o) const
 {
 	return (this->value == o.value);
@@ -30,18 +37,26 @@ public:
 					inputEvt = ChamChamChamEvent::left();
 					return true;
 					break;
-				//case KEY_UP:
-				//	inputEvt = ChamChamChamEvent::up();
-				//	return true;
-				//	break;
 				case KEY_RIGHT:
 					inputEvt = ChamChamChamEvent::right();
 					return true;
 					break;
-				//case KEY_DOWN:
-				//	inputEvt = ChamChamChamEvent::down();
-				//	return true;
-				//	break;
+				case KEY_UP:
+					if(ChamChamChamEvent::getDirectionCount() > 2) {
+						inputEvt = ChamChamChamEvent::up();
+						return true;
+					} else {
+						inputEvt.value = ChamChamChamEvent::kNone;
+					}
+					break;
+				case KEY_DOWN:
+					if(ChamChamChamEvent::getDirectionCount() > 2) {
+						inputEvt = ChamChamChamEvent::down();
+						return true;
+					} else {
+						inputEvt.value = ChamChamChamEvent::kNone;
+					}
+					break;
 				default:
 					return false;
 				}
@@ -89,8 +104,7 @@ BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 		icon->setPosition(core::vector3df(0, 0, -0.5));
 		icon->drop();
 	}
-	/*
-	{
+	if(ChamChamChamEvent::getDirectionCount() > 2) {
 		auto upTex = Lib::driver->getTexture(res::texture::ARROW_HOLLOW_UP_PNG);
 		auto node = Lib::smgr->addEmptySceneNode(root_);
 		node->setRotation(core::vector3df(-20, 0, 0));
@@ -102,7 +116,6 @@ BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 		icon->setPosition(core::vector3df(0, 0, -0.5));
 		icon->drop();
 	}
-	*/
 	{
 		auto rightTex = Lib::driver->getTexture(res::texture::ARROW_HOLLOW_RIGHT_PNG);
 		auto node = Lib::smgr->addEmptySceneNode(root_);
@@ -115,8 +128,7 @@ BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 		icon->setPosition(core::vector3df(0, 0, -0.5));
 		icon->drop();
 	}
-	/*
-	{
+	if(ChamChamChamEvent::getDirectionCount() > 2) {
 		auto downTex = Lib::driver->getTexture(res::texture::ARROW_HOLLOW_DOWN_PNG);
 		auto node = Lib::smgr->addEmptySceneNode(root_);
 		node->setRotation(core::vector3df(20, 0, 0));
@@ -128,7 +140,6 @@ BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 		icon->setPosition(core::vector3df(0, 0, -0.5));
 		icon->drop();
 	}
-	*/
 
 	for(auto sprite : arrowList) {
 		float radius = 30;
@@ -155,12 +166,8 @@ BaseChamChamCham::~BaseChamChamCham()
 
 ChamChamChamEvent BaseChamChamCham::choiceAIEvent() const
 {
-	static std::default_random_engine e1;
-	//4방향
-	//std::uniform_int_distribution<int> randGen(1, 4);
-
-	//2방향
-	std::uniform_int_distribution<int> randGen(1, 2);
+	static std::default_random_engine e1(time(nullptr));
+	std::uniform_int_distribution<int> randGen(1, ChamChamChamEvent::getDirectionCount());
 	auto value = randGen(e1);
 	return ChamChamChamEvent(value);
 }

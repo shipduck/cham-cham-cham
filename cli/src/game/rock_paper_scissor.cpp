@@ -229,7 +229,7 @@ void RockPaperScissor::update(int ms)
 
 RPSEvent RockPaperScissor::selectAIEvent() const
 {
-	static std::default_random_engine e1;
+	static std::default_random_engine e1(time(nullptr));
 	std::uniform_int_distribution<int> randGen(RPSEvent::kRock, RPSEvent::kScissor);
 	auto value = randGen(e1);
 	return RPSEvent(value);

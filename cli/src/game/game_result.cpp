@@ -16,12 +16,12 @@ using namespace irr;
 irr::video::ITexture *getChamChamChamTexture(const ChamChamChamEvent &evt)
 {
 	switch(evt.value) {
-	//case ChamChamChamEvent::kUp:
-	//	return Lib::driver->getTexture(res::texture::ARROW_HOLLOW_UP_PNG);
-	//	break;
-	//case ChamChamChamEvent::kDown:
-	//	return Lib::driver->getTexture(res::texture::ARROW_HOLLOW_DOWN_PNG);
-	//	break;
+	case ChamChamChamEvent::kUp:
+		return Lib::driver->getTexture(res::texture::ARROW_HOLLOW_UP_PNG);
+		break;
+	case ChamChamChamEvent::kDown:
+		return Lib::driver->getTexture(res::texture::ARROW_HOLLOW_DOWN_PNG);
+		break;
 	case ChamChamChamEvent::kLeft:
 		return Lib::driver->getTexture(res::texture::ARROW_HOLLOW_LEFT_PNG);
 		break;
