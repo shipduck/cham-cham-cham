@@ -5,6 +5,7 @@
 #include "irr/sprite_scene_node.h"
 #include "res.h"
 #include "util/event_receiver_manager.h"
+#include "irr/leapmotion.h"
 
 using namespace std;
 using namespace irr;
@@ -97,6 +98,21 @@ public:
 	}
 	virtual bool OnEvent(const SHeadTrackingEvent &evt) {
 		return false;
+	}
+
+	virtual bool OnEvent(const SLeapMotionEvent &evt) {
+		int noFingers = evt.fingers.count();
+		if(noFingers >= 3) {
+			rpsEvent.value = RPSEvent::kPaper;
+		}
+		else if(noFingers == 1 || noFingers == 2) {
+			rpsEvent.value = RPSEvent::kScissor;
+		}
+		else {
+			rpsEvent.value = RPSEvent::kRock;
+		}
+		
+		return true;
 	}
 
 	RPSEvent rpsEvent;

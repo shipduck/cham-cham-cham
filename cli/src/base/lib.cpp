@@ -14,6 +14,7 @@
 #include "util/cvar_key.h"
 #include "game/key_mapping.h"
 #include "game/sequence.h"
+#include "irr/leapmotion.h"
 
 using namespace std;
 using namespace irr;
@@ -25,6 +26,12 @@ AudioManager *Lib::audio = &audioManagerLocal;
 
 HeadTracker headTrackerLocal;
 HeadTracker *Lib::headTracker = &headTrackerLocal;
+
+Leap::Controller leapControllerLocal;
+Leap::Controller *Lib::leapController = &leapControllerLocal;
+
+IrrLeapListener leapListenerLocal;
+IrrLeapListener *Lib::leapListener = &leapListenerLocal;
 
 EventReceiverManager eventReceiverMgrLocal;
 EventReceiverManager *Lib::eventReceiver = &eventReceiverMgrLocal;
@@ -139,6 +146,9 @@ bool Lib::startUp(const EngineParam &param)
 	HMDDescriptor descriptor = hmdDescriptorBind->convert();
 	stereoRenderer = new HMDStereoRender(device, descriptor, 10);
 
+	//Leapmotion Initialize
+	leapController->addListener(*leapListener);
+
 	// 12/14 폰트는 얻는 함수를 따로 만들어놧었다. 그거 쓰면 코드 중복을 제거 가능
 	// 로딩이 느리니까 일단 꺼놓고 필요해지면 살리기
 	//getNormalFont12();
@@ -158,6 +168,7 @@ void Lib::shutDown()
 	audio->shutDown();
 	headTracker->shutDown();
 	eventReceiver->shutDown();
+	leapController->removeListener(*leapListener);
 }
 
 void Lib::updateStereoRenderer()

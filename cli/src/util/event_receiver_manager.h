@@ -4,6 +4,7 @@
 class JoystickDevice;
 class EventReceiverManager;
 struct SHeadTrackingEvent;
+struct SLeapMotionEvent;
 
 // 게임 내부에서 사용하는 Event receiver이다
 // HMD로 얻은 값까지 동일한 구조로 처리하기 위해서 도입함
@@ -13,6 +14,7 @@ public:
 	virtual ~ICustomEventReceiver() {}
 	virtual bool OnEvent(const irr::SEvent &evt) = 0;
 	virtual bool OnEvent(const SHeadTrackingEvent &evt) = 0;
+	virtual bool OnEvent(const SLeapMotionEvent &evt) { return false;}
 };
 
 class EventReceiverManager : public ICustomEventReceiver {
@@ -44,6 +46,7 @@ public:
 
 	virtual bool OnEvent(const irr::SEvent &evt);
 	bool OnEvent(const SHeadTrackingEvent &evt);
+	virtual bool OnEvent(const SLeapMotionEvent &evt);
 	/*
 	priority < 0은 high priority로 분리되서 디바이스 보다 먼저 처리됨
 	priority >= 0은 low priority로 분리해서 디바이스 이후에 처리됨

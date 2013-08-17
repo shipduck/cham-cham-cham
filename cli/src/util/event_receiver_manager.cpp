@@ -111,6 +111,17 @@ bool EventReceiverManager::OnEvent(const irr::SEvent &evt)
 	return false;
 }
 
+bool EventReceiverManager::OnEvent(const SLeapMotionEvent &evt)
+{
+	for(auto &receiver : highPriorityReceiverList_) {
+		receiver.receiver->OnEvent(evt);
+	}
+	for(auto &receiver : lowPriorityReceiverList_) {
+		receiver.receiver->OnEvent(evt);
+	}
+	return false;
+}
+
 JoystickDevice::JoystickDevice()
 	: device_(nullptr), supportJoystick_(false)
 {

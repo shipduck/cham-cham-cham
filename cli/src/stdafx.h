@@ -48,6 +48,9 @@
 // libovr
 #include <OVR.h>
 
+// Leap Motion
+#include <Leap.h>
+
 #include "AL/alut.h"
 #if defined(__APPLE__)
 #include <OpenAL/al.h>
