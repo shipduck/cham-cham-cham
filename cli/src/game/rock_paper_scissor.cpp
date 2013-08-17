@@ -133,6 +133,8 @@ RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam)
 	std::vector<irr::scene::SpriteSceneNode*> rpsSpriteList;
 	std::vector<irr::scene::SpriteSceneNode*> padIconList;
 
+	const bool usePadIcon = false;
+
 	//생성한 sprite를 drop하는것은 list 루프에서 처리함
 	{
 		auto rockTex = Lib::driver->getTexture(res::texture::ICON_ROCK_PNG);
@@ -141,9 +143,11 @@ RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam)
 		auto sprite = new irr::scene::SpriteSceneNode(rock_, Lib::smgr, 0, rockTex);
 		rpsSpriteList.push_back(sprite);
 		
-		auto xTex = Lib::driver->getTexture(res::texture::XBOX_PAD_X_PNG);
-		auto icon = new irr::scene::SpriteSceneNode(sprite, Lib::smgr, 0, xTex);
-		padIconList.push_back(icon);
+		if(usePadIcon) {
+			auto xTex = Lib::driver->getTexture(res::texture::XBOX_PAD_X_PNG);
+			auto icon = new irr::scene::SpriteSceneNode(sprite, Lib::smgr, 0, xTex);
+			padIconList.push_back(icon);
+		}
 	}
 	{
 		auto paperTex = Lib::driver->getTexture(res::texture::ICON_PAPER_PNG);
@@ -152,9 +156,11 @@ RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam)
 		auto sprite = new irr::scene::SpriteSceneNode(scissor_, Lib::smgr, 0, paperTex);
 		rpsSpriteList.push_back(sprite);
 
-		auto iconTex = Lib::driver->getTexture(res::texture::XBOX_PAD_Y_PNG);
-		auto icon = new irr::scene::SpriteSceneNode(sprite, Lib::smgr, 0, iconTex);
-		padIconList.push_back(icon);
+		if(usePadIcon) {
+			auto iconTex = Lib::driver->getTexture(res::texture::XBOX_PAD_Y_PNG);
+			auto icon = new irr::scene::SpriteSceneNode(sprite, Lib::smgr, 0, iconTex);
+			padIconList.push_back(icon);
+		}
 	}
 	{
 		auto scissorTex = Lib::driver->getTexture(res::texture::ICON_SCISSOR_PNG);
@@ -163,9 +169,11 @@ RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam)
 		auto sprite = new irr::scene::SpriteSceneNode(paper_, Lib::smgr, 0, scissorTex);
 		rpsSpriteList.push_back(sprite);
 
-		auto iconTex = Lib::driver->getTexture(res::texture::XBOX_PAD_B_PNG);
-		auto icon = new irr::scene::SpriteSceneNode(sprite, Lib::smgr, 0, iconTex);
-		padIconList.push_back(icon);
+		if(usePadIcon) {
+			auto iconTex = Lib::driver->getTexture(res::texture::XBOX_PAD_B_PNG);
+			auto icon = new irr::scene::SpriteSceneNode(sprite, Lib::smgr, 0, iconTex);
+			padIconList.push_back(icon);
+		}
 	}
 
 	for(auto sprite : rpsSpriteList) {

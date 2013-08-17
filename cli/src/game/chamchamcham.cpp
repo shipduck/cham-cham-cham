@@ -159,6 +159,8 @@ BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 	centerText_->setSize(size);
 	centerText_->drop();
 
+	const bool usePadIcon = false;
+
 	std::vector<irr::scene::SpriteSceneNode*> arrowList;
 	{
 		auto leftTex = Lib::driver->getTexture(res::texture::ARROW_HOLLOW_LEFT_PNG);
@@ -167,10 +169,12 @@ BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 		auto sprite = new irr::scene::SpriteSceneNode(node, Lib::smgr, 0, leftTex);
 		arrowList.push_back(sprite);
 		
-		auto xTex = Lib::driver->getTexture(res::texture::XBOX_PAD_X_PNG);
-		auto icon = new irr::scene::SpriteSceneNode(sprite, Lib::smgr, 0, xTex);
-		icon->setPosition(core::vector3df(0, 0, -0.5));
-		icon->drop();
+		if(usePadIcon) {
+			auto xTex = Lib::driver->getTexture(res::texture::XBOX_PAD_X_PNG);
+			auto icon = new irr::scene::SpriteSceneNode(sprite, Lib::smgr, 0, xTex);
+			icon->setPosition(core::vector3df(0, 0, -0.5));
+			icon->drop();
+		}
 	}
 	if(ChamChamChamEvent::getDirectionCount() > 2) {
 		auto upTex = Lib::driver->getTexture(res::texture::ARROW_HOLLOW_UP_PNG);
@@ -179,10 +183,12 @@ BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 		auto sprite = new irr::scene::SpriteSceneNode(node, Lib::smgr, 0, upTex);
 		arrowList.push_back(sprite);
 		
-		auto yTex = Lib::driver->getTexture(res::texture::XBOX_PAD_Y_PNG);
-		auto icon = new irr::scene::SpriteSceneNode(sprite, Lib::smgr, 0, yTex);
-		icon->setPosition(core::vector3df(0, 0, -0.5));
-		icon->drop();
+		if(usePadIcon) {
+			auto yTex = Lib::driver->getTexture(res::texture::XBOX_PAD_Y_PNG);
+			auto icon = new irr::scene::SpriteSceneNode(sprite, Lib::smgr, 0, yTex);
+			icon->setPosition(core::vector3df(0, 0, -0.5));
+			icon->drop();
+		}
 	}
 	{
 		auto rightTex = Lib::driver->getTexture(res::texture::ARROW_HOLLOW_RIGHT_PNG);
@@ -191,10 +197,12 @@ BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 		auto sprite = new irr::scene::SpriteSceneNode(node, Lib::smgr, 0, rightTex);
 		arrowList.push_back(sprite);
 		
-		auto bTex = Lib::driver->getTexture(res::texture::XBOX_PAD_B_PNG);
-		auto icon = new irr::scene::SpriteSceneNode(sprite, Lib::smgr, 0, bTex);
-		icon->setPosition(core::vector3df(0, 0, -0.5));
-		icon->drop();
+		if(usePadIcon) {
+			auto bTex = Lib::driver->getTexture(res::texture::XBOX_PAD_B_PNG);
+			auto icon = new irr::scene::SpriteSceneNode(sprite, Lib::smgr, 0, bTex);
+			icon->setPosition(core::vector3df(0, 0, -0.5));
+			icon->drop();
+		}
 	}
 	if(ChamChamChamEvent::getDirectionCount() > 2) {
 		auto downTex = Lib::driver->getTexture(res::texture::ARROW_HOLLOW_DOWN_PNG);
@@ -203,10 +211,12 @@ BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 		auto sprite = new irr::scene::SpriteSceneNode(node, Lib::smgr, 0, downTex);
 		arrowList.push_back(sprite);
 		
-		auto aTex = Lib::driver->getTexture(res::texture::XBOX_PAD_A_PNG);
-		auto icon = new irr::scene::SpriteSceneNode(sprite, Lib::smgr, 0, aTex);
-		icon->setPosition(core::vector3df(0, 0, -0.5));
-		icon->drop();
+		if(usePadIcon) {
+			auto aTex = Lib::driver->getTexture(res::texture::XBOX_PAD_A_PNG);
+			auto icon = new irr::scene::SpriteSceneNode(sprite, Lib::smgr, 0, aTex);
+			icon->setPosition(core::vector3df(0, 0, -0.5));
+			icon->drop();
+		}
 	}
 
 	for(auto sprite : arrowList) {
