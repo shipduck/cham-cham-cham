@@ -9,9 +9,26 @@
 #include "util/event_receiver_manager.h"
 #include "finger_direction_event.h"
 #include "ai_player.h"
+#include "game/game_result.h"
 
 using namespace std;
 using namespace irr;
+
+class AttackPhase : public BaseFingerDirectionPhase {
+public:
+	AttackPhase(irr::scene::ICameraSceneNode *cam);
+	virtual ~AttackPhase();
+	void update(int ms);
+	virtual std::unique_ptr<FingerResult> createResult(irr::scene::ICameraSceneNode *cam);
+};
+
+class DefensePhase : public BaseFingerDirectionPhase {
+public:
+	DefensePhase(irr::scene::ICameraSceneNode *cam);
+	virtual ~DefensePhase();
+	void update(int ms);
+	virtual std::unique_ptr<FingerResult> createResult(irr::scene::ICameraSceneNode *cam);
+};
 
 
 BaseFingerDirectionPhase::BaseFingerDirectionPhase(irr::scene::ICameraSceneNode *cam)
@@ -117,6 +134,16 @@ const FingerDirectionEvent &BaseFingerDirectionPhase::getPlayerChoice() const
 	return evtReceiver_->inputEvt;
 }
 
+std::unique_ptr<BaseFingerDirectionPhase> BaseFingerDirectionPhase::createAttack(irr::scene::ICameraSceneNode *cam)
+{
+	return std::unique_ptr<BaseFingerDirectionPhase>(new AttackPhase(cam));
+}
+
+std::unique_ptr<BaseFingerDirectionPhase> BaseFingerDirectionPhase::createDefense(irr::scene::ICameraSceneNode *cam)
+{
+	return std::unique_ptr<BaseFingerDirectionPhase>(new DefensePhase(cam));
+}
+
 
 ///////////////////////////////////////
 
@@ -143,6 +170,12 @@ void AttackPhase::update(int ms)
 	FingerDirectionEvent aiEvt = AiPlayer().think(evtReceiver_->inputEvt);
 	aiChoice_.reset(new FingerDirectionEvent(aiEvt));
 	end_ = true;
+}
+std::unique_ptr<FingerResult> AttackPhase::createResult(irr::scene::ICameraSceneNode *cam)
+{
+	auto ai = this->getAiChoice();
+	auto player = this->getPlayerChoice();
+	return std::unique_ptr<FingerResult>(new AttackResult(cam, player, ai));
 }
 
 ///////////////////////////////////////
@@ -172,4 +205,11 @@ void DefensePhase::update(int ms)
 	FingerDirectionEvent aiEvt = AiPlayer().think(evtReceiver_->inputEvt);
 	aiChoice_.reset(new FingerDirectionEvent(aiEvt));
 	end_ = true;
+}
+
+std::unique_ptr<FingerResult> DefensePhase::createResult(irr::scene::ICameraSceneNode *cam)
+{
+	auto ai = this->getAiChoice();
+	auto player = this->getPlayerChoice();
+	return std::unique_ptr<FingerResult>(new DefenseResult(cam, player, ai));
 }

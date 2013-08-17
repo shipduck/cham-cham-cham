@@ -111,6 +111,7 @@ ScoreBoard::ScoreBoard(irr::scene::ICameraSceneNode *cam)
 
 ScoreBoard::~ScoreBoard()
 {
+	hmdNode_->remove();
 	hmdNode_->drop();
 	hmdNode_ = nullptr;
 }
@@ -138,4 +139,17 @@ void ScoreBoard::updateScoreNode(int playerScore, int aiScore)
 void ScoreBoard::update()
 {
 	updateScoreNode(playerScore_, aiScore_);
+}
+
+bool ScoreBoard::isGameOver() const
+{
+	const int maxScore = 2;
+	//const int maxScore = 3;
+	if(playerScore_ >= maxScore) {
+		return true;
+	}
+	if(aiScore_ >= maxScore) {
+		return true;
+	}
+	return false;
 }

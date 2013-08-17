@@ -9,6 +9,7 @@ class Text3dSceneNode;
 
 class FingerDirectionEvent;
 class FingerDirectionEventReceiver;
+class FingerResult;
 
 class BaseFingerDirectionPhase {
 public:
@@ -22,6 +23,12 @@ public:
 	const FingerDirectionEvent &getAiChoice() const { return *aiChoice_; }
 	const FingerDirectionEvent &getPlayerChoice() const;
 
+	virtual std::unique_ptr<FingerResult> createResult(irr::scene::ICameraSceneNode *cam) = 0;
+
+public:
+	static std::unique_ptr<BaseFingerDirectionPhase> createAttack(irr::scene::ICameraSceneNode *cam);
+	static std::unique_ptr<BaseFingerDirectionPhase> createDefense(irr::scene::ICameraSceneNode *cam);
+
 protected:
 	bool end_;
 	
@@ -31,23 +38,4 @@ protected:
 	std::unique_ptr<FingerDirectionEvent> aiChoice_;
 
 	FingerDirectionEventReceiver *evtReceiver_;
-};
-
-class AttackPhase : public BaseFingerDirectionPhase {
-public:
-	AttackPhase(irr::scene::ICameraSceneNode *cam);
-	virtual ~AttackPhase();
-
-	void update(int ms);
-
-};
-
-class DefensePhase : public BaseFingerDirectionPhase {
-public:
-	DefensePhase(irr::scene::ICameraSceneNode *cam);
-	virtual ~DefensePhase();
-
-	void update(int ms);
-private:
-	
 };

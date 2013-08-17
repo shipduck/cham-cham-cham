@@ -155,13 +155,24 @@ irr::video::ITexture *RockPaperScissorResult::getRPSTexture(int rps)
 	return nullptr;
 }
 
-
-AttackResult::AttackResult(irr::scene::ICameraSceneNode *cam,
+FingerResult::FingerResult(irr::scene::ICameraSceneNode *cam,
 		const FingerDirectionEvent &playerChoice,
 		const FingerDirectionEvent &aiChoice)
 	: AbstractGameResult(cam),
 	aiChoice_(new FingerDirectionEvent(aiChoice)),
 	playerChoice_(new FingerDirectionEvent(playerChoice))	
+{
+	setPlayerTexture(getChamChamChamTexture(playerChoice)); 
+	setAiTexture(getChamChamChamTexture(aiChoice));
+}
+FingerResult::~FingerResult()
+{
+}
+
+AttackResult::AttackResult(irr::scene::ICameraSceneNode *cam,
+		const FingerDirectionEvent &playerChoice,
+		const FingerDirectionEvent &aiChoice)
+		: FingerResult(cam, playerChoice, aiChoice)
 {
 	std::wstring msg;
 	if(aiChoice == playerChoice) {
@@ -170,20 +181,14 @@ AttackResult::AttackResult(irr::scene::ICameraSceneNode *cam,
 		msg = L"Fail";
 	}
 	setText(msg.c_str());
-	setPlayerTexture(getChamChamChamTexture(playerChoice)); 
-	setAiTexture(getChamChamChamTexture(aiChoice));
-}
-AttackResult::~AttackResult()
-{
+	
 }
 
 
 DefenseResult::DefenseResult(irr::scene::ICameraSceneNode *cam,
 		const FingerDirectionEvent &playerChoice,
 		const FingerDirectionEvent &aiChoice)
-	: AbstractGameResult(cam),
-	aiChoice_(new FingerDirectionEvent(aiChoice)),
-	playerChoice_(new FingerDirectionEvent(playerChoice))	
+	: FingerResult(cam, playerChoice, aiChoice)
 {
 	std::wstring msg;
 	if(aiChoice == playerChoice) {
@@ -192,10 +197,4 @@ DefenseResult::DefenseResult(irr::scene::ICameraSceneNode *cam,
 		msg = L"Success";
 	}
 	setText(msg.c_str());
-	setPlayerTexture(getChamChamChamTexture(playerChoice)); 
-	setAiTexture(getChamChamChamTexture(aiChoice));
 }
-DefenseResult::~DefenseResult()
-{
-}
-

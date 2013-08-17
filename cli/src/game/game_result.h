@@ -52,13 +52,16 @@ private:
 	irr::video::ITexture *getRPSTexture(int rps);
 };
 
-class AttackResult : public AbstractGameResult {
+class FingerResult : public AbstractGameResult {
 public:
-	AttackResult(irr::scene::ICameraSceneNode *cam,
+	FingerResult(irr::scene::ICameraSceneNode *cam,
 		const FingerDirectionEvent &playerChoice,
 		const FingerDirectionEvent &aiChoice);
-	virtual ~AttackResult();
+	virtual ~FingerResult();
 
+	virtual bool isAttackResult() const = 0;
+
+public:
 	const FingerDirectionEvent &getAiChoice() const { return *aiChoice_; }
 	const FingerDirectionEvent &getPlayerChoice() const { return *playerChoice_; }
 
@@ -67,16 +70,22 @@ private:
 	std::unique_ptr<FingerDirectionEvent> playerChoice_;
 };
 
-class DefenseResult : public AbstractGameResult {
+class AttackResult : public FingerResult {
+public:
+	AttackResult(irr::scene::ICameraSceneNode *cam,
+		const FingerDirectionEvent &playerChoice,
+		const FingerDirectionEvent &aiChoice);
+	virtual ~AttackResult() {}
+
+	virtual bool isAttackResult() const { return true; }
+};
+
+class DefenseResult : public FingerResult {
 public:
 	DefenseResult(irr::scene::ICameraSceneNode *cam,
 		const FingerDirectionEvent &playerChoice,
 		const FingerDirectionEvent &aiChoice);
-	virtual ~DefenseResult();
+	virtual ~DefenseResult() {}
 
-	const FingerDirectionEvent &getAiChoice() const { return *aiChoice_; }
-	const FingerDirectionEvent &getPlayerChoice() const { return *playerChoice_; }
-private:
-	std::unique_ptr<FingerDirectionEvent> aiChoice_;
-	std::unique_ptr<FingerDirectionEvent> playerChoice_;
+	virtual bool isAttackResult() const { return false; }
 };

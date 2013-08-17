@@ -51,7 +51,6 @@ MainSequence::MainSequence()
 	//init logic
 	scoreBoard_.reset(new ScoreBoard(cam));
 	rps_.reset(new RockPaperScissor(cam));	
-	rps_->setEnable(true);
 }
 
 MainSequence::~MainSequence()
@@ -101,11 +100,8 @@ void MainSequence::update(int ms)
 	if(rps_.get() != nullptr) {
 		rps_->update(ms);
 	}
-	if(cccAttack_.get() != nullptr) {
-		cccAttack_->update(ms);
-	}
-	if(cccDefense_.get() != nullptr) {
-		cccDefense_->update(ms);
+	if(fingerPhase_.get() != nullptr) {
+		fingerPhase_->update(ms);
 	}
 
 	//가위바위보 끝난 경우, 점수 반영
@@ -118,20 +114,10 @@ void MainSequence::update(int ms)
 		//가위바위보 완료후에 결과장면을 보여줄 시간
 		resultShowRemain = 1000;
 	}
-	if(cccAttack_.get() != nullptr && cccAttack_->isEnd() && attackResult_.get() == nullptr) {
+	if(fingerPhase_.get() != nullptr && fingerPhase_->isEnd() && fingerResult_.get() == nullptr) {
 		auto cam = Lib::smgr->getActiveCamera();
-		auto ai = cccAttack_->getAiChoice();
-		auto player = cccAttack_->getPlayerChoice();
-		attackResult_.reset(new AttackResult(cam, player, ai));
-		cccAttack_.reset(nullptr);
-		resultShowRemain = 1000;
-	}
-	if(cccDefense_.get() != nullptr && cccDefense_->isEnd() && defenseResult_.get() == nullptr) {
-		auto cam = Lib::smgr->getActiveCamera();
-		auto ai = cccDefense_->getAiChoice();
-		auto player = cccDefense_->getPlayerChoice();
-		defenseResult_.reset(new DefenseResult(cam, player, ai));
-		cccDefense_.reset(nullptr);
+		fingerResult_ = std::move(fingerPhase_->createResult(cam));
+		fingerPhase_.reset(nullptr);
 		resultShowRemain = 1000;
 	}
 
@@ -146,9 +132,9 @@ void MainSequence::update(int ms)
 			if(ai == player) {
 				rps_.reset(new RockPaperScissor(cam));
 			} else if(ai > player) {
-				cccDefense_.reset(new DefensePhase(cam));
+				fingerPhase_ = std::move(BaseFingerDirectionPhase::createDefense(cam));
 			} else if(ai < player) {
-				cccAttack_.reset(new AttackPhase(cam));
+				fingerPhase_ = std::move(BaseFingerDirectionPhase::createAttack(cam));
 			} else {
 				SR_ASSERT(!"do not reach");
 			}
@@ -157,34 +143,33 @@ void MainSequence::update(int ms)
 		}
 	}
 
-	if(attackResult_.get() != nullptr) {
+	if(fingerResult_.get() != nullptr) {
 		resultShowRemain -= ms;
 		if(resultShowRemain < 0) {
-			auto ai = attackResult_->getAiChoice();
-			auto player = attackResult_->getPlayerChoice();
+			auto ai = fingerResult_->getAiChoice();
+			auto player = fingerResult_->getPlayerChoice();
 			auto cam = Lib::smgr->getActiveCamera();
 
-			if(ai == player) {
-				//attack success
-				scoreBoard_->playerGetPoint();
+			if(fingerResult_->isAttackResult()) {
+				if(ai == player) {
+					//attack success
+					scoreBoard_->playerGetPoint();
+				}
+			} else {
+				if(ai == player) {
+					//defense fail
+					scoreBoard_->aiGetPoint();	
+				}
 			}
 			rps_.reset(new RockPaperScissor(cam));
-			attackResult_.reset(nullptr);
+			fingerResult_.reset(nullptr);
 		}
 	}
-	if(defenseResult_.get() != nullptr) {
-		resultShowRemain -= ms;
-		if(resultShowRemain < 0) {
-			auto ai = defenseResult_->getAiChoice();
-			auto player = defenseResult_->getPlayerChoice();
-			auto cam = Lib::smgr->getActiveCamera();
-
-			if(ai == player) {
-				//defense fail
-				scoreBoard_->aiGetPoint();	
-			}
-			rps_.reset(new RockPaperScissor(cam));
-			defenseResult_.reset(nullptr);
-		}
+	if(rps_.get() != nullptr && scoreBoard_->isGameOver()) {
+		//장면 교체
+		auto cam = Lib::smgr->getActiveCamera();
+		scoreBoard_.reset(new ScoreBoard(cam));
+		rps_.reset(new RockPaperScissor(cam));	
+		printf("new game\n");
 	}
 }
