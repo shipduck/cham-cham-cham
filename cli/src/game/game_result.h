@@ -2,7 +2,7 @@
 #pragma once
 
 class RPSEvent;
-class ChamChamChamEvent;
+class FingerDirectionEvent;
 
 namespace irr {;
 namespace scene {;
@@ -55,28 +55,28 @@ private:
 class AttackResult : public AbstractGameResult {
 public:
 	AttackResult(irr::scene::ICameraSceneNode *cam,
-		const ChamChamChamEvent &playerChoice,
-		const ChamChamChamEvent &aiChoice);
+		const FingerDirectionEvent &playerChoice,
+		const FingerDirectionEvent &aiChoice);
 	virtual ~AttackResult();
 
-	const ChamChamChamEvent &getAiChoice() const { return *aiChoice_; }
-	const ChamChamChamEvent &getPlayerChoice() const { return *playerChoice_; }
+	const FingerDirectionEvent &getAiChoice() const { return *aiChoice_; }
+	const FingerDirectionEvent &getPlayerChoice() const { return *playerChoice_; }
 
 private:
-	std::unique_ptr<ChamChamChamEvent> aiChoice_;
-	std::unique_ptr<ChamChamChamEvent> playerChoice_;
+	std::unique_ptr<FingerDirectionEvent> aiChoice_;
+	std::unique_ptr<FingerDirectionEvent> playerChoice_;
 };
 
 class DefenseResult : public AbstractGameResult {
 public:
 	DefenseResult(irr::scene::ICameraSceneNode *cam,
-		const ChamChamChamEvent &playerChoice,
-		const ChamChamChamEvent &aiChoice);
+		const FingerDirectionEvent &playerChoice,
+		const FingerDirectionEvent &aiChoice);
 	virtual ~DefenseResult();
 
-	const ChamChamChamEvent &getAiChoice() const { return *aiChoice_; }
-	const ChamChamChamEvent &getPlayerChoice() const { return *playerChoice_; }
+	const FingerDirectionEvent &getAiChoice() const { return *aiChoice_; }
+	const FingerDirectionEvent &getPlayerChoice() const { return *playerChoice_; }
 private:
-	std::unique_ptr<ChamChamChamEvent> aiChoice_;
-	std::unique_ptr<ChamChamChamEvent> playerChoice_;
+	std::unique_ptr<FingerDirectionEvent> aiChoice_;
+	std::unique_ptr<FingerDirectionEvent> playerChoice_;
 };

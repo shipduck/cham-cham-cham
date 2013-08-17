@@ -7,35 +7,8 @@ class Text3dSceneNode;
 }	// namespace scene
 }	// namespace irr
 
-class LRUDEventReceiver;
-
-class ChamChamChamEvent {
-public:
-	enum {
-		kNone,
-		kLeft,
-		kRight,
-		kUp,
-		kDown,
-	};
-
-	ChamChamChamEvent() : value(kNone) {}
-	ChamChamChamEvent(int val) : value(val) {}
-
-	static ChamChamChamEvent up() { return ChamChamChamEvent(kUp); }
-	static ChamChamChamEvent down() { return ChamChamChamEvent(kDown); }
-	static ChamChamChamEvent left() { return ChamChamChamEvent(kLeft); }
-	static ChamChamChamEvent right() { return ChamChamChamEvent(kRight); }
-
-	bool operator==(const ChamChamChamEvent &o) const;
-	bool operator!=(const ChamChamChamEvent &o) const;
-
-	bool isValid() const { return value != kNone; }
-
-	int value;
-
-	static int getDirectionCount();
-};
+class FingerDirectionEvent;
+class FingerDirectionEventReceiver;
 
 class BaseChamChamCham {
 public:
@@ -46,8 +19,8 @@ public:
 
 	bool isEnd() const { return end_; }
 
-	const ChamChamChamEvent &getAiChoice() const { return aiChoice_; }
-	const ChamChamChamEvent &getPlayerChoice() const;
+	const FingerDirectionEvent &getAiChoice() const { return *aiChoice_; }
+	const FingerDirectionEvent &getPlayerChoice() const;
 
 protected:
 	bool end_;
@@ -55,10 +28,10 @@ protected:
 	irr::scene::ISceneNode *root_;
 	irr::scene::Text3dSceneNode *centerText_;
 
-	ChamChamChamEvent choiceAIEvent() const;
-	ChamChamChamEvent aiChoice_;
+	FingerDirectionEvent choiceAIEvent() const;
+	std::unique_ptr<FingerDirectionEvent> aiChoice_;
 
-	LRUDEventReceiver *evtReceiver_;
+	FingerDirectionEventReceiver *evtReceiver_;
 };
 
 class ChamChamChamAttack : public BaseChamChamCham {

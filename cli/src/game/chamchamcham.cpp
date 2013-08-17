@@ -7,141 +7,11 @@
 #include "base/lib.h"
 #include "irr/debug_drawer.h"
 #include "util/event_receiver_manager.h"
-#include "irr/head_tracker.h"
-#include "irr/leapmotion.h"
+#include "finger_direction_event.h"
 
 using namespace std;
 using namespace irr;
 
-int ChamChamChamEvent::getDirectionCount() 
-{
-	//좌우/좌우상하 중에서 선택
-	//return 2; 
-	return 4;
-}
-
-bool ChamChamChamEvent::operator==(const ChamChamChamEvent &o) const
-{
-	return (this->value == o.value);
-}
-bool ChamChamChamEvent::operator!=(const ChamChamChamEvent &o) const
-{
-	return !(*this == o);
-}
-
-class LRUDEventReceiver : public ICustomEventReceiver {
-public:
-	virtual bool OnEvent(const irr::SEvent &evt) {
-		if(evt.EventType == irr::EET_KEY_INPUT_EVENT) {
-			if(evt.KeyInput.PressedDown) {
-				switch(evt.KeyInput.Key) {
-				case KEY_LEFT:
-					inputEvt = ChamChamChamEvent::left();
-					return true;
-					break;
-				case KEY_RIGHT:
-					inputEvt = ChamChamChamEvent::right();
-					return true;
-					break;
-				case KEY_UP:
-					if(ChamChamChamEvent::getDirectionCount() > 2) {
-						inputEvt = ChamChamChamEvent::up();
-						return true;
-					} else {
-						inputEvt.value = ChamChamChamEvent::kNone;
-					}
-					break;
-				case KEY_DOWN:
-					if(ChamChamChamEvent::getDirectionCount() > 2) {
-						inputEvt = ChamChamChamEvent::down();
-						return true;
-					} else {
-						inputEvt.value = ChamChamChamEvent::kNone;
-					}
-					break;
-				default:
-					return false;
-				}
-			} else {
-				inputEvt.value = ChamChamChamEvent::kNone;
-			}
-		}
-		return false;
-	}
-
-	virtual bool OnEvent(const SHeadTrackingEvent &evt) {
-		const float yawLimit = core::PI * 0.25f * 0.4f;
-		const float pitchLimit = core::PI * 0.25f * 0.3f;
-		if(evt.yaw > yawLimit) {
-			//left
-			inputEvt = ChamChamChamEvent::left();
-			return true;
-		} else if(evt.yaw < -yawLimit) {
-			inputEvt = ChamChamChamEvent::right();
-			//right
-			return true;
-		}
-		if(ChamChamChamEvent::getDirectionCount() > 2) {
-			if(evt.pitch > pitchLimit) {
-				//up
-				inputEvt = ChamChamChamEvent::up();
-				return true;
-			} else if(evt.pitch < -pitchLimit) {
-				//down
-				inputEvt = ChamChamChamEvent::down();
-				return true;
-			}
-		}
-		return false;
-	}
-#ifdef USE_LEAP_MOTION
-	virtual bool OnEvent(const SLeapMotionEvent &evt) {
-		auto gestures = evt.gestures;
-
-		for(auto gesture : gestures)
-		{
-			if(gesture.type() == Leap::Gesture::TYPE_SWIPE)
-			{
-				const auto& swipe = static_cast<Leap::SwipeGesture>(gesture);
-				auto vector = swipe.direction();
-
-				// Float 비교 부정확성, 그리고 소수점 이하 비교는 필요하지 않기 떄문에
-				// Int로 형변환해서 비교한다
-				int x = 100 * vector.x;
-				int y = 100 * vector.y;
-				int absX = abs(x);
-				int absY = abs(y);
-
-				int absLargest = max(absX, absY);
-
-				if(absLargest == x)
-				{
-					inputEvt = ChamChamChamEvent::right();
-				}
-				else if(absLargest == absX)
-				{
-					inputEvt = ChamChamChamEvent::left();
-				}
-				else if(absLargest == y)
-				{
-					inputEvt = ChamChamChamEvent::up();
-				}
-				else if(absLargest == absY)
-				{
-					inputEvt = ChamChamChamEvent::down();
-				}
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-#endif
-	ChamChamChamEvent inputEvt;
-};
-
-///////////////////////////////////////
 
 BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 	: end_(false),
@@ -176,7 +46,7 @@ BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 			icon->drop();
 		}
 	}
-	if(ChamChamChamEvent::getDirectionCount() > 2) {
+	if(FingerDirectionEvent::getDirectionCount() > 2) {
 		auto upTex = Lib::driver->getTexture(res::texture::ARROW_HOLLOW_UP_PNG);
 		auto node = Lib::smgr->addEmptySceneNode(root_);
 		node->setRotation(core::vector3df(-20, 0, 0));
@@ -204,7 +74,7 @@ BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 			icon->drop();
 		}
 	}
-	if(ChamChamChamEvent::getDirectionCount() > 2) {
+	if(FingerDirectionEvent::getDirectionCount() > 2) {
 		auto downTex = Lib::driver->getTexture(res::texture::ARROW_HOLLOW_DOWN_PNG);
 		auto node = Lib::smgr->addEmptySceneNode(root_);
 		node->setRotation(core::vector3df(20, 0, 0));
@@ -227,30 +97,29 @@ BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 		sprite->setPosition(spritePos);
 		sprite->drop();
 	}
-
-	evtReceiver_ = new LRUDEventReceiver();
-	Lib::eventReceiver->attachReceiver(evtReceiver_);
 }
 
 BaseChamChamCham::~BaseChamChamCham()
 {
-	Lib::eventReceiver->detachReceiver(evtReceiver_);
-	evtReceiver_ = nullptr;
+	if(evtReceiver_ != nullptr) {
+		Lib::eventReceiver->detachReceiver(evtReceiver_);
+		evtReceiver_ = nullptr;
+	}
 
 	root_->remove();
 	root_->drop();
 	root_ = nullptr;
 }
 
-ChamChamChamEvent BaseChamChamCham::choiceAIEvent() const
+FingerDirectionEvent BaseChamChamCham::choiceAIEvent() const
 {
 	static std::default_random_engine e1(time(nullptr));
-	std::uniform_int_distribution<int> randGen(1, ChamChamChamEvent::getDirectionCount());
+	std::uniform_int_distribution<int> randGen(1, FingerDirectionEvent::getDirectionCount());
 	auto value = randGen(e1);
-	return ChamChamChamEvent(value);
+	return FingerDirectionEvent(value);
 }
 
-const ChamChamChamEvent &BaseChamChamCham::getPlayerChoice() const
+const FingerDirectionEvent &BaseChamChamCham::getPlayerChoice() const
 {
 	return evtReceiver_->inputEvt;
 }
@@ -262,6 +131,9 @@ ChamChamChamAttack::ChamChamChamAttack(irr::scene::ICameraSceneNode *cam)
 	: BaseChamChamCham(cam)
 {
 	centerText_->setText(L"Attack");
+
+	evtReceiver_ = new FingerDirectionEventReceiver(true, false, true);
+	Lib::eventReceiver->attachReceiver(evtReceiver_);
 }
 ChamChamChamAttack::~ChamChamChamAttack()
 {
@@ -276,7 +148,7 @@ void ChamChamChamAttack::update(int ms)
 		return;
 	}
 
-	aiChoice_ = this->choiceAIEvent();
+	aiChoice_.reset(new FingerDirectionEvent(this->choiceAIEvent()));
 	end_ = true;
 }
 
@@ -286,6 +158,9 @@ ChamChamChamDefense::ChamChamChamDefense(irr::scene::ICameraSceneNode *cam)
 	: BaseChamChamCham(cam)
 {
 	centerText_->setText(L"Defense");
+
+	evtReceiver_ = new FingerDirectionEventReceiver(true, true, false);
+	Lib::eventReceiver->attachReceiver(evtReceiver_);
 }
 
 ChamChamChamDefense::~ChamChamChamDefense()
@@ -301,6 +176,6 @@ void ChamChamChamDefense::update(int ms)
 		return;
 	}
 
-	aiChoice_ = this->choiceAIEvent();
+	aiChoice_.reset(new FingerDirectionEvent(this->choiceAIEvent()));
 	end_ = true;
 }

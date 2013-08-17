@@ -7,25 +7,25 @@
 #include "irr/sprite_scene_node.h"
 #include "irr/text_3d_scene_node.h"
 #include "irr/debug_drawer.h"
-#include "game/chamchamcham.h"
+#include "game/finger_direction_event.h"
 
 using namespace std;
 using namespace irr;
 
 
-irr::video::ITexture *getChamChamChamTexture(const ChamChamChamEvent &evt)
+irr::video::ITexture *getChamChamChamTexture(const FingerDirectionEvent &evt)
 {
 	switch(evt.value) {
-	case ChamChamChamEvent::kUp:
+	case FingerDirectionEvent::kUp:
 		return Lib::driver->getTexture(res::texture::ARROW_HOLLOW_UP_PNG);
 		break;
-	case ChamChamChamEvent::kDown:
+	case FingerDirectionEvent::kDown:
 		return Lib::driver->getTexture(res::texture::ARROW_HOLLOW_DOWN_PNG);
 		break;
-	case ChamChamChamEvent::kLeft:
+	case FingerDirectionEvent::kLeft:
 		return Lib::driver->getTexture(res::texture::ARROW_HOLLOW_LEFT_PNG);
 		break;
-	case ChamChamChamEvent::kRight:
+	case FingerDirectionEvent::kRight:
 		return Lib::driver->getTexture(res::texture::ARROW_HOLLOW_RIGHT_PNG);
 		break;
 	default:
@@ -157,11 +157,11 @@ irr::video::ITexture *RockPaperScissorResult::getRPSTexture(int rps)
 
 
 AttackResult::AttackResult(irr::scene::ICameraSceneNode *cam,
-		const ChamChamChamEvent &playerChoice,
-		const ChamChamChamEvent &aiChoice)
+		const FingerDirectionEvent &playerChoice,
+		const FingerDirectionEvent &aiChoice)
 	: AbstractGameResult(cam),
-	aiChoice_(new ChamChamChamEvent(aiChoice)),
-	playerChoice_(new ChamChamChamEvent(playerChoice))	
+	aiChoice_(new FingerDirectionEvent(aiChoice)),
+	playerChoice_(new FingerDirectionEvent(playerChoice))	
 {
 	std::wstring msg;
 	if(aiChoice == playerChoice) {
@@ -179,11 +179,11 @@ AttackResult::~AttackResult()
 
 
 DefenseResult::DefenseResult(irr::scene::ICameraSceneNode *cam,
-		const ChamChamChamEvent &playerChoice,
-		const ChamChamChamEvent &aiChoice)
+		const FingerDirectionEvent &playerChoice,
+		const FingerDirectionEvent &aiChoice)
 	: AbstractGameResult(cam),
-	aiChoice_(new ChamChamChamEvent(aiChoice)),
-	playerChoice_(new ChamChamChamEvent(playerChoice))	
+	aiChoice_(new FingerDirectionEvent(aiChoice)),
+	playerChoice_(new FingerDirectionEvent(playerChoice))	
 {
 	std::wstring msg;
 	if(aiChoice == playerChoice) {
