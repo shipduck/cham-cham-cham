@@ -1,6 +1,8 @@
 ﻿// Ŭnicode please 
 #pragma once
 
+#ifdef USE_LEAP_MOTION
+
 #include <Leap.h>
 
 struct SLeapMotionEvent
@@ -27,3 +29,5 @@ public:
 private:
 	SLeapMotionEvent evt;
 };
+
+#endif

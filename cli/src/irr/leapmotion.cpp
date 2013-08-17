@@ -1,5 +1,6 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
+#ifdef USE_LEAP_MOTION
 #include "leapmotion.h"
 
 using namespace Leap;
@@ -14,3 +15,4 @@ void IrrLeapListener::onFrame(const Controller& controller)
 	evt.tools = frame.tools();
 	evt.gestures = frame.gestures();
 }
+#endif

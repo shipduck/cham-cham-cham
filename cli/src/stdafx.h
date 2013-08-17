@@ -2,6 +2,8 @@
 #include "base/arch.h"
 #include "base/assert_inc.h"
 
+//#define USE_LEAP_MOTION
+
 #if SR_USE_PCH
 #include <cmath>
 #include <cstdlib>
@@ -49,7 +51,9 @@
 #include <OVR.h>
 
 // Leap Motion
+#ifdef USE_LEAP_MOTION
 #include <Leap.h>
+#endif
 
 #include "AL/alut.h"
 #if defined(__APPLE__)

@@ -100,6 +100,7 @@ public:
 		return false;
 	}
 
+#ifdef USE_LEAP_MOTION
 	virtual bool OnEvent(const SLeapMotionEvent &evt) {
 		int noFingers = evt.fingers.count();
 		if(noFingers >= 3) {
@@ -114,6 +115,7 @@ public:
 		
 		return true;
 	}
+#endif
 
 	RPSEvent rpsEvent;
 };
@@ -135,7 +137,7 @@ RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam)
 	{
 		auto rockTex = Lib::driver->getTexture(res::texture::ICON_ROCK_PNG);
 		rock_ = Lib::smgr->addEmptySceneNode(root_);
-		rock_->setRotation(core::vector3df(0, -30, 0));
+		rock_->setRotation(core::vector3df(0, -20, 0));
 		auto sprite = new irr::scene::SpriteSceneNode(rock_, Lib::smgr, 0, rockTex);
 		rpsSpriteList.push_back(sprite);
 		
@@ -146,7 +148,7 @@ RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam)
 	{
 		auto paperTex = Lib::driver->getTexture(res::texture::ICON_PAPER_PNG);
 		scissor_ = Lib::smgr->addEmptySceneNode(root_);
-		scissor_->setRotation(core::vector3df(-30, 0, 0));
+		scissor_->setRotation(core::vector3df(-20, 0, 0));
 		auto sprite = new irr::scene::SpriteSceneNode(scissor_, Lib::smgr, 0, paperTex);
 		rpsSpriteList.push_back(sprite);
 
@@ -157,7 +159,7 @@ RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam)
 	{
 		auto scissorTex = Lib::driver->getTexture(res::texture::ICON_SCISSOR_PNG);
 		paper_ = Lib::smgr->addEmptySceneNode(root_);
-		paper_->setRotation(core::vector3df(0, 30, 0));
+		paper_->setRotation(core::vector3df(0, 20, 0));
 		auto sprite = new irr::scene::SpriteSceneNode(paper_, Lib::smgr, 0, scissorTex);
 		rpsSpriteList.push_back(sprite);
 
@@ -169,7 +171,7 @@ RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam)
 	for(auto sprite : rpsSpriteList) {
 		float radius = 30;
 		core::vector3df spritePos(0, 0, radius);
-		core::dimension2d<float> rpsSize(2, 2);
+		core::dimension2d<float> rpsSize(4, 4);
 		sprite->setSize(rpsSize);
 		sprite->setPosition(spritePos);
 		sprite->drop();
@@ -177,6 +179,7 @@ RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam)
 
 	for(auto icon : padIconList) {
 		icon->setPosition(core::vector3df(0, -3, -0.5));
+		icon->setSize(core::dimension2d<float>(2, 2));
 		icon->drop();
 	}
 

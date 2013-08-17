@@ -80,9 +80,11 @@ int entrypoint(int argc, char* argv[])
 			Lib::eventReceiver->OnEvent(evt);
 		}
 
+#ifdef USE_LEAP_MOTION
 		if(Lib::leapController->isConnected()) {
 			Lib::eventReceiver->OnEvent(Lib::leapListener->getEvent());
 		}
+#endif
 
 		Lib::sequence->update(frameDeltaTime);
 		{

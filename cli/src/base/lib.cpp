@@ -27,11 +27,13 @@ AudioManager *Lib::audio = &audioManagerLocal;
 HeadTracker headTrackerLocal;
 HeadTracker *Lib::headTracker = &headTrackerLocal;
 
+#ifdef USE_LEAP_MOTION
 Leap::Controller leapControllerLocal;
 Leap::Controller *Lib::leapController = &leapControllerLocal;
 
 IrrLeapListener leapListenerLocal;
 IrrLeapListener *Lib::leapListener = &leapListenerLocal;
+#endif
 
 EventReceiverManager eventReceiverMgrLocal;
 EventReceiverManager *Lib::eventReceiver = &eventReceiverMgrLocal;
@@ -146,9 +148,11 @@ bool Lib::startUp(const EngineParam &param)
 	HMDDescriptor descriptor = hmdDescriptorBind->convert();
 	stereoRenderer = new HMDStereoRender(device, descriptor, 10);
 
+#ifdef USE_LEAP_MOTION
 	//Leapmotion Initialize
 	leapController->addListener(*leapListener);
 	leapController->enableGesture(Leap::Gesture::TYPE_SWIPE);
+#endif
 
 	// 12/14 폰트는 얻는 함수를 따로 만들어놧었다. 그거 쓰면 코드 중복을 제거 가능
 	// 로딩이 느리니까 일단 꺼놓고 필요해지면 살리기
@@ -169,7 +173,9 @@ void Lib::shutDown()
 	audio->shutDown();
 	headTracker->shutDown();
 	eventReceiver->shutDown();
+#ifdef USE_LEAP_MOTION
 	leapController->removeListener(*leapListener);
+#endif
 }
 
 void Lib::updateStereoRenderer()

@@ -93,6 +93,7 @@ public:
 		}
 		return false;
 	}
+#ifdef USE_LEAP_MOTION
 	virtual bool OnEvent(const SLeapMotionEvent &evt) {
 		auto gestures = evt.gestures;
 
@@ -135,7 +136,7 @@ public:
 
 		return false;
 	}
-
+#endif
 	ChamChamChamEvent inputEvt;
 };
 

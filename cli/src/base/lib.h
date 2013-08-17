@@ -56,8 +56,10 @@ public:
 	static HeadTracker *headTracker;
 
 	//립모션
+#ifdef USE_LEAP_MOTION
 	static Leap::Controller *leapController;
 	static IrrLeapListener *leapListener;
+#endif
 
 	//이벤트 잡아서 통제하는것도 전역변수같은 느낌으로 1개 필요
 	//엔진에 붙여놓고 사용하는거

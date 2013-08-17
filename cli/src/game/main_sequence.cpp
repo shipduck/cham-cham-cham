@@ -32,7 +32,8 @@ MainSequence::MainSequence()
 	initSkybox();
 
 	//init dynamic
-	irr::scene::IAnimatedMesh *reina = Lib::smgr->getMesh(res::modeldata::nagare::NAGARE_WALK_X);
+	irr::scene::IAnimatedMesh *reina = Lib::smgr->getMesh(res::modeldata::reira::G02T02_X);
+	//irr::scene::IAnimatedMesh *reina = Lib::smgr->getMesh(res::modeldata::nagare::NAGARE_WALK_X);
 	reinaNode_ = Lib::smgr->addAnimatedMeshSceneNode(reina);
     //reinaNode_->setJointMode(irr::scene::EJUOR_CONTROL);
     //reinaNode_->setTransitionTime(0.5);
