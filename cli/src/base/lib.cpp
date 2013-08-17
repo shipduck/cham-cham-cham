@@ -162,6 +162,9 @@ bool Lib::startUp(const EngineParam &param)
 	//사운든는 우선순위 가장 낮음
 	audio->startUp();
 
+	//기본 배경음악 재생. 굳이 끌 필요없다.
+	//console::playBGM(vector<string>());
+
 	return true;
 }
 

@@ -24,7 +24,7 @@ MainSequence::MainSequence()
 	//init camera
 	auto cam = Lib::smgr->addCameraSceneNode();
 	camReceiver_ = new HeadFreeCameraEventReceiver(cam, 0.1f, 0.1f);
-	//camReceiver_->enableCamMove = false;
+	camReceiver_->enableCamMove = false;
 	Lib::eventReceiver->attachReceiver(camReceiver_);
 	Lib::device->getCursorControl()->setVisible(false);
 

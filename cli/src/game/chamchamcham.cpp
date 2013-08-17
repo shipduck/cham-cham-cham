@@ -16,8 +16,8 @@ using namespace irr;
 int ChamChamChamEvent::getDirectionCount() 
 {
 	//좌우/좌우상하 중에서 선택
-	return 2; 
-	//return 4;
+	//return 2; 
+	return 4;
 }
 
 bool ChamChamChamEvent::operator==(const ChamChamChamEvent &o) const
@@ -70,22 +70,23 @@ public:
 	}
 
 	virtual bool OnEvent(const SHeadTrackingEvent &evt) {
-		const float limit = core::PI * 0.25f * 0.5f;
-		if(evt.yaw > limit) {
+		const float yawLimit = core::PI * 0.25f * 0.4f;
+		const float pitchLimit = core::PI * 0.25f * 0.3f;
+		if(evt.yaw > yawLimit) {
 			//left
 			inputEvt = ChamChamChamEvent::left();
 			return true;
-		} else if(evt.yaw < -limit) {
+		} else if(evt.yaw < -yawLimit) {
 			inputEvt = ChamChamChamEvent::right();
 			//right
 			return true;
 		}
 		if(ChamChamChamEvent::getDirectionCount() > 2) {
-			if(evt.pitch > limit) {
+			if(evt.pitch > pitchLimit) {
 				//up
 				inputEvt = ChamChamChamEvent::up();
 				return true;
-			} else if(evt.pitch < -limit) {
+			} else if(evt.pitch < -pitchLimit) {
 				//down
 				inputEvt = ChamChamChamEvent::down();
 				return true;

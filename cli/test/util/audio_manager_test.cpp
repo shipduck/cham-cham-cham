@@ -31,26 +31,26 @@ protected:
 
 TEST_F(BGMTest, open_close_success)
 {
-	BGM bgm;
+	BaseSound bgm;
 	bgm.startUp(existFile);
-	EXPECT_EQ(true, bgm.open());
+	EXPECT_EQ(true, bgm.open(false));
 	EXPECT_EQ(true, bgm.close());
 }
 
 TEST_F(BGMTest, open_close_no_file)
 {
-	BGM bgm;
+	BaseSound bgm;
 	bgm.startUp(notExistFile);
-	EXPECT_EQ(false, bgm.open());
+	EXPECT_EQ(false, bgm.open(false));
 	EXPECT_EQ(false, bgm.close());
 }
 	
 TEST_F(BGMTest, play_pause)
 {
 	//소리가 나면 성공
-	BGM bgm;
+	BaseSound bgm;
 	bgm.startUp(existFile);
-	bgm.open();
+	bgm.open(false);
 	bgm.play();
 	Sleep(500);
 	bgm.pause();

@@ -1,22 +1,23 @@
 ﻿// Ŭnicode please 
 #pragma once
 
-class BGM;
+class BaseSound;
 class AudioManager;
 
 class AudioManager {
 public:
-	typedef std::map<std::string, BGM> BgmDictType;
+	typedef std::map<std::string, BaseSound> BgmDictType;
 public:
 	AudioManager();
 	~AudioManager();
 
 	void startUp();
 	void shutDown();
+	void update();
 
 	bool isSupport() { return supportAL_; }
 
-	void addBGM(const std::string &name, const BGM &bgm);
+	void add(const std::string &name, const BaseSound &bgm);
 
 private:
 	bool supportAL_;
@@ -24,21 +25,20 @@ private:
 };
 
 //stl 안에 들어가는 클래스이므로 생성자/소멸자에 로직이 있으면 망한다
-class BGM {
+class BaseSound {
 public:
-	BGM() : bgmBuf_(0), bgmSrc_(0) {}
-	~BGM() {}
-	
-	void startUp(const std::string &file);
+	BaseSound() : buf_(0), src_(0) {}
+	virtual ~BaseSound() {}
 
-	bool open();
+	void startUp(const std::string &file);
+	bool open(bool loop=false);
 	bool close();
 	void play();
 	void pause();
-
-
+	bool isPlaying() const;
+	
 private:
 	std::string file_;
-	ALuint bgmBuf_;
-	ALuint bgmSrc_;
+	ALuint buf_;
+	ALuint src_;
 };
