@@ -13,6 +13,8 @@ SET( DOKURO_EXT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ext )
 SET( DOKURO_EXE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/exe )
 SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin" )
 
+OPTION( USE_LEAP_MOTION "Use Leap motion" ON )
+
 IF( APPLE )
 	SET( CMAKE_FIND_ROOT_PATH ${CMAKE_OSX_SYSROOT} )
 ENDIF(  )
@@ -70,6 +72,25 @@ IF(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/boost/boost )
 	MESSAGE( FATAL_ERROR Please\ put\ boost\ library\ in\ “${CMAKE_CURRENT_SOURCE_DIR}/boost/boost” )
 ENDIF(  )
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/boost )
+
+# Add Leap motion
+IF( USE_LEAP_MOTION )
+	MESSAGE( "Use Leap motion" )
+    IF( NOT EXISTS ${DOKURO_EXT_DIR}/leap )
+        MESSAGE( FATAL_ERROR Please\ put\ leap\ motion\ library\ in\ "${DOKURO_EXT_DIR}/leap" )
+    ENDIF(  )
+
+    INCLUDE_DIRECTORIES( "${DOKURO_EXT_DIR}/leap/include" )
+    LINK_DIRECTORIES( "${DOKURO_EXT_DIR}/leap/lib" )
+    ADD_DEFINITIONS( "-DUSE_LEAP_MOTION" )
+    APPEND_LINK_LIBS( "Leap" )
+    IF( APPLE )
+    	SET( LIB_DYLIB_PATH "${DOKURO_EXT_DIR}/leap/lib/libLeap.dylib" )
+    	LIST( APPEND DOKURO_EXE_FILES ${LIB_DYLIB_PATH} )
+    	SET_SOURCE_FILES_PROPERTIES( ${LIB_DYLIB_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "MacOS" )
+    ELSEIF(  )
+    ENDIF(  )
+ENDIF(  )
 
 #########################################################
 
@@ -155,7 +176,6 @@ TARGET_LINK_LIBRARIES( dokuro_exe
 	${DOKURO_LINK_LIBS}
 	${IRRLICHT_LINK_LIBS}
 	dokuro )
-
 
 ADD_EXECUTABLE( dokuro_test
 	${DOKURO_TEST_SRC_FILES}
