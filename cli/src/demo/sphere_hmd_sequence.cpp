@@ -21,12 +21,8 @@ struct SphereSpriteInitData {
 	float radius;
 };
 
-irr::video::ITexture *rt = nullptr;
-
-
-AbstractHMDCameraEventReceiver *receiver = nullptr;
-
 SphereHMDSequence::SphereHMDSequence()
+	: receiver(nullptr)
 {
 	initScene();
 	hideCursor();

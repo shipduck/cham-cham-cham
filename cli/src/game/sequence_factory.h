@@ -11,6 +11,7 @@ typedef enum {
 	kSequenceDemoCylinderHMD,
 	kSequenceDemoSphereHMD,
 	kSequenceDemoColor,
+	kSequenceDemoAni,
 } SequenceType;
 
 typedef enum {

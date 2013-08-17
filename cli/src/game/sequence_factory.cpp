@@ -12,6 +12,7 @@
 #include "demo/sphere_hmd_sequence.h"
 #include "demo/color_sequence.h"
 #include "demo/ui_test_sequence.h"
+#include "demo/ani_sequence.h"
 
 using namespace std;
 
@@ -43,6 +44,9 @@ Sequence *SequenceFactory::createRaw(SequenceType type) const
 	case kSequenceDemoColor:
 		seq = new demo::ColorSequence();
 		break;
+	case kSequenceDemoAni:
+		seq = new demo::AniSequence();
+		break;
 	default:
 		break;
 	}
@@ -70,6 +74,7 @@ SequenceType SequenceFactory::select(DisplayType *displayType) const
 	oss << "(2) Demo Spehere" << endl;
 	oss << "(3) Debug Draw" << endl;
 	oss << "(4) Color" << endl;
+	oss << "(5) Ani" << endl;
 	oss << "(etc) Title" << endl;
 	cout << oss.str();
 
@@ -95,6 +100,7 @@ SequenceType SequenceFactory::select(DisplayType *displayType) const
 	sequenceCodeTable['2'] = kSequenceDemoSphereHMD;
 	sequenceCodeTable['3'] = kSequenceDebugDraw;
 	sequenceCodeTable['4'] = kSequenceDemoColor;
+	sequenceCodeTable['5'] = kSequenceDemoAni;
 	auto found = sequenceCodeTable.find(code);
 	if(found == sequenceCodeTable.end()) {
 		return kSequenceMain;

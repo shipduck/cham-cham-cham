@@ -3,6 +3,7 @@
 
 #include "demo_sequence.h"
 
+class AbstractHMDCameraEventReceiver;
 namespace demo {;
 class SphereHMDSequence : public AbstractHMDSequence {
 public:
@@ -10,5 +11,7 @@ public:
 	virtual ~SphereHMDSequence();
 
 	virtual void update(int ms);
+private:
+	AbstractHMDCameraEventReceiver *receiver;
 };
 }	// namespace demo
