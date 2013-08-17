@@ -45,7 +45,7 @@ void initConsoleVar()
 	CVarUtils::CreateCVar<float>(CVAR_GAME_CAM_ROTATE_SPEED, 0.1f);
 
 	CVarUtils::CreateCVar<float>(CVAR_GAME_CHARACTER_POS_X, 0.0f);
-	CVarUtils::CreateCVar<float>(CVAR_GAME_CHARACTER_POS_Y, -135.0f);
+	CVarUtils::CreateCVar<float>(CVAR_GAME_CHARACTER_POS_Y, -130.0f);
 	CVarUtils::CreateCVar<float>(CVAR_GAME_CHARACTER_POS_Z, 100.0f);
 
 	//console, engine는 내가 직접 개입할거같지 않으니까 그냥 해당 클래스에서 선언한거 갖다쓰자

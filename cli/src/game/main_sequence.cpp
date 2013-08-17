@@ -88,10 +88,10 @@ void MainSequence::update(int ms)
 	camReceiver_->rotateSpeed = rotateSpeed;
 
 	//캐릭터 위치 설정
-	//float &posX = CVarUtils::GetCVarRef<float>(CVAR_GAME_CHARACTER_POS_X);
-	//float &posY = CVarUtils::GetCVarRef<float>(CVAR_GAME_CHARACTER_POS_Y);
-	//float &posZ = CVarUtils::GetCVarRef<float>(CVAR_GAME_CHARACTER_POS_Z);
-	//reinaNode_->setPosition(irr::core::vector3df(posX, posY, posZ));
+	float &posX = CVarUtils::GetCVarRef<float>(CVAR_GAME_CHARACTER_POS_X);
+	float &posY = CVarUtils::GetCVarRef<float>(CVAR_GAME_CHARACTER_POS_Y);
+	float &posZ = CVarUtils::GetCVarRef<float>(CVAR_GAME_CHARACTER_POS_Z);
+	reinaNode_->setPosition(irr::core::vector3df(posX, posY, posZ));
 
 
 	camReceiver_->update(ms);
