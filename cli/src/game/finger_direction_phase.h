@@ -28,7 +28,6 @@ protected:
 	irr::scene::ISceneNode *root_;
 	irr::scene::Text3dSceneNode *centerText_;
 
-	FingerDirectionEvent choiceAIEvent() const;
 	std::unique_ptr<FingerDirectionEvent> aiChoice_;
 
 	FingerDirectionEventReceiver *evtReceiver_;

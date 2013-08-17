@@ -24,4 +24,8 @@ public:
 	bool operator<(const RPSEvent &o) const;
 	bool operator<=(const RPSEvent &o) const;
 	bool operator==(const RPSEvent &o) const;
+
+	RPSEvent winEvent() const;
+	RPSEvent loseEvent() const;
+	RPSEvent drawEvent() const;
 };

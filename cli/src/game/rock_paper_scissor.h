@@ -29,8 +29,6 @@ private:
 	void attachEventReceiver();
 	void detachEventReceiver();
 
-	RPSEvent selectAIEvent() const;
-
 private:
 	irr::scene::ISceneNode *root_;
 

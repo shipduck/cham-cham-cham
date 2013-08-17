@@ -7,6 +7,7 @@
 #include "util/event_receiver_manager.h"
 #include "irr/leapmotion.h"
 #include "rps_event.h"
+#include "ai_player.h"
 
 using namespace std;
 using namespace irr;
@@ -195,17 +196,9 @@ void RockPaperScissor::update(int ms)
 	if(playerEvt.value == RPSEvent::kNone) {
 		return;
 	}
-	auto aiEvt = selectAIEvent();
+	auto aiEvt = AiPlayer().think(playerEvt);
 
 	end_ = true;
 	aiChoice_.reset(new RPSEvent(aiEvt));
 	playerChoice_.reset(new RPSEvent(playerEvt));
-}
-
-RPSEvent RockPaperScissor::selectAIEvent() const
-{
-	static std::default_random_engine e1(time(nullptr));
-	std::uniform_int_distribution<int> randGen(RPSEvent::kRock, RPSEvent::kScissor);
-	auto value = randGen(e1);
-	return RPSEvent(value);
 }

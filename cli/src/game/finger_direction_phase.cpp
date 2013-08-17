@@ -8,6 +8,7 @@
 #include "irr/debug_drawer.h"
 #include "util/event_receiver_manager.h"
 #include "finger_direction_event.h"
+#include "ai_player.h"
 
 using namespace std;
 using namespace irr;
@@ -111,14 +112,6 @@ BaseFingerDirectionPhase::~BaseFingerDirectionPhase()
 	root_ = nullptr;
 }
 
-FingerDirectionEvent BaseFingerDirectionPhase::choiceAIEvent() const
-{
-	static std::default_random_engine e1(time(nullptr));
-	std::uniform_int_distribution<int> randGen(1, FingerDirectionEvent::getDirectionCount());
-	auto value = randGen(e1);
-	return FingerDirectionEvent(value);
-}
-
 const FingerDirectionEvent &BaseFingerDirectionPhase::getPlayerChoice() const
 {
 	return evtReceiver_->inputEvt;
@@ -147,8 +140,8 @@ void AttackPhase::update(int ms)
 	if(evtReceiver_->inputEvt.isValid() == false) {
 		return;
 	}
-
-	aiChoice_.reset(new FingerDirectionEvent(this->choiceAIEvent()));
+	FingerDirectionEvent aiEvt = AiPlayer().think(evtReceiver_->inputEvt);
+	aiChoice_.reset(new FingerDirectionEvent(aiEvt));
 	end_ = true;
 }
 
@@ -176,6 +169,7 @@ void DefensePhase::update(int ms)
 		return;
 	}
 
-	aiChoice_.reset(new FingerDirectionEvent(this->choiceAIEvent()));
+	FingerDirectionEvent aiEvt = AiPlayer().think(evtReceiver_->inputEvt);
+	aiChoice_.reset(new FingerDirectionEvent(aiEvt));
 	end_ = true;
 }
