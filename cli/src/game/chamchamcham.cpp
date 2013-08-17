@@ -8,6 +8,7 @@
 #include "irr/debug_drawer.h"
 #include "util/event_receiver_manager.h"
 #include "irr/head_tracker.h"
+#include "irr/leapmotion.h"
 
 using namespace std;
 using namespace irr;
@@ -92,6 +93,49 @@ public:
 		}
 		return false;
 	}
+	virtual bool OnEvent(const SLeapMotionEvent &evt) {
+		auto gestures = evt.gestures;
+
+		for(auto gesture : gestures)
+		{
+			if(gesture.type() == Leap::Gesture::TYPE_SWIPE)
+			{
+				const auto& swipe = static_cast<Leap::SwipeGesture>(gesture);
+				auto vector = swipe.direction();
+
+				// Float 비교 부정확성, 그리고 소수점 이하 비교는 필요하지 않기 떄문에
+				// Int로 형변환해서 비교한다
+				int x = 100 * vector.x;
+				int y = 100 * vector.y;
+				int absX = abs(x);
+				int absY = abs(y);
+
+				int absLargest = max(absX, absY);
+
+				if(absLargest == x)
+				{
+					inputEvt = ChamChamChamEvent::right();
+				}
+				else if(absLargest == absX)
+				{
+					inputEvt = ChamChamChamEvent::left();
+				}
+				else if(absLargest == y)
+				{
+					inputEvt = ChamChamChamEvent::up();
+				}
+				else if(absLargest == absY)
+				{
+					inputEvt = ChamChamChamEvent::down();
+				}
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	ChamChamChamEvent inputEvt;
 };
 

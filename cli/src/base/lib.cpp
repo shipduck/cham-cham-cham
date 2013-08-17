@@ -148,6 +148,7 @@ bool Lib::startUp(const EngineParam &param)
 
 	//Leapmotion Initialize
 	leapController->addListener(*leapListener);
+	leapController->enableGesture(Leap::Gesture::TYPE_SWIPE);
 
 	// 12/14 폰트는 얻는 함수를 따로 만들어놧었다. 그거 쓰면 코드 중복을 제거 가능
 	// 로딩이 느리니까 일단 꺼놓고 필요해지면 살리기
