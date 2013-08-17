@@ -6,63 +6,11 @@
 #include "res.h"
 #include "util/event_receiver_manager.h"
 #include "irr/leapmotion.h"
+#include "rps_event.h"
 
 using namespace std;
 using namespace irr;
 
-bool RPSEvent::operator==(const RPSEvent &o) const
-{
-	SR_ASSERT(o.value != kNone);
-	SR_ASSERT(this->value != kNone);
-	return this->value == o.value;
-}
-
-bool RPSEvent::operator>(const RPSEvent &o) const
-{
-	SR_ASSERT(o.value != kNone);
-	SR_ASSERT(this->value != kNone);
-	if(this->value == kRock && o.value == kScissor) {
-		return true;
-	}
-	if(this->value == kScissor && o.value == kPaper) {
-		return true;
-	}
-	if(this->value == kPaper && o.value == kRock) {
-		return true;
-	}
-	return false;
-}
-
-bool RPSEvent::operator>=(const RPSEvent &o) const
-{
-	if(*this == o) {
-		return true;
-	}
-	return (*this > o);
-}
-
-bool RPSEvent::operator<(const RPSEvent &o) const
-{
-	SR_ASSERT(o.value != kNone);
-	SR_ASSERT(this->value != kNone);
-	if(this->value == kScissor && o.value == kRock) {
-		return true;
-	}
-	if(this->value == kPaper && o.value == kScissor) {
-		return true;
-	}
-	if(this->value == kRock && o.value == kPaper) {
-		return true;
-	}
-	return false;
-}
-bool RPSEvent::operator<=(const RPSEvent &o) const
-{
-	if(*this == o) {
-		return true;
-	}
-	return (*this < o);
-}
 
 class RPSEventReceiver : public ICustomEventReceiver {
 public:
@@ -250,8 +198,8 @@ void RockPaperScissor::update(int ms)
 	auto aiEvt = selectAIEvent();
 
 	end_ = true;
-	aiChoice_ = aiEvt;
-	playerChoice_ = playerEvt;
+	aiChoice_.reset(new RPSEvent(aiEvt));
+	playerChoice_.reset(new RPSEvent(playerEvt));
 }
 
 RPSEvent RockPaperScissor::selectAIEvent() const

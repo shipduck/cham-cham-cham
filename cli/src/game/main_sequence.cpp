@@ -8,6 +8,7 @@
 #include "util/cvar_key.h"
 #include "game/score_board.h"
 #include "game/rock_paper_scissor.h"
+#include "game/rps_event.h"
 #include "game/game_result.h"
 #include "game/chamchamcham.h"
 #include "res.h"

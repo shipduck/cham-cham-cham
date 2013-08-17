@@ -1,7 +1,7 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
 #include "game_result.h"
-#include "rock_paper_scissor.h"
+#include "rps_event.h"
 #include "base/lib.h"
 #include "res.h"
 #include "irr/sprite_scene_node.h"

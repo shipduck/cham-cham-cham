@@ -1,6 +1,6 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
-#include "game/rock_paper_scissor.h"
+#include "game/rps_event.h"
 
 TEST(RPSEvent, testOperator)
 {
