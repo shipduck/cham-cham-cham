@@ -6,6 +6,7 @@
 #include "irr/debug_draw_manager.h"
 #include "irr/head_tracker.h"
 #include "irr/hmd_event_receiver.h"
+#include "irr/leapmotion.h"
 #include "base/lib.h"
 #include "console/console_function.h"
 #include "util/cvar_key.h"
@@ -77,6 +78,10 @@ int entrypoint(int argc, char* argv[])
 		if(Lib::headTracker->isConnected()) {
 			SHeadTrackingEvent evt = Lib::headTracker->getValue();
 			Lib::eventReceiver->OnEvent(evt);
+		}
+
+		if(Lib::leapController->isConnected()) {
+			Lib::eventReceiver->OnEvent(Lib::leapListener->getEvent());
 		}
 
 		Lib::sequence->update(frameDeltaTime);

@@ -9,6 +9,7 @@ class HMDEventReceiver;
 class HMDStereoRender;
 class KeyMapping;
 class Sequence;
+class IrrLeapListener;
 
 /*
 전역변수로 존재하는 대부분의 항목에 직접 접근하는것 괜찮겟지만
@@ -53,6 +54,10 @@ public:
 	//device관련 내용은 class Device같은 형태로 분리 가능성 존재
 	//근데 귀찮은 관계로 당분간은 냅두자
 	static HeadTracker *headTracker;
+
+	//립모션
+	static Leap::Controller *leapController;
+	static IrrLeapListener *leapListener;
 
 	//이벤트 잡아서 통제하는것도 전역변수같은 느낌으로 1개 필요
 	//엔진에 붙여놓고 사용하는거
