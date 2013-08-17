@@ -80,24 +80,24 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/boost )
 # Add Leap motion
 IF( USE_LEAP_MOTION )
 	MESSAGE( "Use Leap motion" )
-    IF( NOT EXISTS ${DOKURO_EXT_DIR}/leap )
-        MESSAGE( FATAL_ERROR Please\ put\ leap\ motion\ library\ in\ "${DOKURO_EXT_DIR}/leap" )
-    ENDIF(  )
-
-    INCLUDE_DIRECTORIES( "${DOKURO_EXT_DIR}/leap/include" )
-    LINK_DIRECTORIES( "${DOKURO_EXT_DIR}/leap/lib" )
-    ADD_DEFINITIONS( "-DUSE_LEAP_MOTION" )
-	IF( MSVC )
-	    APPEND_LINK_EXT_LIBS( "Leap", "Leapd" )
-	ELSE(  )
-        APPEND_LINK_LIBS( "Leap" )
+	IF( NOT EXISTS ${DOKURO_EXT_DIR}/leap )
+		MESSAGE( FATAL_ERROR Please\ put\ leap\ motion\ library\ in\ "${DOKURO_EXT_DIR}/leap" )
 	ENDIF(  )
-    IF( APPLE )
-    	SET( LIB_DYLIB_PATH "${DOKURO_EXT_DIR}/leap/lib/libLeap.dylib" )
-    	LIST( APPEND DOKURO_EXE_FILES ${LIB_DYLIB_PATH} )
-    	SET_SOURCE_FILES_PROPERTIES( ${LIB_DYLIB_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "MacOS" )
-    ELSEIF(  )
-    ENDIF(  )
+
+	INCLUDE_DIRECTORIES( "${DOKURO_EXT_DIR}/leap/include" )
+	LINK_DIRECTORIES( "${DOKURO_EXT_DIR}/leap/lib" )
+	ADD_DEFINITIONS( "-DUSE_LEAP_MOTION" )
+	IF( MSVC )
+		APPEND_LINK_EXT_LIBS( "Leap" "Leapd" )
+	ELSE(  )
+		APPEND_LINK_LIBS( "Leap" )
+	ENDIF(  )
+	IF( APPLE )
+		SET( LIB_DYLIB_PATH "${DOKURO_EXT_DIR}/leap/lib/libLeap.dylib" )
+		LIST( APPEND DOKURO_EXE_FILES ${LIB_DYLIB_PATH} )
+		SET_SOURCE_FILES_PROPERTIES( ${LIB_DYLIB_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "MacOS" )
+	ELSEIF(  )
+	ENDIF(  )
 ENDIF(  )
 
 #########################################################
@@ -117,7 +117,7 @@ ENDIF(  )
 
 # File List
 FILE( GLOB DOKURO_SRC_FILES
-    "${DOKURO_SRC_DIR}/*.*" )
+	"${DOKURO_SRC_DIR}/*.*" )
 FILE( GLOB DOKURO_BASE_SRC_FILES 
 	"${DOKURO_SRC_DIR}/base/*.*" )
 FILE( GLOB DOKURO_GAME_SRC_FILES 
@@ -161,8 +161,8 @@ ADD_LIBRARY( dokuro
 	${DOKURO_DEMO_SRC_FILES} )
 	
 MSVC_SET_PCH( dokuro
-    "${DOKURO_SRC_DIR}/stdafx.h"
-    "${DOKURO_SRC_DIR}/stdafx.cpp")
+	"${DOKURO_SRC_DIR}/stdafx.h"
+	"${DOKURO_SRC_DIR}/stdafx.cpp")
 
 SOURCE_GROUP( "" FILES ${DOKURO_SRC_FILES} )
 SOURCE_GROUP( base FILES ${DOKURO_BASE_SRC_FILES} )
@@ -194,7 +194,7 @@ ADD_EXECUTABLE( dokuro_test
 	${DOKURO_TEST_CBES_SRC_FILES}
 	${DOKURO_TEST_IRR_SRC_FILES}
 	"${DOKURO_SRC_DIR}/stdafx.h"
-    "${DOKURO_SRC_DIR}/stdafx.cpp" )
+	"${DOKURO_SRC_DIR}/stdafx.cpp" )
 
 SOURCE_GROUP( "" FILES ${DOKURO_TEST_SRC_FILES} )
 SOURCE_GROUP( base FILES ${DOKURO_TEST_BASE_SRC_FILES} )
@@ -207,11 +207,12 @@ TARGET_LINK_LIBRARIES( dokuro_test
 	${DOKURO_LINK_LIBS} 
 	${IRRLICHT_LINK_LIBS} 
 	gtest
-	dokuro )
+	dokuro
+	${DOKURO_LINK_EXT_LIBS}	)
 
 MSVC_SET_PCH( dokuro_test
-    "${DOKURO_SRC_DIR}/stdafx.h"
-    "${DOKURO_SRC_DIR}/stdafx.cpp")
+	"${DOKURO_SRC_DIR}/stdafx.h"
+	"${DOKURO_SRC_DIR}/stdafx.cpp")
 
 ADD_CUSTOM_TARGET( dokuro_res
 	COMMAND python ${DOKURO_SCRIPT_DIR}/res_build.py
@@ -226,3 +227,10 @@ IF( APPLE )
 	# For debug... OSX App bundle find file from app bundle existance path
 	SET_TARGET_PROPERTIES( dokuro_exe PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR} )
 ENDIF(  )
+
+IF( MSVC )
+	FILE(COPY ${DOKURO_EXT_DIR}/leap/lib/Leap.dll 
+		DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release )
+	FILE(COPY ${DOKURO_EXT_DIR}/leap/lib/Leapd.dll 
+		DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug )
+ENDIF( )

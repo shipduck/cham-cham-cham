@@ -2,9 +2,9 @@
 #include "base/arch.h"
 #include "base/assert_inc.h"
 
-#ifdef USE_LEAP_MOTION
-#undef USE_LEAP_MOTION
-#endif
+//#ifdef USE_LEAP_MOTION
+//#undef USE_LEAP_MOTION
+//#endif
 
 #if SR_USE_PCH
 #include <cmath>
