@@ -7,8 +7,8 @@ class ScoreBoard;
 class RockPaperScissor;
 class AbstractHMDCameraEventReceiver;
 class RockPaperScissorResult;
-class ChamChamChamAttack;
-class ChamChamChamDefense;
+class AttackPhase;
+class DefensePhase;
 class AttackResult;
 class DefenseResult;
 
@@ -37,8 +37,8 @@ private:
 	std::unique_ptr<ScoreBoard> scoreBoard_;
 	std::unique_ptr<RockPaperScissor> rps_;
 	std::unique_ptr<RockPaperScissorResult> rpsResult_;
-	std::unique_ptr<ChamChamChamAttack> cccAttack_;
-	std::unique_ptr<ChamChamChamDefense> cccDefense_;
+	std::unique_ptr<AttackPhase> cccAttack_;
+	std::unique_ptr<DefensePhase> cccDefense_;
 	std::unique_ptr<AttackResult> attackResult_;
 	std::unique_ptr<DefenseResult> defenseResult_;
 };

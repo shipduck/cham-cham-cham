@@ -146,9 +146,9 @@ void MainSequence::update(int ms)
 			if(ai == player) {
 				rps_.reset(new RockPaperScissor(cam));
 			} else if(ai > player) {
-				cccDefense_.reset(new ChamChamChamDefense(cam));
+				cccDefense_.reset(new DefensePhase(cam));
 			} else if(ai < player) {
-				cccAttack_.reset(new ChamChamChamAttack(cam));
+				cccAttack_.reset(new AttackPhase(cam));
 			} else {
 				SR_ASSERT(!"do not reach");
 			}

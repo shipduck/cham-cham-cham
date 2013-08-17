@@ -13,7 +13,7 @@ using namespace std;
 using namespace irr;
 
 
-BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
+BaseFingerDirectionPhase::BaseFingerDirectionPhase(irr::scene::ICameraSceneNode *cam)
 	: end_(false),
 	root_(nullptr),
 	centerText_(nullptr),
@@ -99,7 +99,7 @@ BaseChamChamCham::BaseChamChamCham(irr::scene::ICameraSceneNode *cam)
 	}
 }
 
-BaseChamChamCham::~BaseChamChamCham()
+BaseFingerDirectionPhase::~BaseFingerDirectionPhase()
 {
 	if(evtReceiver_ != nullptr) {
 		Lib::eventReceiver->detachReceiver(evtReceiver_);
@@ -111,7 +111,7 @@ BaseChamChamCham::~BaseChamChamCham()
 	root_ = nullptr;
 }
 
-FingerDirectionEvent BaseChamChamCham::choiceAIEvent() const
+FingerDirectionEvent BaseFingerDirectionPhase::choiceAIEvent() const
 {
 	static std::default_random_engine e1(time(nullptr));
 	std::uniform_int_distribution<int> randGen(1, FingerDirectionEvent::getDirectionCount());
@@ -119,7 +119,7 @@ FingerDirectionEvent BaseChamChamCham::choiceAIEvent() const
 	return FingerDirectionEvent(value);
 }
 
-const FingerDirectionEvent &BaseChamChamCham::getPlayerChoice() const
+const FingerDirectionEvent &BaseFingerDirectionPhase::getPlayerChoice() const
 {
 	return evtReceiver_->inputEvt;
 }
@@ -127,19 +127,19 @@ const FingerDirectionEvent &BaseChamChamCham::getPlayerChoice() const
 
 ///////////////////////////////////////
 
-ChamChamChamAttack::ChamChamChamAttack(irr::scene::ICameraSceneNode *cam)
-	: BaseChamChamCham(cam)
+AttackPhase::AttackPhase(irr::scene::ICameraSceneNode *cam)
+	: BaseFingerDirectionPhase(cam)
 {
 	centerText_->setText(L"Attack");
 
 	evtReceiver_ = new FingerDirectionEventReceiver(true, false, true);
 	Lib::eventReceiver->attachReceiver(evtReceiver_);
 }
-ChamChamChamAttack::~ChamChamChamAttack()
+AttackPhase::~AttackPhase()
 {
 	
 }
-void ChamChamChamAttack::update(int ms)
+void AttackPhase::update(int ms)
 {
 	if(isEnd() == true) {
 		return;
@@ -154,8 +154,8 @@ void ChamChamChamAttack::update(int ms)
 
 ///////////////////////////////////////
 
-ChamChamChamDefense::ChamChamChamDefense(irr::scene::ICameraSceneNode *cam)
-	: BaseChamChamCham(cam)
+DefensePhase::DefensePhase(irr::scene::ICameraSceneNode *cam)
+	: BaseFingerDirectionPhase(cam)
 {
 	centerText_->setText(L"Defense");
 
@@ -163,11 +163,11 @@ ChamChamChamDefense::ChamChamChamDefense(irr::scene::ICameraSceneNode *cam)
 	Lib::eventReceiver->attachReceiver(evtReceiver_);
 }
 
-ChamChamChamDefense::~ChamChamChamDefense()
+DefensePhase::~DefensePhase()
 {
 }
 
-void ChamChamChamDefense::update(int ms)
+void DefensePhase::update(int ms)
 {
 	if(isEnd() == true) {
 		return;

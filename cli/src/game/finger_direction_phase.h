@@ -10,10 +10,10 @@ class Text3dSceneNode;
 class FingerDirectionEvent;
 class FingerDirectionEventReceiver;
 
-class BaseChamChamCham {
+class BaseFingerDirectionPhase {
 public:
-	BaseChamChamCham(irr::scene::ICameraSceneNode *cam);
-	virtual ~BaseChamChamCham();
+	BaseFingerDirectionPhase(irr::scene::ICameraSceneNode *cam);
+	virtual ~BaseFingerDirectionPhase();
 
 	virtual void update(int ms) = 0;
 
@@ -34,19 +34,19 @@ protected:
 	FingerDirectionEventReceiver *evtReceiver_;
 };
 
-class ChamChamChamAttack : public BaseChamChamCham {
+class AttackPhase : public BaseFingerDirectionPhase {
 public:
-	ChamChamChamAttack(irr::scene::ICameraSceneNode *cam);
-	virtual ~ChamChamChamAttack();
+	AttackPhase(irr::scene::ICameraSceneNode *cam);
+	virtual ~AttackPhase();
 
 	void update(int ms);
 
 };
 
-class ChamChamChamDefense : public BaseChamChamCham {
+class DefensePhase : public BaseFingerDirectionPhase {
 public:
-	ChamChamChamDefense(irr::scene::ICameraSceneNode *cam);
-	virtual ~ChamChamChamDefense();
+	DefensePhase(irr::scene::ICameraSceneNode *cam);
+	virtual ~DefensePhase();
 
 	void update(int ms);
 private:
