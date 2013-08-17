@@ -10,7 +10,7 @@
 #include "game/rock_paper_scissor.h"
 #include "game/rps_event.h"
 #include "game/game_result.h"
-#include "game/chamchamcham.h"
+#include "game/finger_direction_phase.h"
 #include "game/finger_direction_event.h"
 #include "res.h"
 
