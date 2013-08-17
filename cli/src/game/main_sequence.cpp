@@ -24,7 +24,7 @@ MainSequence::MainSequence()
 	//init camera
 	auto cam = Lib::smgr->addCameraSceneNode();
 	camReceiver_ = new HeadFreeCameraEventReceiver(cam, 0.1f, 0.1f);
-	camReceiver_->enableCamMove = false;
+	//camReceiver_->enableCamMove = false;
 	Lib::eventReceiver->attachReceiver(camReceiver_);
 	Lib::device->getCursorControl()->setVisible(false);
 
@@ -32,11 +32,18 @@ MainSequence::MainSequence()
 	initSkybox();
 
 	//init dynamic
-	irr::scene::IAnimatedMesh *reina = Lib::smgr->getMesh(res::modeldata::reira::G02T02_X);
+	irr::scene::IAnimatedMesh *reina = Lib::smgr->getMesh(res::modeldata::nagare::NAGARE_WALK_X);
 	reinaNode_ = Lib::smgr->addAnimatedMeshSceneNode(reina);
-	reinaNode_->setPosition(irr::core::vector3df(0, 0, 0));
+    //reinaNode_->setJointMode(irr::scene::EJUOR_CONTROL);
+    //reinaNode_->setTransitionTime(0.5);
 	reinaNode_->setMaterialFlag(video::EMF_LIGHTING, false);
 	reinaNode_->setDebugDataVisible(scene::EDS_BBOX);
+    reinaNode_->setLoopMode(true);
+    reinaNode_->setAnimationSpeed(5000.f);
+    reinaNode_->setFrameLoop(reinaNode_->getStartFrame(), reinaNode_->getEndFrame());
+    //reinaNode_->animateJoints();
+    
+    printf("%d ~ %d\n", reinaNode_->getStartFrame(), reinaNode_->getEndFrame());
 
 	//init logic
 	scoreBoard_.reset(new ScoreBoard(cam));
@@ -79,10 +86,11 @@ void MainSequence::update(int ms)
 	camReceiver_->rotateSpeed = rotateSpeed;
 
 	//캐릭터 위치 설정
-	float &posX = CVarUtils::GetCVarRef<float>(CVAR_GAME_CHARACTER_POS_X);
-	float &posY = CVarUtils::GetCVarRef<float>(CVAR_GAME_CHARACTER_POS_Y);
-	float &posZ = CVarUtils::GetCVarRef<float>(CVAR_GAME_CHARACTER_POS_Z);
-	reinaNode_->setPosition(irr::core::vector3df(posX, posY, posZ));
+	//float &posX = CVarUtils::GetCVarRef<float>(CVAR_GAME_CHARACTER_POS_X);
+	//float &posY = CVarUtils::GetCVarRef<float>(CVAR_GAME_CHARACTER_POS_Y);
+	//float &posZ = CVarUtils::GetCVarRef<float>(CVAR_GAME_CHARACTER_POS_Z);
+	//reinaNode_->setPosition(irr::core::vector3df(posX, posY, posZ));
+
 
 	camReceiver_->update(ms);
 	scoreBoard_->update();
