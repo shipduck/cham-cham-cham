@@ -41,6 +41,7 @@ MainSequence::MainSequence()
 	//init logic
 	scoreBoard_.reset(new ScoreBoard(cam));
 	rps_.reset(new RockPaperScissor(cam));	
+	rps_->setEnable(true);
 }
 
 MainSequence::~MainSequence()
