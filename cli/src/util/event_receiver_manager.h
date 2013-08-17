@@ -48,7 +48,7 @@ public:
 
 	virtual bool OnEvent(const irr::SEvent &evt);
 	bool OnEvent(const SHeadTrackingEvent &evt);
-#ifdef USE_LEAP_MPTION
+#ifdef USE_LEAP_MOTION
 	bool OnEvent(const SLeapMotionEvent &evt);
 #endif
 	/*
