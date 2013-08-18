@@ -11,31 +11,20 @@ class Text3dSceneNode;
 
 class FingerDirectionEvent;
 class FingerDirectionEventReceiver;
-class FingerResult;
 
 class BaseFingerDirectionPhase : public SubSequence {
 public:
-	BaseFingerDirectionPhase(irr::scene::ICameraSceneNode *cam);
+	BaseFingerDirectionPhase(irr::scene::ICameraSceneNode *cam, ScoreBoard *board);
 	virtual ~BaseFingerDirectionPhase();
 
 	virtual std::unique_ptr<SubSequence> update(int ms) = 0;
 
-	bool isEnd() const { return end_; }
-
 	const FingerDirectionEvent &getAiChoice() const { return *aiChoice_; }
 	const FingerDirectionEvent &getPlayerChoice() const;
 
-	virtual std::unique_ptr<FingerResult> createResult(irr::scene::ICameraSceneNode *cam) = 0;
-
-public:
-	static BaseFingerDirectionPhase *createAttackRawPtr(irr::scene::ICameraSceneNode *cam);
-	static BaseFingerDirectionPhase *createDefenseRawPtr(irr::scene::ICameraSceneNode *cam);
-	static std::unique_ptr<BaseFingerDirectionPhase> createAttack(irr::scene::ICameraSceneNode *cam);
-	static std::unique_ptr<BaseFingerDirectionPhase> createDefense(irr::scene::ICameraSceneNode *cam);
+	virtual SubSequence *createResult() = 0;
 
 protected:
-	bool end_;
-	
 	irr::scene::ISceneNode *root_;
 	irr::scene::Text3dSceneNode *centerText_;
 

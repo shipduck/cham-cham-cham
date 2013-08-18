@@ -86,8 +86,8 @@ private:
 #endif
 };
 
-RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam)
-	: SubSequence(cam),
+RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam, ScoreBoard *board)
+	: SubSequence(cam, board),
 	root_(nullptr),
 	evtReceiver_(nullptr),
 	end_(false),
@@ -222,6 +222,5 @@ std::unique_ptr<SubSequence> RockPaperScissor::update(int ms)
 	aiChoice_.reset(new RPSEvent(aiEvt));
 	playerChoice_.reset(new RPSEvent(playerEvt));
 
-	//return std::unique_ptr<SubSequence>(new SubSequenceTransitTimer(new RockPaperScissorResult(getCamera(), playerEvt, aiEvt)));
-	return std::unique_ptr<SubSequence>(new RockPaperScissorResult(getCamera(), playerEvt, aiEvt));
+	return std::unique_ptr<SubSequence>(new RockPaperScissorResult(getCamera(), getScoreBoard(), playerEvt, aiEvt));
 }

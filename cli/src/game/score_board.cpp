@@ -8,6 +8,10 @@
 using namespace std;
 using namespace irr;
 
+//const int maxScore = 2;
+const int maxScore = 3;
+static_assert(maxScore > 0, "min score==1");
+
 struct ScoreBoardSpriteData {
 	ScoreBoardSpriteData(float yaw=0.0f, 
 		float pitch=0.0f, 
@@ -59,7 +63,7 @@ ScoreBoard::ScoreBoard(irr::scene::ICameraSceneNode *cam)
 	const ScoreBoardSpriteData reinaWinCircle(0, 0, 1.5f, 1.5f, 25.0f, circleRed);
 	const ScoreBoardSpriteData playerWinCircle(0, 0, 1.5f, 1.5f, 25.0f, circleGreen);
 
-	for(int i = 0 ; i < 3 ; i++) {
+	for(int i = 0 ; i < maxScore ; i++) {
 		for(int j = 0 ; j < 2 ; j++) {
 			float yaw = scoreboardYaw + yawSeperation * (i + 1);
 			float pitch = scoreboardPitch + pitchSeperation * j;
@@ -118,8 +122,8 @@ ScoreBoard::~ScoreBoard()
 
 void ScoreBoard::updateScoreNode(int playerScore, int aiScore)
 {
-	SR_ASSERT(playerScore >= 0 && playerScore <= playerScoreNodeList_.size());
-	SR_ASSERT(aiScore >= 0 && aiScore <= aiScoreNodeList_.size());
+	SR_ASSERT(playerScore >= 0 && playerScore <= (int)playerScoreNodeList_.size());
+	SR_ASSERT(aiScore >= 0 && aiScore <= (int)aiScoreNodeList_.size());
 
 	for(auto node : playerScoreNodeList_) {
 		node->setVisible(false);
@@ -143,8 +147,6 @@ void ScoreBoard::update()
 
 bool ScoreBoard::isGameOver() const
 {
-	const int maxScore = 2;
-	//const int maxScore = 3;
 	if(playerScore_ >= maxScore) {
 		return true;
 	}
@@ -152,4 +154,11 @@ bool ScoreBoard::isGameOver() const
 		return true;
 	}
 	return false;
+}
+
+void ScoreBoard::reset()
+{
+	playerScore_ = 0;
+	aiScore_ = 0;
+	updateScoreNode(0, 0);
 }

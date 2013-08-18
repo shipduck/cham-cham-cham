@@ -14,26 +14,10 @@
 using namespace std;
 using namespace irr;
 
-class AttackPhase : public BaseFingerDirectionPhase {
-public:
-	AttackPhase(irr::scene::ICameraSceneNode *cam);
-	virtual ~AttackPhase();
-	virtual std::unique_ptr<SubSequence> update(int ms);
-	virtual std::unique_ptr<FingerResult> createResult(irr::scene::ICameraSceneNode *cam);
-};
-
-class DefensePhase : public BaseFingerDirectionPhase {
-public:
-	DefensePhase(irr::scene::ICameraSceneNode *cam);
-	virtual ~DefensePhase();
-	virtual std::unique_ptr<SubSequence> update(int ms);
-	virtual std::unique_ptr<FingerResult> createResult(irr::scene::ICameraSceneNode *cam);
-};
 
 
-BaseFingerDirectionPhase::BaseFingerDirectionPhase(irr::scene::ICameraSceneNode *cam)
-	: SubSequence(cam),
-	end_(false),
+BaseFingerDirectionPhase::BaseFingerDirectionPhase(irr::scene::ICameraSceneNode *cam, ScoreBoard *board)
+	: SubSequence(cam, board),
 	root_(nullptr),
 	centerText_(nullptr),
 	evtReceiver_(nullptr)
@@ -133,101 +117,4 @@ BaseFingerDirectionPhase::~BaseFingerDirectionPhase()
 const FingerDirectionEvent &BaseFingerDirectionPhase::getPlayerChoice() const
 {
 	return evtReceiver_->inputEvt;
-}
-
-std::unique_ptr<BaseFingerDirectionPhase> BaseFingerDirectionPhase::createAttack(irr::scene::ICameraSceneNode *cam)
-{
-	return std::unique_ptr<BaseFingerDirectionPhase>(new AttackPhase(cam));
-}
-
-std::unique_ptr<BaseFingerDirectionPhase> BaseFingerDirectionPhase::createDefense(irr::scene::ICameraSceneNode *cam)
-{
-	return std::unique_ptr<BaseFingerDirectionPhase>(new DefensePhase(cam));
-}
-
-
-BaseFingerDirectionPhase *BaseFingerDirectionPhase::createAttackRawPtr(irr::scene::ICameraSceneNode *cam)
-{
-	return new AttackPhase(cam);
-}
-
-BaseFingerDirectionPhase *BaseFingerDirectionPhase::createDefenseRawPtr(irr::scene::ICameraSceneNode *cam)
-{
-	return new DefensePhase(cam);
-}
-
-///////////////////////////////////////
-
-AttackPhase::AttackPhase(irr::scene::ICameraSceneNode *cam)
-	: BaseFingerDirectionPhase(cam)
-{
-	centerText_->setText(L"Attack");
-
-	evtReceiver_ = new FingerDirectionEventReceiver(true, false, true);
-	Lib::eventReceiver->attachReceiver(evtReceiver_);
-}
-AttackPhase::~AttackPhase()
-{
-	
-}
-
-std::unique_ptr<SubSequence> AttackPhase::update(int ms)
-{
-	std::unique_ptr<SubSequence> empty;
-
-	if(isEnd() == true) {
-		return empty;
-	}
-	if(evtReceiver_->inputEvt.isValid() == false) {
-		return empty;
-	}
-	FingerDirectionEvent aiEvt = AiPlayer().think(evtReceiver_->inputEvt);
-	aiChoice_.reset(new FingerDirectionEvent(aiEvt));
-	end_ = true;
-	return empty;
-}
-
-std::unique_ptr<FingerResult> AttackPhase::createResult(irr::scene::ICameraSceneNode *cam)
-{
-	auto ai = this->getAiChoice();
-	auto player = this->getPlayerChoice();
-	return std::unique_ptr<FingerResult>(new AttackResult(cam, player, ai));
-}
-
-///////////////////////////////////////
-
-DefensePhase::DefensePhase(irr::scene::ICameraSceneNode *cam)
-	: BaseFingerDirectionPhase(cam)
-{
-	centerText_->setText(L"Defense");
-
-	evtReceiver_ = new FingerDirectionEventReceiver(true, true, false);
-	Lib::eventReceiver->attachReceiver(evtReceiver_);
-}
-
-DefensePhase::~DefensePhase()
-{
-}
-
-std::unique_ptr<SubSequence> DefensePhase::update(int ms)
-{
-	std::unique_ptr<SubSequence> empty;
-	if(isEnd() == true) {
-		return empty;
-	}
-	if(evtReceiver_->inputEvt.isValid() == false) {
-		return empty;
-	}
-
-	FingerDirectionEvent aiEvt = AiPlayer().think(evtReceiver_->inputEvt);
-	aiChoice_.reset(new FingerDirectionEvent(aiEvt));
-	end_ = true;
-	return empty;
-}
-
-std::unique_ptr<FingerResult> DefensePhase::createResult(irr::scene::ICameraSceneNode *cam)
-{
-	auto ai = this->getAiChoice();
-	auto player = this->getPlayerChoice();
-	return std::unique_ptr<FingerResult>(new DefenseResult(cam, player, ai));
 }

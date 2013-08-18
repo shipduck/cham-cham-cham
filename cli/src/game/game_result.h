@@ -15,7 +15,7 @@ class Text3dSceneNode;
 
 class AbstractGameResult : public SubSequence {
 public:
-	AbstractGameResult(irr::scene::ICameraSceneNode *cam, int remain);
+	AbstractGameResult(irr::scene::ICameraSceneNode *cam, ScoreBoard *board, int remain);
 	virtual ~AbstractGameResult();
 
 public:
@@ -45,6 +45,7 @@ private:
 class RockPaperScissorResult : public AbstractGameResult {
 public:
 	RockPaperScissorResult(irr::scene::ICameraSceneNode *cam,
+		ScoreBoard *board, 
 		const RPSEvent &playerChoice,
 		const RPSEvent &aiChoice);
 	virtual ~RockPaperScissorResult();
@@ -64,6 +65,7 @@ private:
 class FingerResult : public AbstractGameResult {
 public:
 	FingerResult(irr::scene::ICameraSceneNode *cam,
+		ScoreBoard *board,
 		const FingerDirectionEvent &playerChoice,
 		const FingerDirectionEvent &aiChoice);
 	virtual ~FingerResult();
@@ -82,6 +84,7 @@ private:
 class AttackResult : public FingerResult {
 public:
 	AttackResult(irr::scene::ICameraSceneNode *cam,
+		ScoreBoard *board,
 		const FingerDirectionEvent &playerChoice,
 		const FingerDirectionEvent &aiChoice);
 	virtual ~AttackResult() {}
@@ -90,6 +93,7 @@ public:
 class DefenseResult : public FingerResult {
 public:
 	DefenseResult(irr::scene::ICameraSceneNode *cam,
+		ScoreBoard *board, 
 		const FingerDirectionEvent &playerChoice,
 		const FingerDirectionEvent &aiChoice);
 	virtual ~DefenseResult() {}

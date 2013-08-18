@@ -9,7 +9,7 @@ class RPSEventReceiver;
 
 class RockPaperScissor : public SubSequence {
 public:
-	RockPaperScissor(irr::scene::ICameraSceneNode *cam);
+	RockPaperScissor(irr::scene::ICameraSceneNode *cam, ScoreBoard *board);
 	virtual ~RockPaperScissor();
 
 	void setEnable(bool b);

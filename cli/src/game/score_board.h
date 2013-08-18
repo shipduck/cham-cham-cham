@@ -17,6 +17,8 @@ public:
 	void playerGetPoint() { playerScore_ += 1; }
 	void aiGetPoint() { aiScore_ += 1; }
 
+	void reset();
+
 private:
 	void updateScoreNode(int playerScore, int aiScore);
 

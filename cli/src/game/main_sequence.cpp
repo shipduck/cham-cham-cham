@@ -27,7 +27,7 @@ MainSequence::MainSequence()
 	//init camera
 	auto cam = Lib::smgr->addCameraSceneNode();
 	camReceiver_ = new HeadFreeCameraEventReceiver(cam, 0.1f, 0.1f);
-	//camReceiver_->enableCamMove = false;
+	camReceiver_->enableCamMove = false;
 	Lib::eventReceiver->attachReceiver(camReceiver_);
 	Lib::device->getCursorControl()->setVisible(false);
 
@@ -35,8 +35,8 @@ MainSequence::MainSequence()
 	initSkybox();
 
 	//init dynamic
-	//irr::scene::IAnimatedMesh *reina = Lib::smgr->getMesh(res::modeldata::reira::G02T02_X);
-	irr::scene::IAnimatedMesh *reina = Lib::smgr->getMesh(res::modeldata::reira::RSP_X);
+	irr::scene::IAnimatedMesh *reina = Lib::smgr->getMesh(res::modeldata::reira::G02T02_X);
+	//irr::scene::IAnimatedMesh *reina = Lib::smgr->getMesh(res::modeldata::reira::RSP_X);
 	//irr::scene::IAnimatedMesh *reina = Lib::smgr->getMesh(res::modeldata::nagare::NAGARE_WALK_X);
 	reinaNode_ = Lib::smgr->addAnimatedMeshSceneNode(reina);
     //reinaNode_->setJointMode(irr::scene::EJUOR_CONTROL);
@@ -54,7 +54,7 @@ MainSequence::MainSequence()
 	scoreBoard_.reset(new ScoreBoard(cam));
 
 	//최초 상태는 가위바위보. 메뉴같은거 추가하면 그때 손보기
-	subSequence_.reset(new RockPaperScissor(cam));
+	subSequence_.reset(new RockPaperScissor(cam, scoreBoard_.get()));
 }
 
 MainSequence::~MainSequence()
@@ -107,82 +107,4 @@ void MainSequence::update(int ms)
 	if(next.get() != nullptr) {
 		subSequence_ = std::move(next);
 	}
-
-	/*
-	if(rps_.get() != nullptr) {
-		rps_->update(ms);
-	}
-	if(fingerPhase_.get() != nullptr) {
-		fingerPhase_->update(ms);
-	}
-
-	//가위바위보 끝난 경우, 점수 반영
-	if(rps_.get() != nullptr && rps_->isEnd() && rpsResult_.get() == nullptr) {
-		auto cam = Lib::smgr->getActiveCamera();
-		auto ai = rps_->getAiChoice();
-		auto player = rps_->getPlayerChoice();
-		rpsResult_.reset(new RockPaperScissorResult(cam, player, ai));
-		rps_.reset(nullptr);
-		//가위바위보 완료후에 결과장면을 보여줄 시간
-		resultShowRemain = 1000;
-	}
-	if(fingerPhase_.get() != nullptr && fingerPhase_->isEnd() && fingerResult_.get() == nullptr) {
-		auto cam = Lib::smgr->getActiveCamera();
-		fingerResult_ = std::move(fingerPhase_->createResult(cam));
-		fingerPhase_.reset(nullptr);
-		resultShowRemain = 1000;
-	}
-
-	if(rpsResult_.get() != nullptr) {
-		resultShowRemain -= ms;
-		if(resultShowRemain < 0) {
-			auto ai = rpsResult_->getAiChoice();
-			auto player = rpsResult_->getPlayerChoice();
-
-			auto cam = Lib::smgr->getActiveCamera();
-
-			if(ai == player) {
-				rps_.reset(new RockPaperScissor(cam));
-			} else if(ai > player) {
-				fingerPhase_ = std::move(BaseFingerDirectionPhase::createDefense(cam));
-			} else if(ai < player) {
-				fingerPhase_ = std::move(BaseFingerDirectionPhase::createAttack(cam));
-			} else {
-				SR_ASSERT(!"do not reach");
-			}
-
-			rpsResult_.reset(nullptr);
-		}
-	}
-
-	if(fingerResult_.get() != nullptr) {
-		resultShowRemain -= ms;
-		if(resultShowRemain < 0) {
-			auto ai = fingerResult_->getAiChoice();
-			auto player = fingerResult_->getPlayerChoice();
-			auto cam = Lib::smgr->getActiveCamera();
-
-			if(fingerResult_->isAttackResult()) {
-				if(ai == player) {
-					//attack success
-					scoreBoard_->playerGetPoint();
-				}
-			} else {
-				if(ai == player) {
-					//defense fail
-					scoreBoard_->aiGetPoint();	
-				}
-			}
-			rps_.reset(new RockPaperScissor(cam));
-			fingerResult_.reset(nullptr);
-		}
-	}
-	if(rps_.get() != nullptr && scoreBoard_->isGameOver()) {
-		//장면 교체
-		auto cam = Lib::smgr->getActiveCamera();
-		scoreBoard_.reset(new ScoreBoard(cam));
-		rps_.reset(new RockPaperScissor(cam));	
-		printf("new game\n");
-	}
-	*/
 }

@@ -10,6 +10,9 @@
 #include "game/finger_direction_event.h"
 #include "rock_paper_scissor.h"
 #include "finger_direction_phase.h"
+#include "attack_phase.h"
+#include "defense_phase.h"
+#include "score_board.h"
 
 using namespace std;
 using namespace irr;
@@ -36,8 +39,8 @@ irr::video::ITexture *getChamChamChamTexture(const FingerDirectionEvent &evt)
 	return nullptr;
 }
 
-AbstractGameResult::AbstractGameResult(irr::scene::ICameraSceneNode *cam, int remain)
-	: SubSequence(cam),
+AbstractGameResult::AbstractGameResult(irr::scene::ICameraSceneNode *cam, ScoreBoard *board, int remain)
+	: SubSequence(cam, board),
 	root_(nullptr),
 	aiNode_(nullptr),
 	playerNode_(nullptr),
@@ -126,9 +129,10 @@ std::unique_ptr<SubSequence> AbstractGameResult::update(int ms)
 ////////////////////////////
 
 RockPaperScissorResult::RockPaperScissorResult(irr::scene::ICameraSceneNode *cam,
+											   ScoreBoard *board, 
 											   const RPSEvent &playerChoice,
 											   const RPSEvent &aiChoice)
-	: AbstractGameResult(cam, 1000),
+	: AbstractGameResult(cam, board, 1000),
 	aiChoice_(new RPSEvent(aiChoice)),
 	playerChoice_(new RPSEvent(playerChoice))	
 {
@@ -176,11 +180,11 @@ SubSequence *RockPaperScissorResult::createNext()
 	const auto &player = playerChoice_;
 
 	if(ai == player) {
-		return new RockPaperScissor(getCamera());
+		return new RockPaperScissor(getCamera(), getScoreBoard());
 	} else if(ai > player) {
-		return BaseFingerDirectionPhase::createDefenseRawPtr(getCamera());
+		return new AttackPhase(getCamera(), getScoreBoard());
 	} else if(ai < player) {
-		return BaseFingerDirectionPhase::createAttackRawPtr(getCamera());
+		return new DefensePhase(getCamera(), getScoreBoard());
 	} else {
 		SR_ASSERT(!"do not reach");
 		return nullptr;
@@ -190,9 +194,10 @@ SubSequence *RockPaperScissorResult::createNext()
 /////////////////////////////////////////////////////
 
 FingerResult::FingerResult(irr::scene::ICameraSceneNode *cam,
+						   ScoreBoard *board, 
 		const FingerDirectionEvent &playerChoice,
 		const FingerDirectionEvent &aiChoice)
-	: AbstractGameResult(cam, 1000),
+	: AbstractGameResult(cam, board, 1000),
 	aiChoice_(new FingerDirectionEvent(aiChoice)),
 	playerChoice_(new FingerDirectionEvent(playerChoice))	
 {
@@ -205,14 +210,19 @@ FingerResult::~FingerResult()
 
 SubSequence *FingerResult::createNext()
 {
-	//TODO 점수반영...?
-	return new RockPaperScissor(getCamera());
+	if(getScoreBoard()->isGameOver()) {
+		//TODO 게임 오버에서 추가 메세지 띄우기?
+		getScoreBoard()->reset();
+		printf("new game\n");
+	}
+	return new RockPaperScissor(getCamera(), getScoreBoard());
 }
 
 AttackResult::AttackResult(irr::scene::ICameraSceneNode *cam,
+						   ScoreBoard *board, 
 		const FingerDirectionEvent &playerChoice,
 		const FingerDirectionEvent &aiChoice)
-		: FingerResult(cam, playerChoice, aiChoice)
+		: FingerResult(cam, board, playerChoice, aiChoice)
 {
 	std::wstring msg;
 	if(aiChoice == playerChoice) {
@@ -222,14 +232,19 @@ AttackResult::AttackResult(irr::scene::ICameraSceneNode *cam,
 	}
 	setText(msg.c_str());
 	
+	if(aiChoice == playerChoice) {
+		//attack success
+		board->playerGetPoint();
+	}
 }
 
 
 
 DefenseResult::DefenseResult(irr::scene::ICameraSceneNode *cam,
+							 ScoreBoard *board, 
 		const FingerDirectionEvent &playerChoice,
 		const FingerDirectionEvent &aiChoice)
-	: FingerResult(cam, playerChoice, aiChoice)
+	: FingerResult(cam, board, playerChoice, aiChoice)
 {
 	std::wstring msg;
 	if(aiChoice == playerChoice) {
@@ -238,4 +253,9 @@ DefenseResult::DefenseResult(irr::scene::ICameraSceneNode *cam,
 		msg = L"Success";
 	}
 	setText(msg.c_str());
+
+	if(aiChoice == playerChoice) {
+		//defense fail
+		board->aiGetPoint();	
+	}
 }
