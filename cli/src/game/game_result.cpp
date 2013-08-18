@@ -180,15 +180,15 @@ irr::video::ITexture *RockPaperScissorResult::getRPSTexture(int rps)
 
 SubSequence *RockPaperScissorResult::createNext()
 {
-	const auto &ai = aiChoice_;
-	const auto &player = playerChoice_;
+	const RPSEvent &ai = *aiChoice_;
+	const RPSEvent &player = *playerChoice_;
 
 	if(ai == player) {
 		return new RockPaperScissor(getCamera(), getScoreBoard());
 	} else if(ai > player) {
-		return new AttackPhase(getCamera(), getScoreBoard());
-	} else if(ai < player) {
 		return new DefensePhase(getCamera(), getScoreBoard());
+	} else if(ai < player) {
+		return new AttackPhase(getCamera(), getScoreBoard());
 	} else {
 		SR_ASSERT(!"do not reach");
 		return nullptr;
