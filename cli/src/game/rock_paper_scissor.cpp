@@ -17,6 +17,9 @@ using namespace irr;
 class RPSEventReceiver : public ICustomEventReceiver {
 public:
 	RPSEventReceiver() {
+#ifdef USE_LEAP_MOTION
+        leapStartCapturing = false;
+#endif
 	}
 	virtual ~RPSEventReceiver() {
 	}
@@ -50,24 +53,37 @@ public:
 		return false;
 	}
 
+    RPSEvent rpsEvent;
+    
 #ifdef USE_LEAP_MOTION
 	virtual bool OnEvent(const SLeapMotionEvent &evt) {
+        int noHands = evt.hands.count();
 		int noFingers = evt.fingers.count();
-		if(noFingers >= 3) {
-			rpsEvent.value = RPSEvent::kPaper;
-		}
-		else if(noFingers == 1 || noFingers == 2) {
-			rpsEvent.value = RPSEvent::kScissor;
-		}
-		else {
-			rpsEvent.value = RPSEvent::kRock;
-		}
+
+        if(noHands == 0) {
+            leapStartCapturing = true;
+            return false;
+        }
+        
+        if(leapStartCapturing == true) {
+            if(noFingers >= 3) {
+                rpsEvent.value = RPSEvent::kPaper;
+            }
+            else if(noFingers == 1 || noFingers == 2) {
+                rpsEvent.value = RPSEvent::kScissor;
+            }
+            else {
+                rpsEvent.value = RPSEvent::kRock;
+            }
+            
+            leapStartCapturing = false;
+        }
 		
 		return true;
 	}
+private:
+    bool leapStartCapturing;
 #endif
-
-	RPSEvent rpsEvent;
 };
 
 RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam)

@@ -125,7 +125,7 @@ bool FingerDirectionEventReceiver::OnEvent(const SLeapMotionEvent &evt)
 			int absX = abs(x);
 			int absY = abs(y);
 
-			int absLargest = max(absX, absY);
+			int absLargest = std::max(absX, absY);
 
 			if(absLargest == x)
 			{
