@@ -5,6 +5,7 @@
 #include "base/string_util.h"
 #include "util/audio_manager.h"
 #include "res.h"
+#include "SimpleAudioEngine.h"
 
 namespace console {;
 bool driverInfo(const std::vector<std::string> &args)
@@ -32,19 +33,13 @@ bool driverInfo(const std::vector<std::string> &args)
 
 bool playBGM(const std::vector<std::string> &args)
 {
-	//제대로 만드려면 중복재생같은거 예외처리 해야됨
 	if(Lib::audio->isSupport()) {
-		//const std::string bg("res/sound/bg.wav");
-		const std::string bg(res::theme::SLIDERGIRLS_LONG_WAV);
-		BaseSound bgm;
-		bgm.startUp(bg);
-		bgm.open(true);
-		bgm.play();
-		Lib::audio->add(bg, bgm);
+		Lib::audio->playBackgroundMusic(res::theme::SLIDERGIRLS_LONG_WAV);
 		return true;
 	} else {
 		return false;
-	}
+	}	
+	return true;
 }
 
 bool save(const std::vector<std::string> &args)

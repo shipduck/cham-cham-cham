@@ -80,8 +80,6 @@ int entrypoint(int argc, char* argv[])
 			Lib::eventReceiver->OnEvent(evt);
 		}
 
-		Lib::audio->update();
-
 #ifdef USE_LEAP_MOTION
 		if(Lib::leapController->isConnected()) {
 			Lib::eventReceiver->OnEvent(Lib::leapListener->getEvent());

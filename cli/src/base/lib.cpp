@@ -15,14 +15,15 @@
 #include "game/key_mapping.h"
 #include "game/sequence.h"
 #include "irr/leapmotion.h"
+#include "util/SimpleAudioEngine.h"
 
 using namespace std;
 using namespace irr;
 
 const int MAX_STRING_CHARS = 4096;
 
-AudioManager audioManagerLocal;
-AudioManager *Lib::audio = &audioManagerLocal;
+CocosDenshion::SimpleAudioEngine audioLocal;
+CocosDenshion::SimpleAudioEngine *Lib::audio = &audioLocal;
 
 HeadTracker headTrackerLocal;
 HeadTracker *Lib::headTracker = &headTrackerLocal;
