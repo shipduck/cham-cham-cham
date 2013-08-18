@@ -14,5 +14,6 @@ void IrrLeapListener::onFrame(const Controller& controller)
 	evt.hands = frame.hands();
 	evt.tools = frame.tools();
 	evt.gestures = frame.gestures();
+    evt.timestamp = frame.timestamp();  
 }
 #endif

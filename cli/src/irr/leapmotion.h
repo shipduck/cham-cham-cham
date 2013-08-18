@@ -12,6 +12,7 @@ struct SLeapMotionEvent
 	Leap::HandList hands;
 	Leap::ToolList tools;
 	Leap::GestureList gestures;
+    int64_t timestamp;
 };
 
 class IrrLeapListener : public Leap::Listener
