@@ -167,6 +167,10 @@ void SimpleAudioEngine::startUp()
 
 void SimpleAudioEngine::shutDown()
 {
+	if(supportAL_ == false) {
+		return;
+	}
+
 	checkALError("end:init");
 
 	// clear all the sound effects
@@ -215,6 +219,10 @@ void SimpleAudioEngine::shutDown()
 //
 void SimpleAudioEngine::preloadBackgroundMusic(const char* pszFilePath)
 {
+	if(supportAL_ == false) {
+		return;
+	}
+
 	// Changing file path to full path
 	//std::string fullPath = FileUtils::getInstance()->fullPathForFilename(pszFilePath);
 	std::string fullPath = pszFilePath;
@@ -254,6 +262,10 @@ void SimpleAudioEngine::preloadBackgroundMusic(const char* pszFilePath)
 
 void SimpleAudioEngine::playBackgroundMusic(const char* pszFilePath, bool bLoop)
 {
+	if(supportAL_ == false) {
+		return;
+	}
+
 	// If there is already a background music source we stop it first
 	if (s_backgroundSource != AL_NONE) {
 		stopBackgroundMusic(false);
@@ -282,6 +294,10 @@ void SimpleAudioEngine::playBackgroundMusic(const char* pszFilePath, bool bLoop)
 
 void SimpleAudioEngine::stopBackgroundMusic(bool bReleaseData)
 {
+	if(supportAL_ == false) {
+		return;
+	}
+
 	// If there is no source, then there is nothing that can be stopped
 	if (s_backgroundSource == AL_NONE)
 		return;
@@ -294,6 +310,10 @@ void SimpleAudioEngine::stopBackgroundMusic(bool bReleaseData)
 
 void SimpleAudioEngine::pauseBackgroundMusic()
 {
+	if(supportAL_ == false) {
+		return;
+	}
+
 	// If there is no source, then there is nothing that can be paused
 	if (s_backgroundSource == AL_NONE)
 		return;
@@ -308,6 +328,10 @@ void SimpleAudioEngine::pauseBackgroundMusic()
 
 void SimpleAudioEngine::resumeBackgroundMusic()
 {
+	if(supportAL_ == false) {
+		return;
+	}
+
 	// If there is no source, then there is nothing that can be resumed
 	if (s_backgroundSource == AL_NONE)
 		return;
@@ -322,6 +346,10 @@ void SimpleAudioEngine::resumeBackgroundMusic()
 
 void SimpleAudioEngine::rewindBackgroundMusic()
 {
+	if(supportAL_ == false) {
+		return;
+	}
+
 	// If there is no source, then there is nothing that can be rewinded
 	if (s_backgroundSource == AL_NONE)
 		return;
@@ -345,6 +373,10 @@ void SimpleAudioEngine::rewindBackgroundMusic()
 
 bool SimpleAudioEngine::willPlayBackgroundMusic()
 {
+	if(supportAL_ == false) {
+		return false;
+	}
+
 	// We are able to play background music
 	// if we have a valid background source
 	if (s_backgroundSource == AL_NONE)
@@ -355,6 +387,10 @@ bool SimpleAudioEngine::willPlayBackgroundMusic()
 
 bool SimpleAudioEngine::isBackgroundMusicPlaying()
 {
+	if(supportAL_ == false) {
+		return false;
+	}
+
 	// If there is no source, then there is nothing that is playing
 	if (s_backgroundSource == AL_NONE)
 		return false;
@@ -395,6 +431,10 @@ float SimpleAudioEngine::getEffectsVolume()
 
 void SimpleAudioEngine::setEffectsVolume(float volume)
 {
+	if(supportAL_ == false) {
+		return;
+	}
+
 	if (volume != s_effectVolume)
 	{
 		EffectsMap::const_iterator end = s_effects.end();
@@ -410,6 +450,10 @@ void SimpleAudioEngine::setEffectsVolume(float volume)
 unsigned int SimpleAudioEngine::playEffect(const char* pszFilePath, bool bLoop,
 										   float pitch, float pan, float gain)
 {
+	if(supportAL_ == false) {
+		return -1;
+	}
+
 	//std::string fullPath = FileUtils::getInstance()->fullPathForFilename(pszFilePath);
 	std::string fullPath = pszFilePath;
 
@@ -448,12 +492,20 @@ unsigned int SimpleAudioEngine::playEffect(const char* pszFilePath, bool bLoop,
 
 void SimpleAudioEngine::stopEffect(unsigned int nSoundId)
 {
+	if(supportAL_ == false) {
+		return;
+	}
+
 	alSourceStop(nSoundId);
 	checkALError("stopEffect:alSourceStop");
 }
 
 void SimpleAudioEngine::preloadEffect(const char* pszFilePath)
 {
+	if(supportAL_ == false) {
+		return;
+	}
+
 	// Changing file path to full path
 	//std::string fullPath = FileUtils::getInstance()->fullPathForFilename(pszFilePath);
 	std::string fullPath = pszFilePath;
@@ -507,6 +559,10 @@ void SimpleAudioEngine::preloadEffect(const char* pszFilePath)
 
 void SimpleAudioEngine::unloadEffect(const char* pszFilePath)
 {
+	if(supportAL_ == false) {
+		return;
+	}
+
 	// Changing file path to full path
 	//std::string fullPath = FileUtils::getInstance()->fullPathForFilename(pszFilePath);
 	std::string fullPath = pszFilePath;
@@ -533,6 +589,10 @@ void SimpleAudioEngine::unloadEffect(const char* pszFilePath)
 
 void SimpleAudioEngine::pauseEffect(unsigned int nSoundId)
 {
+	if(supportAL_ == false) {
+		return;
+	}
+
 	ALint state;
 	alGetSourcei(nSoundId, AL_SOURCE_STATE, &state);
 	if (state == AL_PLAYING)
@@ -542,6 +602,10 @@ void SimpleAudioEngine::pauseEffect(unsigned int nSoundId)
 
 void SimpleAudioEngine::pauseAllEffects()
 {
+	if(supportAL_ == false) {
+		return;
+	}
+
 	EffectsMap::iterator iter = s_effects.begin();
 	ALint state;
 	while (iter != s_effects.end())
@@ -556,6 +620,10 @@ void SimpleAudioEngine::pauseAllEffects()
 
 void SimpleAudioEngine::resumeEffect(unsigned int nSoundId)
 {
+	if(supportAL_ == false) {
+		return;
+	}
+
 	ALint state;
 	alGetSourcei(nSoundId, AL_SOURCE_STATE, &state);
 	if (state == AL_PAUSED)
@@ -565,6 +633,10 @@ void SimpleAudioEngine::resumeEffect(unsigned int nSoundId)
 
 void SimpleAudioEngine::resumeAllEffects()
 {
+	if(supportAL_ == false) {
+		return;
+	}
+
 	EffectsMap::iterator iter = s_effects.begin();
 	ALint state;
 	while (iter != s_effects.end())
@@ -579,6 +651,10 @@ void SimpleAudioEngine::resumeAllEffects()
 
 void SimpleAudioEngine::stopAllEffects()
 {
+	if(supportAL_ == false) {
+		return;
+	}
+
 	EffectsMap::iterator iter = s_effects.begin();
 
 	if (iter != s_effects.end())
