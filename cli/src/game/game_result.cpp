@@ -13,6 +13,7 @@
 #include "attack_phase.h"
 #include "defense_phase.h"
 #include "score_board.h"
+#include "util/SimpleAudioEngine.h"
 
 using namespace std;
 using namespace irr;
@@ -134,7 +135,8 @@ RockPaperScissorResult::RockPaperScissorResult(irr::scene::ICameraSceneNode *cam
 											   const RPSEvent &aiChoice)
 	: AbstractGameResult(cam, board, 1000),
 	aiChoice_(new RPSEvent(aiChoice)),
-	playerChoice_(new RPSEvent(playerChoice))	
+	playerChoice_(new RPSEvent(playerChoice)),
+	effect_(AL_NONE)
 {
 	std::wstring msg;
 	if(aiChoice == playerChoice) {
@@ -149,6 +151,8 @@ RockPaperScissorResult::RockPaperScissorResult(irr::scene::ICameraSceneNode *cam
 	setText(msg.c_str());
 	setPlayerTexture(getRPSTexture(playerChoice.value)); 
 	setAiTexture(getRPSTexture(aiChoice.value));
+
+	effect_ = Lib::audio->playEffect(res::voice::PAPER_WAV);
 }
 
 RockPaperScissorResult::~RockPaperScissorResult()
@@ -199,10 +203,13 @@ FingerResult::FingerResult(irr::scene::ICameraSceneNode *cam,
 		const FingerDirectionEvent &aiChoice)
 	: AbstractGameResult(cam, board, 1000),
 	aiChoice_(new FingerDirectionEvent(aiChoice)),
-	playerChoice_(new FingerDirectionEvent(playerChoice))	
+	playerChoice_(new FingerDirectionEvent(playerChoice)),
+	effect_(AL_NONE)
 {
 	setPlayerTexture(getChamChamChamTexture(playerChoice)); 
 	setAiTexture(getChamChamChamTexture(aiChoice));
+
+	effect_ = Lib::audio->playEffect(res::voice::CHAM_WAV);
 }
 FingerResult::~FingerResult()
 {

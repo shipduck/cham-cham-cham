@@ -6,6 +6,7 @@
 #include "game_result.h"
 #include "irr/text_3d_scene_node.h"
 #include "finger_direction_event.h"
+#include "util/SimpleAudioEngine.h"
 
 using namespace std;
 using namespace irr;
@@ -27,9 +28,16 @@ AttackPhase::~AttackPhase()
 std::unique_ptr<SubSequence> AttackPhase::update(int ms)
 {
 	std::unique_ptr<SubSequence> empty;
+	if(Lib::audio->isEffectPlaying(effect_) == true) {
+		root_->setVisible(false);
+		return empty;
+	}
+
+	root_->setVisible(true);
 	if(evtReceiver_->inputEvt.isValid() == false) {
 		return empty;
 	}
+
 	FingerDirectionEvent aiEvt = AiPlayer().think(evtReceiver_->inputEvt);
 	aiChoice_.reset(new FingerDirectionEvent(aiEvt));
 

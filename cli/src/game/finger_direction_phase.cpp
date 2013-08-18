@@ -10,6 +10,7 @@
 #include "finger_direction_event.h"
 #include "ai_player.h"
 #include "game/game_result.h"
+#include "util/SimpleAudioEngine.h"
 
 using namespace std;
 using namespace irr;
@@ -20,7 +21,8 @@ BaseFingerDirectionPhase::BaseFingerDirectionPhase(irr::scene::ICameraSceneNode 
 	: SubSequence(cam, board),
 	root_(nullptr),
 	centerText_(nullptr),
-	evtReceiver_(nullptr)
+	evtReceiver_(nullptr),
+	effect_(AL_NONE)
 {
 	root_ = Lib::smgr->addEmptySceneNode(cam);
 	root_->grab();
@@ -100,6 +102,9 @@ BaseFingerDirectionPhase::BaseFingerDirectionPhase(irr::scene::ICameraSceneNode 
 		sprite->setPosition(spritePos);
 		sprite->drop();
 	}
+
+	effect_ = Lib::audio->playEffect(res::voice::CHAMX2_WAV);
+	root_->setVisible(false);
 }
 
 BaseFingerDirectionPhase::~BaseFingerDirectionPhase()

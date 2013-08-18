@@ -60,6 +60,8 @@ private:
 	std::unique_ptr<RPSEvent> playerChoice_;
 
 	irr::video::ITexture *getRPSTexture(int rps);
+
+	int effect_;
 };
 
 class FingerResult : public AbstractGameResult {
@@ -79,6 +81,8 @@ public:
 private:
 	std::unique_ptr<FingerDirectionEvent> aiChoice_;
 	std::unique_ptr<FingerDirectionEvent> playerChoice_;
+
+	int effect_;
 };
 
 class AttackResult : public FingerResult {

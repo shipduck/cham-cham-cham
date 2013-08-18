@@ -213,6 +213,8 @@ public:
 	*/
 	void unloadEffect(const char* pszFilePath);
 
+	bool isEffectPlaying(unsigned int nSoundId);
+
 private:
 	bool supportAL_;
 };

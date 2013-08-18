@@ -31,4 +31,6 @@ protected:
 	std::unique_ptr<FingerDirectionEvent> aiChoice_;
 
 	FingerDirectionEventReceiver *evtReceiver_;
+
+	int effect_;
 };

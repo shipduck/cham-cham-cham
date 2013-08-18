@@ -16,6 +16,7 @@
 #include "game/sequence.h"
 #include "irr/leapmotion.h"
 #include "util/SimpleAudioEngine.h"
+#include "res.h"
 
 using namespace std;
 using namespace irr;
@@ -165,6 +166,13 @@ bool Lib::startUp(const EngineParam &param)
 
 	//기본 배경음악 재생. 굳이 끌 필요없다.
 	console::playBGM(vector<string>());
+	audio->setBackgroundMusicVolume(0.1);
+	
+	//이펙트는 몇개 되지도 않으니까 preload 걸어버리자
+	audio->preloadEffect(res::voice::CHAMX2_WAV);
+	audio->preloadEffect(res::voice::CHAM_WAV);
+	audio->preloadEffect(res::voice::SCISSOR_ROCK_WAV);
+	audio->preloadEffect(res::voice::PAPER_WAV);
 
 	return true;
 }

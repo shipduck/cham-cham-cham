@@ -9,6 +9,7 @@
 #include "rps_event.h"
 #include "ai_player.h"
 #include "game/game_result.h"
+#include "util/SimpleAudioEngine.h"
 
 using namespace std;
 using namespace irr;
@@ -90,8 +91,7 @@ RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam, ScoreBoard
 	: SubSequence(cam, board),
 	root_(nullptr),
 	evtReceiver_(nullptr),
-	end_(false),
-	enable_(true)
+	effect_(AL_NONE)
 {
 	root_ = Lib::smgr->addEmptySceneNode(cam);
 	root_->grab();
@@ -159,6 +159,11 @@ RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam, ScoreBoard
 	}
 
 	attachEventReceiver();
+
+	//가위바위~
+	effect_ = Lib::audio->playEffect(res::voice::SCISSOR_ROCK_WAV);
+
+	root_->setVisible(false);
 }
 
 RockPaperScissor::~RockPaperScissor()
@@ -185,40 +190,25 @@ void RockPaperScissor::detachEventReceiver()
 	evtReceiver_ = nullptr;
 }
 
-	
-void RockPaperScissor::setEnable(bool b)
-{
-	if(isEnable() == b) {
-		return;
-	}
-
-	enable_ = b;
-	if(b == true) {
-		attachEventReceiver();
-	} else {
-		detachEventReceiver();
-	}
-}
-
 std::unique_ptr<SubSequence> RockPaperScissor::update(int ms)
 {
 	std::unique_ptr<SubSequence> empty;
-
-	if(end_ == true) {
-		return empty;
-	}
-
 	if(evtReceiver_ == nullptr) {
 		return empty;
 	}
 
+	if(Lib::audio->isEffectPlaying(effect_) == true) {
+		root_->setVisible(false);
+		return empty;
+	}
+
+	root_->setVisible(true);
 	auto playerEvt = evtReceiver_->rpsEvent;
 	if(playerEvt.value == RPSEvent::kNone) {
 		return empty;
 	}
 	auto aiEvt = AiPlayer().think(playerEvt);
-
-	end_ = true;
+	
 	aiChoice_.reset(new RPSEvent(aiEvt));
 	playerChoice_.reset(new RPSEvent(playerEvt));
 

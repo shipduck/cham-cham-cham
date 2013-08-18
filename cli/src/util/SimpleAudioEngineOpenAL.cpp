@@ -665,4 +665,21 @@ void SimpleAudioEngine::stopAllEffects()
 	}
 }
 
+bool SimpleAudioEngine::isEffectPlaying(unsigned int nSoundId)
+{
+	if(supportAL_ == false) {
+		return false;
+	}
+
+	// If there is no source, then there is nothing that is playing
+	if (nSoundId == AL_NONE) {
+		return false;
+	}
+
+	ALint play_status;
+	alGetSourcei(nSoundId, AL_SOURCE_STATE, &play_status);
+	checkALError("isEffectPlaying:alGetSourcei");
+	return (play_status == AL_PLAYING);
+}
+
 } // namespace CocosDenshion {

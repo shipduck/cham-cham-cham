@@ -12,14 +12,10 @@ public:
 	RockPaperScissor(irr::scene::ICameraSceneNode *cam, ScoreBoard *board);
 	virtual ~RockPaperScissor();
 
-	void setEnable(bool b);
-	bool isEnable() const { return enable_; }
-
 	std::unique_ptr<SubSequence> update(int ms);
 
 	const RPSEvent &getAiChoice() const { return *aiChoice_; }
 	const RPSEvent &getPlayerChoice() const { return *playerChoice_; }
-	bool isEnd() const { return end_; }
 
 private:
 	void attachEventReceiver();
@@ -38,7 +34,6 @@ private:
 	// 가위바위보 결과를 임시 저장
 	std::unique_ptr<RPSEvent> aiChoice_;
 	std::unique_ptr<RPSEvent> playerChoice_;
-	bool end_;
 
-	bool enable_;
+	int effect_;
 };
