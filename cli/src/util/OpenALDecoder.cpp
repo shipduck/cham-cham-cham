@@ -73,6 +73,13 @@ void OpenALDecoder::installDecoders()
 {
 	addDecoder(new AlutDecoder());
 }
+void OpenALDecoder::uninstallDecoders()
+{
+	for(auto decoder : _decoders) {
+		delete(decoder);
+	}
+	_decoders.clear();
+}
 
 void OpenALDecoder::addDecoder(OpenALDecoder *decoder)
 {

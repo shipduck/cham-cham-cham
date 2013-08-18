@@ -38,6 +38,7 @@ public:
 
 	static const std::vector<OpenALDecoder *> &getDecoders();
 	static void installDecoders();
+	static void uninstallDecoders();
 
 protected:
 	static void addDecoder(OpenALDecoder *decoder);

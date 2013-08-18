@@ -208,6 +208,7 @@ void SimpleAudioEngine::shutDown()
 	}
 	s_backgroundMusics.clear();
 
+	OpenALDecoder::uninstallDecoders();
 #ifdef ENABLE_MPG123
 	mpg123_exit();
 #endif
