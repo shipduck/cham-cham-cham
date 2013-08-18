@@ -18,7 +18,7 @@ class AttackPhase : public BaseFingerDirectionPhase {
 public:
 	AttackPhase(irr::scene::ICameraSceneNode *cam);
 	virtual ~AttackPhase();
-	void update(int ms);
+	virtual std::unique_ptr<SubSequence> update(int ms);
 	virtual std::unique_ptr<FingerResult> createResult(irr::scene::ICameraSceneNode *cam);
 };
 
@@ -26,13 +26,14 @@ class DefensePhase : public BaseFingerDirectionPhase {
 public:
 	DefensePhase(irr::scene::ICameraSceneNode *cam);
 	virtual ~DefensePhase();
-	void update(int ms);
+	virtual std::unique_ptr<SubSequence> update(int ms);
 	virtual std::unique_ptr<FingerResult> createResult(irr::scene::ICameraSceneNode *cam);
 };
 
 
 BaseFingerDirectionPhase::BaseFingerDirectionPhase(irr::scene::ICameraSceneNode *cam)
-	: end_(false),
+	: SubSequence(cam),
+	end_(false),
 	root_(nullptr),
 	centerText_(nullptr),
 	evtReceiver_(nullptr)
@@ -145,6 +146,16 @@ std::unique_ptr<BaseFingerDirectionPhase> BaseFingerDirectionPhase::createDefens
 }
 
 
+BaseFingerDirectionPhase *BaseFingerDirectionPhase::createAttackRawPtr(irr::scene::ICameraSceneNode *cam)
+{
+	return new AttackPhase(cam);
+}
+
+BaseFingerDirectionPhase *BaseFingerDirectionPhase::createDefenseRawPtr(irr::scene::ICameraSceneNode *cam)
+{
+	return new DefensePhase(cam);
+}
+
 ///////////////////////////////////////
 
 AttackPhase::AttackPhase(irr::scene::ICameraSceneNode *cam)
@@ -159,18 +170,23 @@ AttackPhase::~AttackPhase()
 {
 	
 }
-void AttackPhase::update(int ms)
+
+std::unique_ptr<SubSequence> AttackPhase::update(int ms)
 {
+	std::unique_ptr<SubSequence> empty;
+
 	if(isEnd() == true) {
-		return;
+		return empty;
 	}
 	if(evtReceiver_->inputEvt.isValid() == false) {
-		return;
+		return empty;
 	}
 	FingerDirectionEvent aiEvt = AiPlayer().think(evtReceiver_->inputEvt);
 	aiChoice_.reset(new FingerDirectionEvent(aiEvt));
 	end_ = true;
+	return empty;
 }
+
 std::unique_ptr<FingerResult> AttackPhase::createResult(irr::scene::ICameraSceneNode *cam)
 {
 	auto ai = this->getAiChoice();
@@ -193,18 +209,20 @@ DefensePhase::~DefensePhase()
 {
 }
 
-void DefensePhase::update(int ms)
+std::unique_ptr<SubSequence> DefensePhase::update(int ms)
 {
+	std::unique_ptr<SubSequence> empty;
 	if(isEnd() == true) {
-		return;
+		return empty;
 	}
 	if(evtReceiver_->inputEvt.isValid() == false) {
-		return;
+		return empty;
 	}
 
 	FingerDirectionEvent aiEvt = AiPlayer().think(evtReceiver_->inputEvt);
 	aiChoice_.reset(new FingerDirectionEvent(aiEvt));
 	end_ = true;
+	return empty;
 }
 
 std::unique_ptr<FingerResult> DefensePhase::createResult(irr::scene::ICameraSceneNode *cam)

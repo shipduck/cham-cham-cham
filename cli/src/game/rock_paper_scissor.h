@@ -1,17 +1,13 @@
 ﻿// Ŭnicode please 
 #pragma once
 
-namespace irr {;
-namespace scene {;
-class SpriteSceneNode;
-}	// namespace scene
-}	// namespace irr
+#include "sub_sequence.h"
 
 
 class RPSEvent;
 class RPSEventReceiver;
 
-class RockPaperScissor {
+class RockPaperScissor : public SubSequence {
 public:
 	RockPaperScissor(irr::scene::ICameraSceneNode *cam);
 	virtual ~RockPaperScissor();
@@ -19,7 +15,7 @@ public:
 	void setEnable(bool b);
 	bool isEnable() const { return enable_; }
 
-	void update(int ms);
+	std::unique_ptr<SubSequence> update(int ms);
 
 	const RPSEvent &getAiChoice() const { return *aiChoice_; }
 	const RPSEvent &getPlayerChoice() const { return *playerChoice_; }

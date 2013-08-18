@@ -163,7 +163,7 @@ bool Lib::startUp(const EngineParam &param)
 	audio->startUp();
 
 	//기본 배경음악 재생. 굳이 끌 필요없다.
-	//console::playBGM(vector<string>());
+	console::playBGM(vector<string>());
 
 	return true;
 }

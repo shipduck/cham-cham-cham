@@ -1,6 +1,8 @@
 ﻿// Ŭnicode please 
 #pragma once
 
+#include "sub_sequence.h"
+
 class RPSEvent;
 class FingerDirectionEvent;
 
@@ -11,9 +13,9 @@ class Text3dSceneNode;
 }	// namespace scene
 }	// namespace irr
 
-class AbstractGameResult {
+class AbstractGameResult : public SubSequence {
 public:
-	AbstractGameResult(irr::scene::ICameraSceneNode *cam);
+	AbstractGameResult(irr::scene::ICameraSceneNode *cam, int remain);
 	virtual ~AbstractGameResult();
 
 public:
@@ -22,6 +24,9 @@ public:
 	void setAiTexture(irr::video::ITexture *tex);
 	void setPlayerTexture(irr::video::ITexture *tex);
 	void setText(const wchar_t *txt);
+
+	virtual std::unique_ptr<SubSequence> update(int ms);
+	virtual SubSequence *createNext() = 0;
 
 private:
 	irr::scene::SpriteSceneNode *getAiNode() { return aiNode_; }
@@ -33,6 +38,8 @@ private:
 	irr::scene::SpriteSceneNode *aiNode_;
 	irr::scene::SpriteSceneNode *playerNode_;
 	irr::scene::Text3dSceneNode *textNode_;
+
+	int remain_;
 };
 
 class RockPaperScissorResult : public AbstractGameResult {
@@ -44,6 +51,8 @@ public:
 
 	const RPSEvent &getAiChoice() const { return *aiChoice_; }
 	const RPSEvent &getPlayerChoice() const { return *playerChoice_; }
+
+	virtual SubSequence *createNext();
 
 private:
 	std::unique_ptr<RPSEvent> aiChoice_;
@@ -59,7 +68,7 @@ public:
 		const FingerDirectionEvent &aiChoice);
 	virtual ~FingerResult();
 
-	virtual bool isAttackResult() const = 0;
+	virtual SubSequence *createNext();
 
 public:
 	const FingerDirectionEvent &getAiChoice() const { return *aiChoice_; }
@@ -76,8 +85,6 @@ public:
 		const FingerDirectionEvent &playerChoice,
 		const FingerDirectionEvent &aiChoice);
 	virtual ~AttackResult() {}
-
-	virtual bool isAttackResult() const { return true; }
 };
 
 class DefenseResult : public FingerResult {
@@ -86,6 +93,4 @@ public:
 		const FingerDirectionEvent &playerChoice,
 		const FingerDirectionEvent &aiChoice);
 	virtual ~DefenseResult() {}
-
-	virtual bool isAttackResult() const { return false; }
 };

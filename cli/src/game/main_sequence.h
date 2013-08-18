@@ -10,6 +10,8 @@ class RockPaperScissorResult;
 class BaseFingerDirectionPhase;
 class FingerResult;
 
+class SubSequence;
+
 enum {
 	kStateRockScissorPaper,
 	kStateChamChamCham,
@@ -33,8 +35,13 @@ private:
 	AbstractHMDCameraEventReceiver *camReceiver_;
 	irr::scene::IAnimatedMeshSceneNode *reinaNode_;
 	std::unique_ptr<ScoreBoard> scoreBoard_;
-	std::unique_ptr<RockPaperScissor> rps_;
+
+	std::unique_ptr<SubSequence> subSequence_;
+
+	/*
+	std::unique_ptr<SubSequence> rps_;
 	std::unique_ptr<RockPaperScissorResult> rpsResult_;
 	std::unique_ptr<BaseFingerDirectionPhase> fingerPhase_;
 	std::unique_ptr<FingerResult> fingerResult_;
+	*/
 };

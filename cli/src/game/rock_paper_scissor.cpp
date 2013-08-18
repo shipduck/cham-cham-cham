@@ -8,6 +8,7 @@
 #include "irr/leapmotion.h"
 #include "rps_event.h"
 #include "ai_player.h"
+#include "game/game_result.h"
 
 using namespace std;
 using namespace irr;
@@ -70,7 +71,8 @@ public:
 };
 
 RockPaperScissor::RockPaperScissor(irr::scene::ICameraSceneNode *cam)
-	: root_(nullptr),
+	: SubSequence(cam),
+	root_(nullptr),
 	evtReceiver_(nullptr),
 	end_(false),
 	enable_(true)
@@ -182,23 +184,28 @@ void RockPaperScissor::setEnable(bool b)
 	}
 }
 
-void RockPaperScissor::update(int ms)
+std::unique_ptr<SubSequence> RockPaperScissor::update(int ms)
 {
+	std::unique_ptr<SubSequence> empty;
+
 	if(end_ == true) {
-		return;
+		return empty;
 	}
 
 	if(evtReceiver_ == nullptr) {
-		return;
+		return empty;
 	}
 
 	auto playerEvt = evtReceiver_->rpsEvent;
 	if(playerEvt.value == RPSEvent::kNone) {
-		return;
+		return empty;
 	}
 	auto aiEvt = AiPlayer().think(playerEvt);
 
 	end_ = true;
 	aiChoice_.reset(new RPSEvent(aiEvt));
 	playerChoice_.reset(new RPSEvent(playerEvt));
+
+	//return std::unique_ptr<SubSequence>(new SubSequenceTransitTimer(new RockPaperScissorResult(getCamera(), playerEvt, aiEvt)));
+	return std::unique_ptr<SubSequence>(new RockPaperScissorResult(getCamera(), playerEvt, aiEvt));
 }

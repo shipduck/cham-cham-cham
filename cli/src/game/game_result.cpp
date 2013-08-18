@@ -8,10 +8,11 @@
 #include "irr/text_3d_scene_node.h"
 #include "irr/debug_drawer.h"
 #include "game/finger_direction_event.h"
+#include "rock_paper_scissor.h"
+#include "finger_direction_phase.h"
 
 using namespace std;
 using namespace irr;
-
 
 irr::video::ITexture *getChamChamChamTexture(const FingerDirectionEvent &evt)
 {
@@ -35,11 +36,13 @@ irr::video::ITexture *getChamChamChamTexture(const FingerDirectionEvent &evt)
 	return nullptr;
 }
 
-AbstractGameResult::AbstractGameResult(irr::scene::ICameraSceneNode *cam)
-	: root_(nullptr),
+AbstractGameResult::AbstractGameResult(irr::scene::ICameraSceneNode *cam, int remain)
+	: SubSequence(cam),
+	root_(nullptr),
 	aiNode_(nullptr),
 	playerNode_(nullptr),
-	textNode_(nullptr)
+	textNode_(nullptr),
+	remain_(remain)
 {
 	//게임 끝난다음에 결과 보여주는 용도로 사용할 node
 	root_ = Lib::smgr->addEmptySceneNode(cam);
@@ -108,12 +111,24 @@ void AbstractGameResult::setText(const wchar_t *txt)
 {
 	textNode_->setText(txt);
 }
+
+std::unique_ptr<SubSequence> AbstractGameResult::update(int ms)
+{
+	remain_ -= ms;
+	if(remain_ < 0) {
+		return std::unique_ptr<SubSequence>(createNext());
+	} else {
+		std::unique_ptr<SubSequence> empty;
+		return empty;
+	}
+}
+
 ////////////////////////////
 
 RockPaperScissorResult::RockPaperScissorResult(irr::scene::ICameraSceneNode *cam,
 											   const RPSEvent &playerChoice,
 											   const RPSEvent &aiChoice)
-	: AbstractGameResult(cam),
+	: AbstractGameResult(cam, 1000),
 	aiChoice_(new RPSEvent(aiChoice)),
 	playerChoice_(new RPSEvent(playerChoice))	
 {
@@ -155,10 +170,29 @@ irr::video::ITexture *RockPaperScissorResult::getRPSTexture(int rps)
 	return nullptr;
 }
 
+SubSequence *RockPaperScissorResult::createNext()
+{
+	const auto &ai = aiChoice_;
+	const auto &player = playerChoice_;
+
+	if(ai == player) {
+		return new RockPaperScissor(getCamera());
+	} else if(ai > player) {
+		return BaseFingerDirectionPhase::createDefenseRawPtr(getCamera());
+	} else if(ai < player) {
+		return BaseFingerDirectionPhase::createAttackRawPtr(getCamera());
+	} else {
+		SR_ASSERT(!"do not reach");
+		return nullptr;
+	}
+}
+
+/////////////////////////////////////////////////////
+
 FingerResult::FingerResult(irr::scene::ICameraSceneNode *cam,
 		const FingerDirectionEvent &playerChoice,
 		const FingerDirectionEvent &aiChoice)
-	: AbstractGameResult(cam),
+	: AbstractGameResult(cam, 1000),
 	aiChoice_(new FingerDirectionEvent(aiChoice)),
 	playerChoice_(new FingerDirectionEvent(playerChoice))	
 {
@@ -167,6 +201,12 @@ FingerResult::FingerResult(irr::scene::ICameraSceneNode *cam,
 }
 FingerResult::~FingerResult()
 {
+}
+
+SubSequence *FingerResult::createNext()
+{
+	//TODO 점수반영...?
+	return new RockPaperScissor(getCamera());
 }
 
 AttackResult::AttackResult(irr::scene::ICameraSceneNode *cam,
@@ -183,6 +223,7 @@ AttackResult::AttackResult(irr::scene::ICameraSceneNode *cam,
 	setText(msg.c_str());
 	
 }
+
 
 
 DefenseResult::DefenseResult(irr::scene::ICameraSceneNode *cam,

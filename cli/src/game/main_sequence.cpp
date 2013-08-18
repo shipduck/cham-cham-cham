@@ -13,6 +13,7 @@
 #include "game/finger_direction_phase.h"
 #include "game/finger_direction_event.h"
 #include "res.h"
+#include "sub_sequence.h"
 
 using namespace std;
 using namespace irr;
@@ -26,7 +27,7 @@ MainSequence::MainSequence()
 	//init camera
 	auto cam = Lib::smgr->addCameraSceneNode();
 	camReceiver_ = new HeadFreeCameraEventReceiver(cam, 0.1f, 0.1f);
-	camReceiver_->enableCamMove = false;
+	//camReceiver_->enableCamMove = false;
 	Lib::eventReceiver->attachReceiver(camReceiver_);
 	Lib::device->getCursorControl()->setVisible(false);
 
@@ -34,7 +35,8 @@ MainSequence::MainSequence()
 	initSkybox();
 
 	//init dynamic
-	irr::scene::IAnimatedMesh *reina = Lib::smgr->getMesh(res::modeldata::reira::G02T02_X);
+	//irr::scene::IAnimatedMesh *reina = Lib::smgr->getMesh(res::modeldata::reira::G02T02_X);
+	irr::scene::IAnimatedMesh *reina = Lib::smgr->getMesh(res::modeldata::reira::RSP_X);
 	//irr::scene::IAnimatedMesh *reina = Lib::smgr->getMesh(res::modeldata::nagare::NAGARE_WALK_X);
 	reinaNode_ = Lib::smgr->addAnimatedMeshSceneNode(reina);
     //reinaNode_->setJointMode(irr::scene::EJUOR_CONTROL);
@@ -50,7 +52,9 @@ MainSequence::MainSequence()
 
 	//init logic
 	scoreBoard_.reset(new ScoreBoard(cam));
-	rps_.reset(new RockPaperScissor(cam));	
+
+	//최초 상태는 가위바위보. 메뉴같은거 추가하면 그때 손보기
+	subSequence_.reset(new RockPaperScissor(cam));
 }
 
 MainSequence::~MainSequence()
@@ -97,6 +101,14 @@ void MainSequence::update(int ms)
 
 	camReceiver_->update(ms);
 	scoreBoard_->update();
+
+	//sub sequence 처리 + 다음 subsequence가 존재할경우, 분기
+	auto next = subSequence_->update(ms);
+	if(next.get() != nullptr) {
+		subSequence_ = std::move(next);
+	}
+
+	/*
 	if(rps_.get() != nullptr) {
 		rps_->update(ms);
 	}
@@ -172,4 +184,5 @@ void MainSequence::update(int ms)
 		rps_.reset(new RockPaperScissor(cam));	
 		printf("new game\n");
 	}
+	*/
 }

@@ -1,6 +1,8 @@
 ﻿// Ŭnicode please
 #pragma once
 
+#include "sub_sequence.h"
+
 namespace irr {;
 namespace scene {;
 class Text3dSceneNode;
@@ -11,12 +13,12 @@ class FingerDirectionEvent;
 class FingerDirectionEventReceiver;
 class FingerResult;
 
-class BaseFingerDirectionPhase {
+class BaseFingerDirectionPhase : public SubSequence {
 public:
 	BaseFingerDirectionPhase(irr::scene::ICameraSceneNode *cam);
 	virtual ~BaseFingerDirectionPhase();
 
-	virtual void update(int ms) = 0;
+	virtual std::unique_ptr<SubSequence> update(int ms) = 0;
 
 	bool isEnd() const { return end_; }
 
@@ -26,6 +28,8 @@ public:
 	virtual std::unique_ptr<FingerResult> createResult(irr::scene::ICameraSceneNode *cam) = 0;
 
 public:
+	static BaseFingerDirectionPhase *createAttackRawPtr(irr::scene::ICameraSceneNode *cam);
+	static BaseFingerDirectionPhase *createDefenseRawPtr(irr::scene::ICameraSceneNode *cam);
 	static std::unique_ptr<BaseFingerDirectionPhase> createAttack(irr::scene::ICameraSceneNode *cam);
 	static std::unique_ptr<BaseFingerDirectionPhase> createDefense(irr::scene::ICameraSceneNode *cam);
 
