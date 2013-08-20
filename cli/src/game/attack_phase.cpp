@@ -15,7 +15,7 @@ using namespace irr;
 AttackPhase::AttackPhase(irr::scene::ICameraSceneNode *cam, ScoreBoard *board)
 	: BaseFingerDirectionPhase(cam, board)
 {
-	centerText_->setText(L"Attack");
+	centerText_->setText(L"Ready");
 
 	evtReceiver_ = new FingerDirectionEventReceiver(true, false, true);
 	Lib::eventReceiver->attachReceiver(evtReceiver_);
@@ -31,6 +31,13 @@ std::unique_ptr<SubSequence> AttackPhase::update(int ms)
 	if(Lib::audio->isEffectPlaying(effect_) == true) {
 		root_->setVisible(false);
 		return empty;
+	}
+
+	if(evtReceiver_->isLeapReady() == true) {
+		centerText_->setText(L"Attack");
+	}
+	else {
+		centerText_->setText(L"Ready");
 	}
 
 	root_->setVisible(true);

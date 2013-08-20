@@ -26,7 +26,10 @@ bool FingerDirectionEvent::operator!=(const FingerDirectionEvent &o) const
 FingerDirectionEventReceiver::FingerDirectionEventReceiver(bool keyboard, bool headtracker, bool leap)
 	: useKeyboard_(keyboard),
 	useHeadTracker_(headtracker),
-	useLeapMotion_(leap)
+	useLeapMotion_(leap),
+	isLeapReady_(false),
+	leapReadyCooltime(0),
+	leapTimeStamp(0)
 {
 }
 bool FingerDirectionEventReceiver::OnEvent(const irr::SEvent &evt)
@@ -109,42 +112,58 @@ bool FingerDirectionEventReceiver::OnEvent(const SLeapMotionEvent &evt)
 		return false;
 	}
 
-	auto gestures = evt.gestures;
+	// Initializing
+	if(leapTimeStamp == 0) {
+		leapTimeStamp = evt.timestamp;
+		return false;
+	}
 
-	for(auto gesture : gestures)
-	{
-		if(gesture.type() == Leap::Gesture::TYPE_SWIPE)
-		{
-			const auto& swipe = static_cast<Leap::SwipeGesture>(gesture);
-			auto vector = swipe.direction();
+	if(evt.hands.count() != 0 && isLeapReady_ == false) {
+		leapReadyCooltime += int(evt.timestamp - leapTimeStamp);
+	}
+	
+	leapTimeStamp = evt.timestamp;
 
-			// Float 비교 부정확성, 그리고 소수점 이하 비교는 필요하지 않기 떄문에
-			// Int로 형변환해서 비교한다
-			int x = 100 * vector.x;
-			int y = 100 * vector.y;
-			int absX = abs(x);
-			int absY = abs(y);
+	if(evt.hands.count() == 0) {
+		leapReadyCooltime = 0;
+		isLeapReady_ = false;
+		return false;
+	}
 
-			int absLargest = std::max(absX, absY);
+	if(leapReadyCooltime >= 1000) {
+		isLeapReady_ = true;
 
-			if(absLargest == x)
-			{
-				inputEvt = FingerDirectionEvent::right();
+		auto gestures = evt.gestures;
+
+		for(auto gesture : gestures) {
+			if(gesture.type() == Leap::Gesture::TYPE_SWIPE) {
+				const auto& swipe = static_cast<Leap::SwipeGesture>(gesture);
+				auto vector = swipe.direction();
+
+				// Float 비교 부정확성, 그리고 소수점 이하 비교는 필요하지 않기 떄문에
+				// Int로 형변환해서 비교한다
+				int x = 100 * int(vector.x);
+				int y = 100 * int(vector.y);
+				int absX = abs(x);
+				int absY = abs(y);
+
+				int absLargest = std::max(absX, absY);
+
+				if(absLargest == x) {
+					inputEvt = FingerDirectionEvent::right();
+				}
+				else if(absLargest == absX) {
+					inputEvt = FingerDirectionEvent::left();
+				}
+				else if(absLargest == y) {
+					inputEvt = FingerDirectionEvent::up();
+				}
+				else if(absLargest == absY) {
+					inputEvt = FingerDirectionEvent::down();
+				}
+
+				return true;
 			}
-			else if(absLargest == absX)
-			{
-				inputEvt = FingerDirectionEvent::left();
-			}
-			else if(absLargest == y)
-			{
-				inputEvt = FingerDirectionEvent::up();
-			}
-			else if(absLargest == absY)
-			{
-				inputEvt = FingerDirectionEvent::down();
-			}
-
-			return true;
 		}
 	}
 
