@@ -1,5 +1,6 @@
 ﻿// Ŭnicode please 
 #include "stdafx.h"
+#include "res.h"
 #include "ani_sequence.h"
 #include "base/lib.h"
 #include "irr/hmd_camera.h"
@@ -27,8 +28,7 @@ AniSequence::AniSequence()
 	Lib::eventReceiver->attachReceiver(receiver);
 	cam->setPosition(core::vector3df(0, 50, -200));
 
-	irr::scene::IAnimatedMesh *dwarf = smgr->getMesh("ext/irrlicht/media/dwarf.x");
-
+	irr::scene::IAnimatedMesh *dwarf = smgr->getMesh(res::modeldata::reira::G02T02_X);
 	{
 		irr::scene::IAnimatedMeshSceneNode *base = smgr->addAnimatedMeshSceneNode(dwarf, nullptr, kSimple);
 		base->setMaterialFlag(video::EMF_LIGHTING, false);

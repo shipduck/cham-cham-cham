@@ -8,8 +8,6 @@
 #include "main_sequence.h"
 
 // demo
-#include "demo/cylinder_hmd_sequence.h"
-#include "demo/sphere_hmd_sequence.h"
 #include "demo/color_sequence.h"
 #include "demo/ui_test_sequence.h"
 #include "demo/ani_sequence.h"
@@ -34,12 +32,6 @@ Sequence *SequenceFactory::createRaw(SequenceType type) const
 		break;
 	case kSequenceGameLoading:
 		seq = new GameLoadingSequence();
-		break;
-	case kSequenceDemoCylinderHMD:
-		seq = new demo::CylinderHMDSequence();
-		break;
-	case kSequenceDemoSphereHMD:
-		seq = new demo::SphereHMDSequence();
 		break;
 	case kSequenceDemoColor:
 		seq = new demo::ColorSequence();
@@ -69,41 +61,21 @@ SequenceType SequenceFactory::select(DisplayType *displayType) const
 	ostringstream oss;
 	oss << "Select Sequence." << endl;
 	oss << "If last character is f, run fullscreen mode." << endl;
-	oss << "If last character is w, run window mode." << endl;
-	oss << "(1) Demo Cylinder" << endl;
-	oss << "(2) Demo Spehere" << endl;
-	oss << "(3) Debug Draw" << endl;
-	oss << "(4) Color" << endl;
-	oss << "(5) Ani" << endl;
-	oss << "(etc) Title" << endl;
+	oss << "elif last character is w, run window mode." << endl;
+	oss << "else, run saved option" << endl;
 	cout << oss.str();
 
 	string input;
 	std::cin >> input;
 
-	char code = '\0';
-	if(input.length() == 1) {
-		code = input[0];
-		*displayType = kDisplayDefault;
+	char code = input[0];
+	char lastChar = input[input.length()-1];
+	if(lastChar == 'f') {
+		*displayType = kDisplayFullscreen;
+	} else if(lastChar == 'w') {
+		*displayType = kDisplayWindow;
 	} else {
-		code = input[0];
-		char lastChar = input[input.length()-1];
-		if(lastChar == 'f') {
-			*displayType = kDisplayFullscreen;
-		} else if(lastChar == 'w') {
-			*displayType = kDisplayWindow;
-		}
+		*displayType = kDisplayDefault;
 	}
-
-	std::map<char, SequenceType> sequenceCodeTable;
-	sequenceCodeTable['1'] = kSequenceDemoCylinderHMD;
-	sequenceCodeTable['2'] = kSequenceDemoSphereHMD;
-	sequenceCodeTable['3'] = kSequenceDebugDraw;
-	sequenceCodeTable['4'] = kSequenceDemoColor;
-	sequenceCodeTable['5'] = kSequenceDemoAni;
-	auto found = sequenceCodeTable.find(code);
-	if(found == sequenceCodeTable.end()) {
-		return kSequenceMain;
-	}
-	return found->second;
+	return kSequenceMain;
 }

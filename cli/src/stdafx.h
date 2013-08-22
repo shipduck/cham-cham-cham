@@ -2,9 +2,9 @@
 #include "base/arch.h"
 #include "base/assert_inc.h"
 
-//#ifdef USE_LEAP_MOTION
+#ifdef USE_LEAP_MOTION
 //#undef USE_LEAP_MOTION
-//#endif
+#endif
 
 #define NOMINMAX 
 

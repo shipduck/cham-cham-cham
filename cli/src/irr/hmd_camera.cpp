@@ -214,7 +214,7 @@ void HeadFreeCameraEventReceiver::update(int ms)
 	auto nextPos = pos + moveDelta + sideDelta;
 	cam->setPosition(nextPos);
 
-	bool displayInfo = true;
+	bool displayInfo = false;
 	if(displayInfo) {
 		irr::video::SColor white(255, 255, 255, 255);
 		auto rotateMsg = (wformat(L"rotate : h=%.2f, v=%.2f") % horizontalRotate_ % verticalRotate_).str();
