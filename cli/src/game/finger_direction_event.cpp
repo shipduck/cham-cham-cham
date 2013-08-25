@@ -142,8 +142,8 @@ bool FingerDirectionEventReceiver::OnEvent(const SLeapMotionEvent &evt)
 
 				// Float 비교 부정확성, 그리고 소수점 이하 비교는 필요하지 않기 떄문에
 				// Int로 형변환해서 비교한다
-				int x = 100 * int(vector.x);
-				int y = 100 * int(vector.y);
+				int x = int(100 * vector.x);
+				int y = int(100 * vector.y);
 				int absX = abs(x);
 				int absY = abs(y);
 
