@@ -38,7 +38,9 @@ public:
 
 	virtual bool OnEvent(const irr::SEvent &evt);
 	virtual bool OnEvent(const SHeadTrackingEvent &evt);
+#ifdef USE_LEAP_MOTION
 	virtual bool OnEvent(const SLeapMotionEvent &evt);
+#endif
 	
 	bool isLeapReady() const { return isLeapReady_;}
 
