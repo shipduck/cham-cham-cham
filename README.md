@@ -1,5 +1,8 @@
 # 참참참 with Oculus Rift + Leap Motion
 
+[Video](http://youtu.be/MnjRdiOq26Q)
+![Screenshot](https://raw.github.com/if1live/cham-cham-cham/master/document/playscreenshot.png)
+
 ## 개요
 오큘러스 리프트로 구현한 참참참이다. 게임은 3개의 sequence로 구성된다. 참참참 룰에 대한 자세한 설명은 생략한다
 * 가위바위보 : 가위=Left / 보=Up / 바위=Right 를 눌러서 입력할 수 있다. (우리는 가위바위보지만 영어로는 Rock-Paper-Scissor)
@@ -21,9 +24,6 @@ cmake CMakeList.txt
 * 실행후 콘솔에서 w를 치면 창모드, f를 쓰면 전체화면을 실행된다. 딴거치면 알아서 대충 기존 설정으로 실행된다.
 * 일반 렌더링/오큘러스 리프트 렌더링을 바꾸는 단축키는 **F2**이다. 
 
-## 플레이 영상
-[Video](http://youtu.be/MnjRdiOq26Q)
-![Screenshot](https://raw.github.com/if1live/cham-cham-cham/master/document/playscreenshot.png)
 
 ## Troubleshooting
 * 컴파일을 하고 실행을 했는데 아무것도 안뜬다
