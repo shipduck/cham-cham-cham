@@ -25,16 +25,18 @@ cmake CMakeList.txt
 
 ## Post-mortem
 
-### Project History
-
+### Team
 팀원의 실명/이메일/트위터를 왭에 까기는 미묘해서 상수로 썼다. 팀원은 총 3명이다
 
-* PD : Project Destoryer. 프로젝트의 PM같은 기분의 일을 함. 오큘러스 물주
+* PD : Project Destoryer. 프로젝트의 PM같은 기분의 일을 함. 오큘러스 물주.
+    * twitter : [@libsora][https://twitter.com/if1live] 사실상 유일한 연락처
 * BM : Builder Machine. 인간 빌드버신. 빌드관련 내용(주로 cmake)을 주로 작업했다. 애니메이션 관련 삽질도 덤으로
 * TO : Teamone. 립모션 물주
 
 팀원 아닌 인원 1명이 도움을 줫다
 * CV : 성우. 이펙트 사운드용 목소리
+
+### Project History
 
 #### 2013년 6월 11일
 github 기록상 최초의 커밋이 등장한다. 이후 8월 11일까지 짬짬히 다음을 삽질했다
