@@ -21,7 +21,7 @@ cmake CMakeList.txt
 
 ## 플레이 영상
 [Video](http://youtu.be/MnjRdiOq26Q)
-![Screenshot](https://raw.github.com/if1live/cham-cham-cham/master/document/playscreenshot.png)]
+![Screenshot](https://raw.github.com/if1live/cham-cham-cham/master/document/playscreenshot.png)
 
 ## Post-mortem
 
@@ -29,7 +29,7 @@ cmake CMakeList.txt
 
 팀원의 실명/이메일/트위터를 왭에 까기는 미묘해서 상수로 썼다. 팀원은 총 3명이다
 
-* PD : Project Destoryer. 프로젝터의 PM같은 기분의 일을 함. 오큘러스 물주
+* PD : Project Destoryer. 프로젝트의 PM같은 기분의 일을 함. 오큘러스 물주
 * BM : Builder Machine. 인간 빌드버신. 빌드관련 내용(주로 cmake)을 주로 작업했다. 애니메이션 관련 삽질도 덤으로
 * TO : Teamone. 립모션 물주
 
