@@ -6,7 +6,12 @@
 * 공격 : 가위바위보에서 이기면 공격을 한다. 방향키를 누르거나 립모션이 있으면 손가락을 잘 흔들면 된다
 * 방어 : 가쥐바위보에서 지면 방어한다. 방향키를 누르거나 오큘러스 리프트를 뒤집어 쓰고 잘 움직이면 된다. 단, 원점은 최초에 오큘러스를 뒤집어 쓰고있을때의 머리 위치다
 
-## 실행 방법
+
+## 빌드/실행 방법
+* ```boost 1.53.0``` 을 ```cli/boost```에 적절히 압축을 출어서 집어넣는다. ```cli/boost/boost/config.hpp```가 존재하면 제대로 넣은거다.
+* [LeapMotion SDK](https://www.leapmotion.com/developers)를 알아서 받아서 ```cli/ext/leap```에 집어넣는다. ```cli/ext/leap/include/Leap.h```가 존재하고 ```cli/ext/leap/lib/Leap.lib```가 존재하면 제대로 넣은거다.
+
+* 기본적인 빌드 스크립트를 돌리자
 ```sh
 cd cli/script
 python res_build.py
@@ -15,6 +20,8 @@ cmake CMakeList.txt
 ```
 
 ## 플레이 영상
+[Video](http://youtu.be/MnjRdiOq26Q)
+![Screenshot](https://raw.github.com/if1live/cham-cham-cham/master/document/playscreenshot.png)]
 
 ## Post-mortem
 
