@@ -41,8 +41,8 @@
 
 <ul>
 <li>가위바위보 : 가위=Left / 보=Up / 바위=Right 를 눌러서 입력할 수 있다. (우리는 가위바위보지만 영어로는 Rock-Paper-Scissor)</li>
-<li>공격 : 가위바위보에서 이기면 공격을 한다. 방향키를 누르거나 립모션이 있으면 손가락을 잘 흔들면 된다</li>
-<li>방어 : 가쥐바위보에서 지면 방어한다. 방향키를 누르거나 오큘러스 리프트를 뒤집어 쓰고 잘 움직이면 된다. 단, 원점은 최초에 오큘러스를 뒤집어 쓰고있을때의 머리 위치다</li>
+<li>공격 : 가위바위보에서 이기면 공격을 한다. <strong>방향키</strong>를 누르거나 <strong>립모션이 있으면 손가락을 잘 흔들면</strong> 된다</li>
+<li>방어 : 가쥐바위보에서 지면 방어한다. <strong>방향키</strong>를 누르거나 <strong>오큘러스 리프트를 뒤집어 쓰고 잘 움직이면</strong> 된다. 단, 원점은 최초에 오큘러스를 뒤집어 쓰고있을때의 머리 위치다</li>
 </ul><h2>
 <a name="%EB%B9%8C%EB%93%9C%EC%8B%A4%ED%96%89-%EB%B0%A9%EB%B2%95" class="anchor" href="#%EB%B9%8C%EB%93%9C%EC%8B%A4%ED%96%89-%EB%B0%A9%EB%B2%95"><span class="octicon octicon-link"></span></a>빌드/실행 방법</h2>
 
@@ -59,6 +59,8 @@ python res_build.py
 cmake CMakeList.txt
 </pre></div>
 </li>
+<li><p>실행후 콘솔에서 w를 치면 창모드, f를 쓰면 전체화면을 실행된다. 딴거치면 알아서 대충 기존 설정으로 실행된다.</p></li>
+<li><p>일반 렌더링/오큘러스 리프트 렌더링을 바꾸는 단축키는 <strong>F2</strong>이다. </p></li>
 </ul><h2>
 <a name="%ED%94%8C%EB%A0%88%EC%9D%B4-%EC%98%81%EC%83%81" class="anchor" href="#%ED%94%8C%EB%A0%88%EC%9D%B4-%EC%98%81%EC%83%81"><span class="octicon octicon-link"></span></a>플레이 영상</h2>
 
@@ -66,6 +68,22 @@ cmake CMakeList.txt
 <img src="https://raw.github.com/if1live/cham-cham-cham/master/document/playscreenshot.png" alt="Screenshot"></p>
 
 <h2>
+<a name="troubleshooting" class="anchor" href="#troubleshooting"><span class="octicon octicon-link"></span></a>Troubleshooting</h2>
+
+<ul>
+<li>컴파일을 하고 실행을 했는데 아무것도 안뜬다
+
+<ul>
+<li>Leap Motion SDK의 버그로 추정되지만 소스가 없어서 세부파악은 실패했습니다. 임시 땜빵으로 LeapMotion 지원을 끄고 컴파일하면 됩니다. <code>cli/src/stdafx.h</code>의 6번째줄 <code>//#undef USE_LEAP_MOTION</code>의 주석을 해제하면 됩니다</li>
+</ul>
+</li>
+<li>이거 이외의 버그
+
+<ul>
+<li>나도 몰라. 버그 고치고 Pull Request 좀....</li>
+</ul>
+</li>
+</ul><h2>
 <a name="post-mortem" class="anchor" href="#post-mortem"><span class="octicon octicon-link"></span></a>Post-mortem</h2>
 
 <h3>
@@ -77,7 +95,7 @@ cmake CMakeList.txt
 <li>PD : Project Destoryer. 프로젝트의 PM같은 기분의 일을 함. 오큘러스 물주.
 
 <ul>
-<li>twitter : [@libsora][<a href="https://twitter.com/if1live">https://twitter.com/if1live</a>] 사실상 유일한 연락처</li>
+<li>twitter : <a href="https://twitter.com/if1live">@if1live</a> 사실상 유일한 연락처</li>
 </ul>
 </li>
 <li>BM : Builder Machine. 인간 빌드버신. 빌드관련 내용(주로 cmake)을 주로 작업했다. 애니메이션 관련 삽질도 덤으로</li>
